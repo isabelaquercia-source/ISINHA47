@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Queen UI Lab</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div class="noise" aria-hidden="true"></div>
+  <div class="aurora" aria-hidden="true"></div>
+
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark">Q</span>
+      <div>
+        <strong>Queen UI Lab</strong>
+        <p>testa · toca · julga</p>
+      </div>
+    </div>
+    <nav class="tabs" id="tabs" aria-label="Telas do lab"></nav>
+  </header>
+
+  <main id="stage" class="stage"></main>
+
+  <footer class="foot">
+    <span>Arrasta, clica, troca de tela.</span>
+    <span id="verdict-hint">No final você me diz: salvador ou quase?</span>
+  </footer>
+
+  <script src="./app.js"></script>
+</body>
+</html>
