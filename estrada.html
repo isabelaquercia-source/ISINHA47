@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="palco">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#070b1f">
+<title>Estrada da Tablatura</title>
+<style>
+/* ===================== Temas ===================== */
+:root{
+  --lane:58px;
+  --tilt:60deg;
+  --pulse:0;
+  --font: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+[data-theme="palco"]{
+  --bg1:#03050f; --bg2:#0b1433; --bg3:#1a2a63;
+  --text:#e8edff; --muted:#93a0c8;
+  --panel:rgba(14,20,48,.82); --panel-b:rgba(120,140,220,.22);
+  --ctl:#1b2552; --ctl-b:#34437f; --accent:#ffb52e;
+  --floor-near:rgba(88,110,200,.50); --floor-mid:rgba(40,55,120,.30); --floor-far:rgba(10,14,40,0);
+  --rail:rgba(140,165,255,.55);
+  --string:rgba(205,218,255,.75);
+  --beat:rgba(170,190,255,.22); --bar:rgba(200,215,255,.55);
+  --now:#ffb52e; --now-glow:rgba(255,170,40,.85);
+  --f0:#8b93a7; --f1:#16c4b0; --f2:#ff8a2b; --f3:#9a6bff; --f4:#ff5fa2;
+  --gem-text:#fff; --gem-edge:rgba(255,255,255,.55);
+  --shadow:rgba(0,0,0,.65);
+  --sign-bg:#0f1838; --sign-b:#ffb52e; --sign-text:#ffe2a8;
+}
+[data-theme="claro"]{
+  --bg1:#f7f3ea; --bg2:#e6ecf6; --bg3:#cfdaee;
+  --text:#1b2033; --muted:#5a6380;
+  --panel:rgba(255,255,255,.85); --panel-b:rgba(30,40,80,.15);
+  --ctl:#ffffff; --ctl-b:#b8c2da; --accent:#d9480f;
+  --floor-near:rgba(255,255,255,.95); --floor-mid:rgba(240,244,252,.65); --floor-far:rgba(220,228,245,0);
+  --rail:rgba(60,70,110,.45);
+  --string:rgba(40,50,80,.7);
+  --beat:rgba(40,50,90,.16); --bar:rgba(30,40,80,.45);
+  --now:#e8590c; --now-glow:rgba(232,89,12,.55);
+  --f0:#7a8296; --f1:#0f9d8c; --f2:#f0701a; --f3:#7c4dff; --f4:#e8397f;
+  --gem-text:#fff; --gem-edge:rgba(255,255,255,.7);
+  --shadow:rgba(20,30,60,.35);
+  --sign-bg:#ffffff; --sign-b:#1b2033; --sign-text:#1b2033;
+}
+[data-theme="pb"]{
+  --bg1:#ffffff; --bg2:#f2f2f2; --bg3:#e4e4e4;
+  --text:#000; --muted:#444;
+  --panel:rgba(255,255,255,.92); --panel-b:#000;
+  --ctl:#fff; --ctl-b:#000; --accent:#000;
+  --floor-near:rgba(255,255,255,1); --floor-mid:rgba(245,245,245,.7); --floor-far:rgba(230,230,230,0);
+  --rail:#000;
+  --string:#000;
+  --beat:rgba(0,0,0,.18); --bar:rgba(0,0,0,.6);
+  --now:#000; --now-glow:rgba(0,0,0,.35);
+  --f0:#fff; --f1:#fff; --f2:#fff; --f3:#fff; --f4:#fff;
+  --gem-text:#000; --gem-edge:#000;
+  --shadow:rgba(0,0,0,.35);
+  --sign-bg:#fff; --sign-b:#000; --sign-text:#000;
+}
+
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{
+  font-family:var(--font); color:var(--text);
+  background:
+    radial-gradient(120% 70% at 50% 0%, var(--bg3) 0%, transparent 60%),
+    linear-gradient(180deg, var(--bg2) 0%, var(--bg1) 100%);
+  background-attachment:fixed;
+  display:flex; flex-direction:column; min-height:100dvh;
+  -webkit-tap-highlight-color:transparent;
+}
+.top{
+  display:flex; align-items:center; justify-content:space-between; gap:.5rem;
+  padding:.55rem .9rem; padding-top:max(.55rem, env(safe-area-inset-top));
+}
+.top h1{font-size:1.05rem; margin:0; letter-spacing:.02em; font-weight:700}
+.top h1 span{color:var(--accent)}
+.tempo{font-size:.8rem; color:var(--muted); font-variant-numeric:tabular-nums}
+
+/* ===================== Palco / câmera ===================== */
+.stage{
+  position:relative; flex:1 1 auto; min-height:56vh; overflow:hidden;
+  perspective:900px; perspective-origin:50% 22%;
+  --now-top:80%;
+  touch-action:manipulation; cursor:pointer;
+}
+.stage.empe{ --now-top:86%; perspective:1400px; perspective-origin:50% 40%; }
+.stage:focus-visible{outline:3px solid var(--accent); outline-offset:-3px}
+.road{
+  position:absolute; left:50%; top:var(--now-top);
+  transform-style:preserve-3d;
+  /* largura, altura, margens e transform são definidos via JS */
+}
+.road > *, .layer > *, .note > *, .sign > *, .nb > *{position:absolute}
+.layer{inset:0; transform-style:preserve-3d; pointer-events:none}
+
+/* Chão com degradê: claro perto da faixa, escurecendo ao longe */
+.floor{
+  top:0; bottom:0; left:var(--side); right:var(--side);
+  background:
+    linear-gradient(to top,
+      var(--floor-far) 0%,
+      var(--floor-near) calc(var(--behind) - 2%),
+      var(--floor-near) var(--behind),
+      var(--floor-mid) 45%,
+      var(--floor-far) 100%);
+  border-radius:6px;
+}
+.rail{top:0; bottom:0; width:3px; background:linear-gradient(to top, transparent 0%, var(--rail) var(--behind), transparent 100%)}
+.str{top:0; bottom:0; transform:translateX(-50%);
+  background:linear-gradient(to top, transparent 0%, var(--string) var(--behind), transparent 100%);
+}
+.bl{left:var(--side); width:calc(100% - var(--side) * 2); top:0; height:2px; margin-top:-1px; background:var(--beat); will-change:transform,opacity}
+.bl.bar{height:4px; margin-top:-2px; background:var(--bar)}
+
+/* Faixa do "agora" com glow pulsante no beat */
+.nowl{
+  left:calc(var(--side) - 10px); right:calc(var(--side) - 10px); height:8px; margin-top:-4px;
+  background:linear-gradient(90deg, transparent, var(--now) 8%, var(--now) 92%, transparent);
+  border-radius:4px;
+  box-shadow:0 0 calc(6px + var(--pulse) * 22px) calc(1px + var(--pulse) * 4px) var(--now-glow);
+}
+.nowl::after{
+  content:""; position:absolute; left:2%; right:2%; top:-34px; bottom:-34px; border-radius:50%;
+  background:radial-gradient(ellipse at center, var(--now-glow) 0%, transparent 70%);
+  opacity:calc(.18 + var(--pulse) * .62);
+  transform:scaleY(calc(.7 + var(--pulse) * .5));
+  pointer-events:none;
+}
+[data-theme="pb"] .nowl::after{display:none}
+.lab{
+  width:var(--lane); margin-left:calc(var(--lane) / -2); text-align:center;
+  font:700 13px/1 var(--font); color:var(--muted); transform:translateY(16px);
+  transition:color .25s, text-shadow .25s;
+}
+.lab.on{color:var(--now); text-shadow:0 0 10px var(--now-glow)}
+
+/* ===================== Notas ===================== */
+.note{left:0; top:0; width:0; height:0; transform-style:preserve-3d; will-change:transform; --o:1; --bl:0; --br:1}
+.note[hidden], .sign[hidden], .bl[hidden]{display:none}
+.shadow{
+  left:-30px; top:-6px; width:60px; height:20px; border-radius:50%;
+  background:radial-gradient(ellipse at center, var(--shadow) 0%, transparent 70%);
+  opacity:calc(var(--o) * .9);
+  filter:blur(calc(var(--bl) * 1px + 1px));
+}
+.nb{
+  left:-24px; bottom:0; width:48px; height:44px;
+  transform-origin:50% 100%;
+  transform:translateZ(1px) rotateX(calc(var(--tilt) * -1));
+  transform-style:preserve-3d;
+}
+.gem{
+  position:absolute; inset:0; border-radius:12px;
+  background-color:var(--c);
+  background-image:
+    linear-gradient(180deg, rgba(255,255,255,.42) 0%, rgba(255,255,255,.08) 42%, rgba(0,0,0,0) 55%, rgba(0,0,0,.28) 100%);
+  border:2px solid var(--gem-edge);
+  box-shadow:0 8px 14px -4px var(--shadow), inset 0 -3px 0 rgba(0,0,0,.18);
+  color:var(--gem-text);
+  display:flex; align-items:center; justify-content:center;
+  font:800 22px/1 var(--font); font-variant-numeric:tabular-nums;
+  text-shadow:0 1px 2px rgba(0,0,0,.45);
+  opacity:var(--o);
+  filter:blur(calc(var(--bl) * 1px)) brightness(var(--br));
+  transform-origin:50% 100%;
+}
+.gem .fg{position:absolute; right:4px; bottom:2px; font-size:10px; font-weight:700; opacity:.85}
+.gem.open{border-style:dashed}
+[data-theme="pb"] .gem{text-shadow:none; box-shadow:0 6px 10px -4px var(--shadow)}
+.gem.hit{animation:squash .24s cubic-bezier(.3,1.6,.5,1)}
+@keyframes squash{
+  0%{transform:scale(1,1)}
+  30%{transform:scale(1.2,.6)}
+  65%{transform:scale(.94,1.08)}
+  100%{transform:scale(1,1)}
+}
+/* Indicador de bend: arco subindo */
+.bend{
+  position:absolute; left:50%; bottom:100%; width:44px; height:50px; margin-left:-6px; overflow:visible;
+  opacity:var(--o); filter:blur(calc(var(--bl) * 1px));
+}
+.bend path{fill:none; stroke-linecap:round; stroke-linejoin:round}
+.bend .bk{stroke:rgba(0,0,0,.45); stroke-width:6}
+.bend .fr{stroke:var(--c); stroke-width:3.2; stroke-dasharray:70; stroke-dashoffset:0}
+[data-theme="pb"] .bend .fr{stroke:#000}
+[data-theme="pb"] .bend .bk{stroke:#fff}
+.bend text{font:800 13px var(--font); fill:var(--text); paint-order:stroke; stroke:var(--bg1); stroke-width:3px}
+.bend.go .fr{animation:bendDraw .3s ease-out}
+@keyframes bendDraw{from{stroke-dashoffset:70}to{stroke-dashoffset:0}}
+
+/* ===================== Placas de acorde na estrada ===================== */
+.sign{left:0; top:0; width:0; height:0; transform-style:preserve-3d; will-change:transform}
+.sb{left:-34px; bottom:0; width:68px; height:86px; transform-origin:50% 100%;
+  transform:rotateX(calc(var(--tilt) * -1)); transform-style:preserve-3d}
+.post{position:absolute; left:50%; bottom:0; width:5px; height:40px; margin-left:-2.5px; background:var(--sign-b); opacity:calc(var(--o) * .8); border-radius:2px}
+.plate{
+  position:absolute; left:0; right:0; top:0; height:48px; border-radius:9px;
+  background:var(--sign-bg); border:2px solid var(--sign-b); color:var(--sign-text);
+  display:flex; align-items:center; justify-content:center;
+  font:800 20px/1 var(--font); box-shadow:0 8px 16px -6px var(--shadow);
+  opacity:var(--o); filter:blur(calc(var(--bl) * 1px)) brightness(var(--br));
+}
+
+/* ===================== HUD de acorde (transição slide/fade) ===================== */
+.hud{
+  position:absolute; left:.75rem; top:.6rem; z-index:5; pointer-events:none;
+  background:var(--panel); border:1px solid var(--panel-b); border-radius:14px;
+  padding:.45rem .8rem .5rem; min-width:7.2rem;
+  backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
+}
+.hud small{display:block; font-size:.68rem; color:var(--muted); text-transform:uppercase; letter-spacing:.08em}
+.chordbox{position:relative; height:2.3rem; overflow:hidden}
+.chord{position:absolute; left:0; top:0; font:800 2rem/2.3rem var(--font); color:var(--accent);
+  transition:transform .32s cubic-bezier(.2,.8,.2,1), opacity .32s ease}
+.chord.enter{transform:translateY(100%); opacity:0}
+.chord.leave{transform:translateY(-100%); opacity:0}
+.next{font-size:.78rem; color:var(--muted)}
+.next b{color:var(--text)}
+.hint{
+  position:absolute; right:.75rem; top:.6rem; z-index:5; pointer-events:none;
+  font-size:.75rem; color:var(--muted); background:var(--panel); border:1px solid var(--panel-b);
+  border-radius:999px; padding:.3rem .65rem; transition:opacity .4s;
+}
+.playing .hint{opacity:0}
+
+/* ===================== Controles ===================== */
+.controls{
+  background:var(--panel); border-top:1px solid var(--panel-b);
+  padding:.65rem .8rem calc(.7rem + env(safe-area-inset-bottom));
+  display:grid; gap:.6rem;
+  backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
+}
+.row{display:flex; flex-wrap:wrap; gap:.5rem; align-items:center}
+button, select, .seg label{
+  font:600 .9rem var(--font); color:var(--text);
+  background:var(--ctl); border:1px solid var(--ctl-b); border-radius:10px;
+  padding:.5rem .8rem; min-height:40px; cursor:pointer;
+}
+button:focus-visible, select:focus-visible, input:focus-visible, summary:focus-visible, .seg input:focus-visible + span{outline:3px solid var(--accent); outline-offset:2px}
+button.primary{background:var(--accent); color:#1a1200; border-color:transparent; min-width:6.5rem}
+[data-theme="pb"] button.primary{color:#fff}
+button[aria-pressed="false"]:not(.primary){opacity:.7}
+fieldset.seg{border:0; margin:0; padding:0; display:inline-flex; gap:0}
+fieldset.seg legend{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0)}
+.seg label{position:relative; border-radius:0; padding:0; display:flex}
+.seg label:first-of-type{border-radius:10px 0 0 10px}
+.seg label:last-of-type{border-radius:0 10px 10px 0; border-left:0}
+.seg input{position:absolute; opacity:0; inset:0; margin:0; cursor:pointer}
+.seg span{padding:.5rem .8rem; display:flex; align-items:center; border-radius:inherit}
+.seg input:checked + span{background:var(--accent); color:#1a1200}
+[data-theme="pb"] .seg input:checked + span{color:#fff}
+details{border:1px solid var(--panel-b); border-radius:12px; padding:.2rem .7rem}
+summary{cursor:pointer; font-weight:700; padding:.45rem 0; min-height:36px}
+.sliders{display:grid; grid-template-columns:repeat(auto-fit, minmax(210px, 1fr)); gap:.35rem 1rem; padding:.2rem 0 .6rem}
+.sl{display:grid; grid-template-columns:5.8rem 1fr 3.4rem; align-items:center; gap:.5rem; font-size:.85rem}
+.sl output{text-align:right; color:var(--muted); font-variant-numeric:tabular-nums}
+input[type=range]{width:100%; accent-color:var(--accent); min-height:32px}
+.chk{display:flex; align-items:center; gap:.4rem; font-size:.85rem}
+.chk input{width:20px; height:20px; accent-color:var(--accent)}
+.legend{display:flex; flex-wrap:wrap; gap:.35rem .8rem; font-size:.78rem; color:var(--muted); padding-bottom:.6rem}
+.legend i{display:inline-block; width:12px; height:12px; border-radius:4px; background:var(--c); vertical-align:-2px; margin-right:.3rem; border:1px solid var(--gem-edge)}
+.sr{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap}
+
+/* Movimento reduzido: desliga as animações novas (squash, bend, slide, pulso, balanço via JS) */
+.rm .gem.hit, .rm .bend.go .fr{animation:none}
+.rm .chord, .rm .lab, .rm .hint{transition:none}
+.rm .nowl::after{transform:none}
+@media (prefers-reduced-motion: reduce){
+  .gem.hit, .bend.go .fr{animation:none}
+  .chord, .lab, .hint{transition:none}
+}
+@media (min-width:900px){
+  .stage{min-height:62vh}
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <h1>Estrada da <span>Tablatura</span></h1>
+  <div class="tempo" id="tempoInfo">84 BPM · compasso 1</div>
+</header>
+
+<main class="stage" id="stage" tabindex="0" role="img"
+      aria-label="Estrada 3D da tablatura: seis cordas, notas com o número do traste se aproximando da faixa do agora. Toque ou pressione espaço para tocar ou pausar.">
+  <div class="hud" aria-hidden="true">
+    <small>Acorde</small>
+    <div class="chordbox" id="chordbox"></div>
+    <div class="next" id="nextChord"></div>
+  </div>
+  <div class="hint" aria-hidden="true">toque para tocar</div>
+  <div class="road" id="road">
+    <div class="floor"></div>
+    <div class="layer" id="lines"></div>
+    <div class="layer" id="strings"></div>
+    <div class="nowl" id="nowl"></div>
+    <div class="layer" id="labels"></div>
+    <div class="layer" id="signs"></div>
+    <div class="layer" id="notes"></div>
+  </div>
+</main>
+<div class="sr" id="live" aria-live="polite" aria-atomic="true"></div>
+
+<section class="controls" aria-label="Controles">
+  <div class="row">
+    <button class="primary" id="btnPlay" aria-pressed="false">▶ Tocar</button>
+    <button id="btnRestart" aria-label="Voltar ao início">⟲ Início</button>
+    <button id="btnSound" aria-pressed="true">🔊 Som</button>
+    <fieldset class="seg" id="modeSeg">
+      <legend>Modo da estrada</legend>
+      <label><input type="radio" name="mode" value="deitado" checked><span>Deitado</span></label>
+      <label><input type="radio" name="mode" value="empe"><span>Em pé</span></label>
+    </fieldset>
+    <label class="chk" for="theme">Tema
+      <select id="theme">
+        <option value="palco">Palco (escuro)</option>
+        <option value="claro">Claro</option>
+        <option value="pb">Preto e branco</option>
+      </select>
+    </label>
+  </div>
+  <div class="row">
+    <div class="sl" style="flex:1 1 260px"><label for="speed">Velocidade</label><input type="range" id="speed" min="0.4" max="1.6" step="0.05" value="1"><output id="speedOut" for="speed">1.00×</output></div>
+    <div class="sl" style="flex:1 1 260px"><label for="seek">Posição</label><input type="range" id="seek" min="0" max="32" step="0.25" value="0"><output id="seekOut" for="seek">1.1</output></div>
+  </div>
+  <details id="camDetails">
+    <summary>Câmera e acessibilidade</summary>
+    <div class="sliders">
+      <div class="sl"><label for="yaw">Yaw</label><input type="range" id="yaw" min="-35" max="35" step="0.5" value="0"><output id="yawOut" for="yaw">0°</output></div>
+      <div class="sl"><label for="tilt">Tilt</label><input type="range" id="tilt" min="0" max="78" step="0.5" value="60"><output id="tiltOut" for="tilt">60°</output></div>
+      <div class="sl"><label for="zoom">Zoom</label><input type="range" id="zoom" min="0.4" max="1.8" step="0.01" value="1"><output id="zoomOut" for="zoom">1.00×</output></div>
+      <div class="sl"><label for="roll">Rolagem</label><input type="range" id="roll" min="-25" max="25" step="0.5" value="0"><output id="rollOut" for="roll">0°</output></div>
+    </div>
+    <div class="row" style="padding-bottom:.6rem">
+      <label class="chk"><input type="checkbox" id="reduce"> Reduzir movimento</label>
+      <button id="btnCam">Restaurar câmera</button>
+    </div>
+    <div class="legend" aria-label="Legenda de cores por dedo">
+      <span><i style="--c:var(--f1)"></i>1 indicador</span>
+      <span><i style="--c:var(--f2)"></i>2 médio</span>
+      <span><i style="--c:var(--f3)"></i>3 anelar</span>
+      <span><i style="--c:var(--f4)"></i>4 mínimo</span>
+      <span><i style="--c:var(--f0)"></i>0 corda solta</span>
+      <span>↗ bend (½ ou 1 tom)</span>
+    </div>
+  </details>
+</section>
+
+<script>
+(() => {
+'use strict';
+
+/* ===================== Música =====================
+   s: corda (1 = mi agudo ... 6 = mi grave), f: traste, d: dedo (0 = solta),
+   t: técnica ('b' = bend), a: tamanho do bend em tons (0.5 = ½, 1 = inteiro) */
+const SONG = {
+  bpm: 84, beatsPerBar: 4, length: 32,
+  chords: [
+    {b:0,n:'Am'},{b:4,n:'C'},{b:8,n:'G'},{b:12,n:'D'},
+    {b:16,n:'Am'},{b:20,n:'G'},{b:24,n:'Em'},{b:28,n:'Am'}
+  ],
+  notes: []
+};
+const N = (b,s,f,d,t,a) => SONG.notes.push({b,s,f,d,t,a});
+const arp = (start, list) => list.forEach((n,i) => N(start + i * .5, ...n));
+arp(0,  [[5,0,0],[4,2,2],[3,2,3],[2,1,1],[1,0,0],[2,1,1],[3,2,3],[4,2,2]]); // Am
+arp(4,  [[5,3,3],[4,2,2],[3,0,0],[2,1,1],[1,0,0],[2,1,1],[3,0,0],[4,2,2]]); // C
+arp(8,  [[6,3,3],[5,2,2],[4,0,0],[3,0,0],[2,0,0],[1,3,4],[2,0,0],[3,0,0]]); // G
+arp(12, [[4,0,0],[3,2,1],[2,3,3],[1,2,2],[2,3,3],[3,2,1],[4,0,0],[3,2,1]]); // D
+// Solo em lá menor pentatônica
+N(16,1,5,1); N(16.5,2,8,4); N(17,2,5,1); N(17.5,3,7,3); N(18,3,7,3,'b',1); N(19.5,3,5,1);
+N(20,4,7,3); N(20.5,4,5,1); N(21,5,7,3); N(21.5,5,5,1); N(22,6,3,2); N(23,4,5,1); N(23.5,3,0,0);
+N(24,6,0,0); N(24.5,5,2,2); N(25,4,2,3); N(25.5,3,0,0); N(26,2,0,0); N(26.5,1,0,0); N(27,2,5,1); N(27.5,2,8,3,'b',.5);
+N(28,1,8,4); N(28.5,1,5,1); N(29,2,5,1); N(29.5,2,8,4); N(30,1,5,1); N(31,3,7,3,'b',1);
+
+const OPEN_HZ = [0, 329.63, 246.94, 196.00, 146.83, 110.00, 82.41];
+const STR_NAMES = ['', 'e', 'B', 'G', 'D', 'A', 'E'];
+
+/* ===================== Geometria ===================== */
+const LANE = 58, SIDE = 92, PPB = 112, AHEAD = 8, BEHIND = 1.25;
+const W = LANE * 6 + SIDE * 2, H = (AHEAD + BEHIND) * PPB, NOWY = AHEAD * PPB;
+const laneX = s => SIDE + (6 - s + .5) * LANE;   // mi grave à esquerda, mi agudo à direita
+const L = SONG.length;
+
+const $ = id => document.getElementById(id);
+const root = document.documentElement;
+const stage = $('stage'), road = $('road');
+road.style.width = W + 'px';
+road.style.height = H + 'px';
+road.style.marginLeft = (-W / 2) + 'px';
+road.style.marginTop = (-NOWY) + 'px';
+road.style.transformOrigin = `50% ${NOWY}px`;
+road.style.setProperty('--side', SIDE + 'px');
+road.style.setProperty('--behind', (BEHIND / (AHEAD + BEHIND) * 100).toFixed(2) + '%');
+$('nowl').style.top = NOWY + 'px';
+
+const mk = (cls, parent, html) => {
+  const el = document.createElement('div'); el.className = cls;
+  if (html) el.innerHTML = html;
+  parent.appendChild(el); return el;
+};
+
+// Trilhos, cordas e rótulos
+const strings = $('strings'), labels = $('labels');
+for (const x of [SIDE - 6, W - SIDE + 3]) mk('rail', strings).style.left = x + 'px';
+const labEls = {};
+for (let s = 1; s <= 6; s++) {
+  const st = mk('str', strings);
+  st.style.left = laneX(s) + 'px'; st.style.width = (1 + s * .45).toFixed(1) + 'px';
+  const lb = mk('lab', labels); lb.textContent = STR_NAMES[s];
+  lb.style.left = laneX(s) + 'px'; lb.style.top = NOWY + 'px';
+  labEls[s] = lb;
+}
+
+// Linhas de beat / compasso
+const lines = [];
+for (let b = 0; b < L; b++) {
+  const bar = b % SONG.beatsPerBar === 0;
+  const el = mk('bl' + (bar ? ' bar' : ''), $('lines'));
+  el.hidden = true;
+  lines.push({b, el, x:0, y:null, k:null, vis:false});
+}
+
+// Notas
+const notes = SONG.notes.map(n => {
+  const el = mk('note', $('notes'));
+  el.hidden = true;
+  el.style.setProperty('--c', n.d ? `var(--f${n.d})` : 'var(--f0)');
+  const arc = 'M4 48 C 6 22, 18 10, 30 8 M23 2 L31 8 L24 15';
+  const bend = n.t === 'b'
+    ? `<svg class="bend" viewBox="0 0 44 50" aria-hidden="true"><path class="bk" d="${arc}"/><path class="fr" d="${arc}"/><text x="33" y="24">${n.a === .5 ? '½' : '1'}</text></svg>`
+    : '';
+  el.innerHTML = `<div class="shadow"></div><div class="nb">${bend}<div class="gem${n.d ? '' : ' open'}">${n.f}<span class="fg">${n.d || ''}</span></div></div>`;
+  return {...n, el, gem: el.querySelector('.gem'), bendEl: el.querySelector('.bend'),
+          x: laneX(n.s), y:null, k:null, vis:false, prevD:null};
+});
+
+// Placas de acorde na lateral esquerda
+const signs = SONG.chords.map(c => {
+  const el = mk('sign', $('signs'), `<div class="sb"><div class="post"></div><div class="plate">${c.n}</div></div>`);
+  el.hidden = true;
+  return {...c, el, x: SIDE / 2 - 6, y:null, k:null, vis:false};
+});
+
+/* ===================== Som (Karplus-Strong) ===================== */
+let actx = null, master = null, soundOn = true;
+const bufCache = new Map();
+function ensureAudio() {
+  if (!actx) {
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return null;
+    actx = new AC();
+    const comp = actx.createDynamicsCompressor();
+    master = actx.createGain(); master.gain.value = .55;
+    master.connect(comp); comp.connect(actx.destination);
+  }
+  if (actx.state === 'suspended') actx.resume();
+  return actx;
+}
+function ksBuffer(freq) {
+  const key = freq.toFixed(2);
+  if (bufCache.has(key)) return bufCache.get(key);
+  const sr = actx.sampleRate, len = Math.floor(sr * 2.4);
+  const buf = actx.createBuffer(1, len, sr), out = buf.getChannelData(0);
+  const P = Math.max(2, Math.round(sr / freq - .5));      // atraso da média = P + ½ amostra
+  const ring = new Float32Array(P);
+  let lp = 0;
+  for (let i = 0; i < P; i++) { lp = lp * .45 + (Math.random() * 2 - 1) * .55; ring[i] = lp; }
+  const decay = freq > 400 ? .9935 : .9965;
+  let idx = 0;
+  for (let i = 0; i < len; i++) {
+    const nx = idx + 1 === P ? 0 : idx + 1;
+    const a = ring[idx];
+    out[i] = a;
+    ring[idx] = decay * .5 * (a + ring[nx]);
+    idx = nx;
+  }
+  const fade = Math.floor(sr * .08);
+  for (let i = 0; i < fade; i++) out[len - 1 - i] *= i / fade;
+  bufCache.set(key, buf);
+  return buf;
+}
+function pluck(n) {
+  if (!soundOn || !actx || actx.state !== 'running') return;
+  const freq = OPEN_HZ[n.s] * Math.pow(2, n.f / 12);
+  const t = actx.currentTime;
+  const src = actx.createBufferSource(); src.buffer = ksBuffer(freq);
+  const g = actx.createGain(); g.gain.value = .42;
+  if (n.t === 'b') {
+    const secPerBeat = 60 / (SONG.bpm * speed);
+    src.playbackRate.setValueAtTime(1, t + .04);
+    src.playbackRate.linearRampToValueAtTime(Math.pow(2, (n.a * 2) / 12), t + Math.min(.35, secPerBeat * .6));
+  }
+  src.connect(g); g.connect(master);
+  src.start(t); src.stop(t + 2.4);
+}
+
+/* ===================== Estado / controles ===================== */
+const mqReduce = window.matchMedia ? matchMedia('(prefers-reduced-motion: reduce)') : {matches:false};
+let reduced = mqReduce.matches;
+let playing = false, beat = 0, speed = 1, seekDrag = false, skipHits = true;
+const MODES = {
+  deitado: {tilt:60, zoom:1,   yaw:0, roll:0},
+  empe:    {tilt:8,  zoom:.78, yaw:0, roll:0}
+};
+let mode = 'deitado';
+const cam = {...MODES.deitado};         // alvo (sliders)
+const camNow = {...MODES.deitado};      // valor suavizado
+const CAM_KEYS = ['yaw','tilt','zoom','roll'];
+const deg = v => (Math.round(v * 10) / 10) + '°';
+const fmt = {yaw:deg, tilt:deg, roll:deg, zoom: v => (+v).toFixed(2) + '×'};
+
+function syncSliders() {
+  for (const k of CAM_KEYS) { $(k).value = cam[k]; $(k + 'Out').textContent = fmt[k](cam[k]); }
+}
+for (const k of CAM_KEYS) {
+  $(k).addEventListener('input', e => { cam[k] = +e.target.value; $(k + 'Out').textContent = fmt[k](cam[k]); save(); });
+}
+function setMode(m, keepCam) {
+  mode = m;
+  stage.classList.toggle('empe', m === 'empe');
+  document.querySelector(`input[name=mode][value=${m}]`).checked = true;
+  if (!keepCam) { Object.assign(cam, MODES[m]); syncSliders(); }
+  save();
+}
+document.querySelectorAll('input[name=mode]').forEach(r => r.addEventListener('change', e => setMode(e.target.value)));
+$('btnCam').addEventListener('click', () => { Object.assign(cam, MODES[mode]); syncSliders(); save(); });
+
+function setSpeed(v) { speed = v; $('speed').value = v; $('speedOut').textContent = v.toFixed(2) + '×'; }
+$('speed').addEventListener('input', e => { setSpeed(+e.target.value); save(); });
+const seek = $('seek');
+seek.max = L;
+seek.addEventListener('pointerdown', () => seekDrag = true);
+addEventListener('pointerup', () => seekDrag = false);
+seek.addEventListener('change', () => seekDrag = false);
+seek.addEventListener('input', e => { beat = +e.target.value; skipHits = true; });
+
+function setPlaying(p) {
+  playing = p;
+  if (p) ensureAudio();
+  skipHits = true;
+  stage.classList.toggle('playing', p);
+  const b = $('btnPlay');
+  b.setAttribute('aria-pressed', String(p));
+  b.textContent = p ? '⏸ Pausar' : '▶ Tocar';
+}
+$('btnPlay').addEventListener('click', () => setPlaying(!playing));
+stage.addEventListener('click', () => setPlaying(!playing));
+$('btnRestart').addEventListener('click', () => { beat = 0; skipHits = true; });
+function setSound(on) {
+  soundOn = on;
+  const b = $('btnSound');
+  b.setAttribute('aria-pressed', String(on));
+  b.textContent = on ? '🔊 Som' : '🔇 Mudo';
+}
+$('btnSound').addEventListener('click', () => { setSound(!soundOn); if (soundOn) ensureAudio(); save(); });
+document.addEventListener('keydown', e => {
+  if (e.code !== 'Space' && e.key !== ' ') return;
+  const tag = (e.target.tagName || '').toLowerCase();
+  if (['input','select','button','summary','textarea'].includes(tag)) return;
+  e.preventDefault(); setPlaying(!playing);
+});
+
+const themeSel = $('theme');
+function setTheme(t) {
+  if (!['palco','claro','pb'].includes(t)) t = 'palco';
+  root.dataset.theme = t; themeSel.value = t;
+  document.querySelector('meta[name=theme-color]').content = t === 'palco' ? '#070b1f' : t === 'claro' ? '#f7f3ea' : '#ffffff';
+}
+themeSel.addEventListener('change', e => { setTheme(e.target.value); save(); });
+
+function setReduced(v) { reduced = v; root.classList.toggle('rm', v); $('reduce').checked = v; }
+$('reduce').addEventListener('change', e => { setReduced(e.target.checked); save(); });
+if (mqReduce.addEventListener) mqReduce.addEventListener('change', e => setReduced(e.matches));
+
+const STORE = 'estrada-tablatura';
+let loaded = false;
+function save() {
+  if (!loaded) return;
+  try { localStorage.setItem(STORE, JSON.stringify({mode, cam, speed, soundOn, theme: root.dataset.theme, reduced})); } catch (_) {}
+}
+function load() {
+  let s = null;
+  try { s = JSON.parse(localStorage.getItem(STORE)); } catch (_) {}
+  s = s || {};
+  setReduced(mqReduce.matches || !!s.reduced);
+  setTheme(s.theme || 'palco');
+  setMode(s.mode === 'empe' ? 'empe' : 'deitado');
+  if (s.cam) for (const k of CAM_KEYS) if (typeof s.cam[k] === 'number') cam[k] = s.cam[k];
+  Object.assign(camNow, cam);
+  syncSliders();
+  if (typeof s.speed === 'number') setSpeed(s.speed);
+  setSound(s.soundOn !== false);
+  loaded = true;
+}
+
+/* ===================== Ajuste à tela ===================== */
+let fit = 1;
+function resize() { fit = Math.min(1.15, (stage.clientWidth - 8) / (W + 16)); }
+addEventListener('resize', resize);
+
+/* ===================== Névoa de profundidade ===================== */
+// Distância em beats -> chave quantizada (evita reescrever estilos todo frame).
+function fogKey(d) {
+  if (d < 0) return -Math.round(Math.min(1, -d / BEHIND) * 20);
+  return Math.round(Math.min(1, d / AHEAD) * 25);
+}
+function applyFog(el, k) {
+  let o, bl, br;
+  if (k < 0) { const t = -k / 20; o = 1 - t; bl = 0; br = 1 - t * .25; }
+  else {
+    const t = k / 25;
+    o  = 1 - .8 * Math.pow(t, 1.15);
+    bl = 2.8 * t * t;
+    br = t < .08 ? 1.12 : 1 - .32 * t;   // ganha contraste perto da faixa
+  }
+  el.style.setProperty('--o', o.toFixed(3));
+  el.style.setProperty('--bl', bl.toFixed(2));
+  el.style.setProperty('--br', br.toFixed(3));
+}
+function wrapDist(b, cur) {
+  let d = ((b - cur) % L + L) % L;
+  if (d > L - BEHIND) d -= L;
+  return d;
+}
+function place(item, d) {
+  if (d > AHEAD + .05 || d < -BEHIND) {
+    if (item.vis) { item.el.hidden = true; item.vis = false; }
+    return false;
+  }
+  if (!item.vis) { item.el.hidden = false; item.vis = true; }
+  const y = Math.round((NOWY - d * PPB) * 10) / 10;
+  if (y !== item.y) { item.y = y; item.el.style.transform = `translate3d(${item.x}px, ${y}px, 0)`; }
+  return true;
+}
+
+/* ===================== Impacto na faixa ===================== */
+function hit(n) {
+  pluck(n);
+  if (!reduced) {
+    n.gem.classList.remove('hit'); void n.gem.offsetWidth; n.gem.classList.add('hit');
+    if (n.bendEl) { n.bendEl.classList.remove('go'); void n.bendEl.getBoundingClientRect(); n.bendEl.classList.add('go'); }
+  }
+  const lb = labEls[n.s];
+  lb.classList.add('on');
+  clearTimeout(lb._t); lb._t = setTimeout(() => lb.classList.remove('on'), 180);
+}
+notes.forEach(n => n.gem.addEventListener('animationend', () => n.gem.classList.remove('hit')));
+
+/* ===================== HUD de acorde ===================== */
+let curChordIdx = -1;
+const chordbox = $('chordbox');
+function chordAt(cur) {
+  let i = SONG.chords.length - 1;
+  for (let j = 0; j < SONG.chords.length; j++) if (SONG.chords[j].b <= cur + 1e-6) i = j;
+  return i;
+}
+function updateChord(cur) {
+  const i = chordAt(cur);
+  if (i === curChordIdx) return;
+  const first = curChordIdx === -1;
+  curChordIdx = i;
+  const c = SONG.chords[i], nx = SONG.chords[(i + 1) % SONG.chords.length];
+  const old = chordbox.querySelectorAll('.chord:not(.leave)');
+  const el = document.createElement('span'); el.className = 'chord'; el.textContent = c.n;
+  if (reduced || first) { chordbox.querySelectorAll('.chord').forEach(o => o.remove()); chordbox.appendChild(el); }
+  else {
+    el.classList.add('enter'); chordbox.appendChild(el);
+    void el.offsetWidth;
+    el.classList.remove('enter');
+    old.forEach(o => { o.classList.add('leave'); setTimeout(() => o.remove(), 360); });
+  }
+  $('nextChord').innerHTML = `a seguir: <b>${nx.n}</b>`;
+  if (playing) $('live').textContent = `Acorde ${c.n}`;
+}
+
+/* ===================== Loop de render ===================== */
+let last = performance.now(), lastInfo = 0;
+function frame(now) {
+  const dt = Math.min(.1, Math.max(0, (now - last) / 1000)); last = now;
+  if (playing) beat += dt * SONG.bpm / 60 * speed;
+  if (beat >= L * 1000) beat -= L * 1000;
+  const cur = ((beat % L) + L) % L;
+
+  // câmera suavizada + balanço sutil no beat (±0.5°)
+  const ease = reduced ? 1 : 1 - Math.pow(.002, dt);
+  for (const k of CAM_KEYS) camNow[k] += (cam[k] - camNow[k]) * ease;
+  const sway = reduced || !playing ? 0 : .5 * Math.sin(beat * Math.PI);
+  const tilt = camNow.tilt + sway;
+  stage.style.setProperty('--tilt', tilt.toFixed(3) + 'deg');
+  road.style.transform =
+    `scale(${(fit * camNow.zoom).toFixed(4)}) rotateZ(${camNow.roll.toFixed(2)}deg) rotateY(${camNow.yaw.toFixed(2)}deg) rotateX(${tilt.toFixed(3)}deg)`;
+
+  // glow da faixa pulsando no tempo
+  const frac = ((beat % 1) + 1) % 1;
+  const pulse = reduced ? .45 : (playing ? Math.pow(1 - frac, 2.4) : .3);
+  stage.style.setProperty('--pulse', pulse.toFixed(3));
+
+  // linhas de compasso com fade na distância
+  for (const ln of lines) {
+    const d = wrapDist(ln.b, cur);
+    if (!place(ln, d)) continue;
+    const o = d < 0 ? Math.max(0, 1 + d / BEHIND) : Math.pow(1 - Math.min(1, d / AHEAD), 1.4);
+    const k = Math.round(o * 40);
+    if (k !== ln.k) { ln.k = k; ln.el.style.opacity = (k / 40).toFixed(3); }
+  }
+  // notas
+  for (const n of notes) {
+    const d = wrapDist(n.b, cur);
+    if (place(n, d)) {
+      const k = fogKey(d);
+      if (k !== n.k) { n.k = k; applyFog(n.el, k); }
+    }
+    if (playing && !skipHits && n.prevD !== null && n.prevD > 0 && d <= 0 && n.prevD - d < 1) hit(n);
+    n.prevD = d;
+  }
+  // placas
+  for (const s of signs) {
+    const d = wrapDist(s.b, cur);
+    if (!place(s, d)) continue;
+    const k = fogKey(d);
+    if (k !== s.k) { s.k = k; applyFog(s.el, k); }
+  }
+  skipHits = false;
+
+  updateChord(cur);
+  if (now - lastInfo > 120) {
+    lastInfo = now;
+    if (!seekDrag) seek.value = cur.toFixed(2);
+    const bar = Math.floor(cur / SONG.beatsPerBar) + 1, bt = Math.floor(cur % SONG.beatsPerBar) + 1;
+    $('seekOut').textContent = `${bar}.${bt}`;
+    $('tempoInfo').textContent = `${Math.round(SONG.bpm * speed)} BPM · compasso ${bar}`;
+  }
+  requestAnimationFrame(frame);
+}
+
+load();
+resize();
+requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
