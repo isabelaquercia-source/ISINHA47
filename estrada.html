@@ -92,7 +92,7 @@ body{
   transform-style:preserve-3d;
   /* largura, altura, margens e transform são definidos via JS */
 }
-.road > *, .layer > *, .note > *, .sign > *, .nb > *{position:absolute}
+.road > *, .layer > *, .note > *, .sign > *, .nb > *, .guide > *{position:absolute}
 .layer{inset:0; transform-style:preserve-3d; pointer-events:none}
 
 /* Chão com degradê: claro perto da faixa, escurecendo ao longe */
@@ -190,6 +190,30 @@ body{
 .bend.go .fr{animation:bendDraw .3s ease-out}
 @keyframes bendDraw{from{stroke-dashoffset:70}to{stroke-dashoffset:0}}
 
+/* Bolinha guia: quica de nota em nota sobre a faixa do "agora" */
+.guide{left:0; top:0; width:0; height:0; transform-style:preserve-3d; will-change:transform; pointer-events:none}
+.gshadow{
+  left:-16px; top:-5px; width:32px; height:10px; border-radius:50%;
+  background:radial-gradient(ellipse at center, var(--shadow) 0%, transparent 70%);
+  will-change:transform,opacity;
+}
+.gbb{
+  left:-11px; bottom:0; width:22px; height:22px;
+  transform-origin:50% 100%;
+  transform:translateZ(2px) rotateX(calc(var(--tilt) * -1));
+  transform-style:preserve-3d;
+}
+.ball{
+  position:absolute; inset:0; border-radius:50%;
+  background:radial-gradient(circle at 34% 30%, #fff 0 16%, var(--gc) 70%);
+  background:radial-gradient(circle at 34% 30%, #fff 0 16%, var(--gc) 58%, color-mix(in srgb, var(--gc) 60%, #000) 100%);
+  border:2px solid var(--gem-edge);
+  box-shadow:0 0 12px 2px var(--now-glow);
+  transform-origin:50% 100%;
+  will-change:transform;
+}
+[data-theme="pb"] .ball{background:#fff; border-color:#000; box-shadow:none}
+
 /* ===================== Placas de acorde na estrada ===================== */
 .sign{left:0; top:0; width:0; height:0; transform-style:preserve-3d; will-change:transform}
 .sb{left:-34px; bottom:0; width:68px; height:86px; transform-origin:50% 100%;
@@ -283,7 +307,7 @@ input[type=range]{width:100%; accent-color:var(--accent); min-height:32px}
 </header>
 
 <main class="stage" id="stage" tabindex="0" role="img"
-      aria-label="Estrada 3D da tablatura: seis cordas, notas com o número do traste se aproximando da faixa do agora. Toque ou pressione espaço para tocar ou pausar.">
+      aria-label="Estrada 3D da tablatura: seis cordas, notas com o número do traste se aproximando da faixa do agora e uma bolinha guia que quica de nota em nota. Toque ou pressione espaço para tocar ou pausar.">
   <div class="hud" aria-hidden="true">
     <small>Acorde</small>
     <div class="chordbox" id="chordbox"></div>
@@ -442,6 +466,35 @@ const signs = SONG.chords.map(c => {
   el.hidden = true;
   return {...c, el, x: SIDE / 2 - 6, y:null, k:null, vis:false};
 });
+
+// Bolinha guia: pousa na corda de cada nota no instante em que ela cruza a faixa
+const ONSETS = [...new Set(SONG.notes.map(n => n.b))].sort((a, b) => a - b).map(b => {
+  const at = SONG.notes.filter(n => n.b === b);
+  const d = at[0].d;
+  return {b, x: at.reduce((t, n) => t + laneX(n.s), 0) / at.length, c: d ? `var(--f${d})` : 'var(--f0)'};
+});
+const GUIDE_BASE = 46;   // pousa no topo da nota (altura da gema + folga)
+const guide = mk('guide', road, '<div class="gshadow"></div><div class="gbb"><div class="ball"></div></div>');
+guide.setAttribute('aria-hidden', 'true');
+const gShadow = guide.querySelector('.gshadow'), gBall = guide.querySelector('.ball');
+let guideC = null;
+function updateGuide(cur) {
+  let j = ONSETS.findIndex(o => o.b > cur + 1e-6);
+  if (j === -1) j = ONSETS.length;
+  const prev = ONSETS[(j - 1 + ONSETS.length) % ONSETS.length], next = ONSETS[j % ONSETS.length];
+  const pb = j === 0 ? prev.b - L : prev.b, qb = j === ONSETS.length ? next.b + L : next.b;
+  const gap = qb - pb, u = Math.min(1, Math.max(0, (cur - pb) / gap));
+  const x = prev.x + (next.x - prev.x) * u;
+  const amp = reduced ? 0 : 38 + 42 * Math.min(1, gap);
+  const lift = amp * 4 * u * (1 - u);
+  const sq = reduced ? 0 : Math.max(0, 1 - Math.min(u, 1 - u) * gap / .07);
+  guide.style.transform = `translate3d(${x.toFixed(1)}px, ${NOWY}px, 0)`;
+  gBall.style.transform = `translateY(${(-GUIDE_BASE - lift).toFixed(1)}px) scale(${(1 + .22 * sq).toFixed(3)}, ${(1 - .3 * sq).toFixed(3)})`;
+  const k = amp ? lift / amp : 0;
+  gShadow.style.transform = `scale(${(1 - .45 * k).toFixed(3)})`;
+  gShadow.style.opacity = (.85 - .5 * k).toFixed(3);
+  if (next.c !== guideC) { guideC = next.c; guide.style.setProperty('--gc', next.c); }
+}
 
 /* ===================== Som (Karplus-Strong) ===================== */
 let actx = null, master = null, soundOn = true;
@@ -739,6 +792,7 @@ function frame(now) {
   }
   skipHits = false;
 
+  updateGuide(cur);
   updateChord(cur);
   if (now - lastInfo > 120) {
     lastInfo = now;
