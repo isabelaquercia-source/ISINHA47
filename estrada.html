@@ -346,7 +346,7 @@ input[type=range]{width:100%; accent-color:var(--accent); min-height:32px}
   </div>
   <div class="row">
     <div class="sl" style="flex:1 1 260px"><label for="speed">Velocidade</label><input type="range" id="speed" min="0.4" max="1.6" step="0.05" value="1"><output id="speedOut" for="speed">1.00×</output></div>
-    <div class="sl" style="flex:1 1 260px"><label for="seek">Posição</label><input type="range" id="seek" min="0" max="32" step="0.25" value="0"><output id="seekOut" for="seek">1.1</output></div>
+    <div class="sl" style="flex:1 1 260px"><label for="seek">Posição</label><input type="range" id="seek" min="0" max="31.75" step="0.25" value="0"><output id="seekOut" for="seek">1.1</output></div>
   </div>
   <details id="camDetails">
     <summary>Câmera e acessibilidade</summary>
@@ -597,7 +597,7 @@ $('btnCam').addEventListener('click', () => { Object.assign(cam, MODES[mode]); s
 function setSpeed(v) { speed = v; $('speed').value = v; $('speedOut').textContent = v.toFixed(2) + '×'; }
 $('speed').addEventListener('input', e => { setSpeed(+e.target.value); save(); });
 const seek = $('seek');
-seek.max = L;
+seek.max = L - +seek.step;   // L equivale a 0: o fim do slider fica no último passo antes do loop
 seek.addEventListener('pointerdown', () => seekDrag = true);
 addEventListener('pointerup', () => seekDrag = false);
 seek.addEventListener('change', () => seekDrag = false);
