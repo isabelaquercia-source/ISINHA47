@@ -679,7 +679,7 @@ function updateChord(cur) {
 let last = performance.now(), lastInfo = 0;
 function frame(now) {
   const dt = Math.min(.1, Math.max(0, (now - last) / 1000)); last = now;
-  if (playing) beat += dt * SONG.bpm / 60 * speed;
+  if (playing && !skipHits) beat += dt * SONG.bpm / 60 * speed;   // 1º frame após play/seek só registra prevD
   if (beat >= L * 1000) beat -= L * 1000;
   const cur = ((beat % L) + L) % L;
 
@@ -712,7 +712,7 @@ function frame(now) {
       const k = fogKey(d);
       if (k !== n.k) { n.k = k; applyFog(n.el, k); }
     }
-    if (playing && !skipHits && n.prevD !== null && n.prevD > 0 && d <= 0 && n.prevD - d < 1) hit(n);
+    if (playing && !skipHits && n.prevD !== null && n.prevD >= 0 && d < 0 && n.prevD - d < 1) hit(n);
     n.prevD = d;
   }
   // placas
