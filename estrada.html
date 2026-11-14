@@ -463,7 +463,7 @@ function ksBuffer(freq) {
   if (bufCache.has(key)) return bufCache.get(key);
   const sr = actx.sampleRate, len = Math.floor(sr * 2.4);
   const buf = actx.createBuffer(1, len, sr), out = buf.getChannelData(0);
-  const P = Math.max(2, Math.round(sr / freq - .5));      // atraso da média = P + ½ amostra
+  const P = Math.max(2, Math.round(sr / freq + .5));      // a média encurta o período em ½ amostra
   const ring = new Float32Array(P);
   let lp = 0;
   for (let i = 0; i < P; i++) { lp = lp * .45 + (Math.random() * 2 - 1) * .55; ring[i] = lp; }
