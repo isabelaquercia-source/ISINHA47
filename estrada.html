@@ -446,6 +446,7 @@ const signs = SONG.chords.map(c => {
 /* ===================== Som (Karplus-Strong) ===================== */
 let actx = null, master = null, soundOn = true;
 const bufCache = new Map();
+const voices = new Set();
 function ensureAudio() {
   if (!actx) {
     const AC = window.AudioContext || window.webkitAudioContext;
@@ -493,7 +494,20 @@ function pluck(n) {
     src.playbackRate.linearRampToValueAtTime(Math.pow(2, (n.a * 2) / 12), t + Math.min(.35, secPerBeat * .6));
   }
   src.connect(g); g.connect(master);
+  const v = {src, g};
+  voices.add(v);
+  src.onended = () => voices.delete(v);
   src.start(t); src.stop(t + 2.4);
+}
+function silence() {
+  if (!actx) return;
+  const t = actx.currentTime;
+  for (const v of voices) {
+    v.g.gain.cancelScheduledValues(t);
+    v.g.gain.setTargetAtTime(0, t, .015);
+    try { v.src.stop(t + .1); } catch (_) {}
+  }
+  voices.clear();
 }
 
 /* ===================== Estado / controles ===================== */
@@ -538,7 +552,7 @@ seek.addEventListener('input', e => { beat = +e.target.value; skipHits = true; }
 
 function setPlaying(p) {
   playing = p;
-  if (p) ensureAudio();
+  if (p) ensureAudio(); else silence();
   skipHits = true;
   stage.classList.toggle('playing', p);
   const b = $('btnPlay');
@@ -550,6 +564,7 @@ stage.addEventListener('click', () => setPlaying(!playing));
 $('btnRestart').addEventListener('click', () => { beat = 0; skipHits = true; });
 function setSound(on) {
   soundOn = on;
+  if (!on) silence();
   const b = $('btnSound');
   b.setAttribute('aria-pressed', String(on));
   b.textContent = on ? '🔊 Som' : '🔇 Mudo';
