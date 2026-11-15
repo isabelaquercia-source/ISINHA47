@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Estilo 1 · Brutal Pop</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Archivo+Black&display=swap" rel="stylesheet" />
+<style>
+  :root{--ink:#111;--paper:#fff6e8;--yellow:#ffe566;--pink:#ff4d6d;--blue:#3d5afe}
+  *{box-sizing:border-box} body{margin:0;background:var(--paper);color:var(--ink);font-family:"Space Grotesk",system-ui,sans-serif}
+  .top{display:flex;justify-content:space-between;align-items:center;padding:16px;border-bottom:3px solid #111}
+  .top a{color:#111;font-weight:700;text-decoration:none}
+  main{padding:22px 16px 48px;max-width:720px;margin:0 auto}
+  h1{font-family:"Archivo Black",sans-serif;font-size:clamp(2.4rem,10vw,4.2rem);line-height:.95;margin:10px 0 12px;text-transform:uppercase}
+  .lead{font-size:1.05rem;max-width:28rem;line-height:1.45}
+  .stamp{display:inline-block;background:var(--yellow);border:3px solid #111;padding:6px 10px;font-weight:700;transform:rotate(-2deg);margin-bottom:8px}
+  .grid{display:grid;gap:12px;margin-top:22px}
+  .tile{border:3px solid #111;background:#fff;box-shadow:6px 6px 0 #111;padding:16px;cursor:pointer;transition:transform .12s ease,box-shadow .12s ease}
+  .tile:active,.tile.on{transform:translate(4px,4px);box-shadow:2px 2px 0 #111}
+  .tile h3{margin:0;font-size:1.25rem}.tile p{margin:8px 0 0;line-height:1.4}
+  .tile.on{background:var(--yellow)}
+  .row{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}
+  button{font:700 1rem "Space Grotesk",system-ui;border:3px solid #111;background:var(--pink);color:#fff;padding:12px 16px;box-shadow:5px 5px 0 #111;cursor:pointer}
+  button.blue{background:var(--blue)}
+  button:active{transform:translate(3px,3px);box-shadow:2px 2px 0 #111}
+  .meter{margin-top:18px;border:3px solid #111;height:28px;background:#fff;overflow:hidden}
+  .meter>i{display:block;height:100%;width:0;background:var(--blue);transition:width .25s ease}
+  .msg{margin-top:12px;font-weight:700;min-height:1.4em}
+</style>
+</head>
+<body>
+  <div class="top"><a href="./mais.html">← estilos</a><strong>01 / BRUTAL</strong></div>
+  <main>
+    <div class="stamp">ESTILO POP</div>
+    <h1>Bate. Clica. Sente.</h1>
+    <p class="lead">UI que parece cartaz de rua: sombra dura, tipografia pesada, interação óbvia. Bom pra jogo, lançamento, energia jovem.</p>
+    <div class="grid" id="tiles">
+      <div class="tile" data-v="20"><h3>Jogo barulhento</h3><p>Tela de start, high-score, botão impossível de ignorar.</p></div>
+      <div class="tile" data-v="35"><h3>Landing de projeto</h3><p>Uma ideia, um CTA, zero enrolação visual.</p></div>
+      <div class="tile" data-v="45"><h3>Quiz irreverente</h3><p>Pergunta grande, resposta que “explode” na tela.</p></div>
+    </div>
+    <div class="row">
+      <button id="boom">Somar vibe</button>
+      <button class="blue" id="reset">Zerar</button>
+    </div>
+    <div class="meter" aria-hidden="true"><i id="bar"></i></div>
+    <p class="msg" id="msg">Clique nos tiles e no botão.</p>
+  </main>
+<script>
+  let power=0; const bar=document.getElementById('bar'); const msg=document.getElementById('msg');
+  function paint(){ bar.style.width=Math.min(power,100)+'%'; msg.textContent=power>=100?'Estilo 1 no talo. Curtiu?':'Energia: '+power+'%'; }
+  document.getElementById('tiles').onclick=e=>{const t=e.target.closest('.tile'); if(!t)return; t.classList.toggle('on'); power+=t.classList.contains('on')?Number(t.dataset.v):-Number(t.dataset.v); power=Math.max(0,power); paint();};
+  document.getElementById('boom').onclick=()=>{power=Math.min(100,power+15); paint();};
+  document.getElementById('reset').onclick=()=>{power=0; document.querySelectorAll('.tile').forEach(t=>t.classList.remove('on')); paint();};
+</script>
+</body>
+</html>

@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Queen Guitar Lab</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@450;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #14110f;
+    --panel: #1d1916;
+    --panel2: #26201b;
+    --line: rgba(255, 214, 170, 0.14);
+    --text: #f7efe4;
+    --muted: #b5a593;
+    --amber: #ffb454;
+    --amber2: #ff8a3d;
+    --ok: #7dffb3;
+    --danger: #ff7a6e;
+    --sans: "Instrument Sans", system-ui, sans-serif;
+    --mono: "JetBrains Mono", ui-monospace, monospace;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100svh;
+    font-family: var(--sans);
+    color: var(--text);
+    background:
+      radial-gradient(900px 480px at 100% -10%, rgba(255, 180, 84, 0.16), transparent 55%),
+      radial-gradient(700px 420px at -10% 80%, rgba(255, 122, 110, 0.1), transparent 50%),
+      var(--bg);
+  }
+  header {
+    display: flex; justify-content: space-between; align-items: center; gap: 12px;
+    padding: 16px 16px 8px; max-width: 920px; margin: 0 auto;
+  }
+  header a { color: var(--amber); text-decoration: none; font-weight: 600; font-size: .9rem; }
+  header strong { letter-spacing: -.02em; }
+  main { max-width: 920px; margin: 0 auto; padding: 8px 16px 48px; }
+  h1 { font-size: clamp(1.8rem, 6vw, 2.6rem); margin: 4px 0 8px; letter-spacing: -.03em; }
+  .lead { color: var(--muted); line-height: 1.5; margin: 0 0 18px; max-width: 38rem; }
+
+  .tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+  .tabs button {
+    border: 1px solid var(--line); background: transparent; color: var(--muted);
+    border-radius: 999px; padding: 8px 14px; font: 600 .88rem var(--sans); cursor: pointer;
+  }
+  .tabs button.on { background: var(--amber); color: #1a1208; border-color: var(--amber); }
+
+  .panel {
+    background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.015));
+    border: 1px solid var(--line); border-radius: 22px; padding: 16px;
+  }
+  .list { display: grid; gap: 10px; }
+  .song {
+    display: grid; gap: 8px;
+    padding: 14px; border-radius: 16px; border: 1px solid var(--line);
+    background: var(--panel); cursor: pointer; text-align: left; color: inherit; width: 100%;
+    font: inherit;
+  }
+  .song:hover, .song.active { border-color: rgba(255,180,84,.45); background: var(--panel2); }
+  .song b { display: block; font-size: 1.05rem; }
+  .song span { color: var(--muted); font-size: .85rem; }
+
+  .player-top { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; }
+  .controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  button.btn {
+    border: 0; border-radius: 999px; padding: 11px 16px;
+    font: 700 .92rem var(--sans); cursor: pointer;
+  }
+  .btn-amber { background: var(--amber); color: #1a1208; }
+  .btn-ghost { background: transparent; color: var(--text); border: 1px solid var(--line); }
+  .meta { color: var(--muted); font-size: .86rem; }
+
+  .stage-wrap {
+    margin-top: 14px; border-radius: 18px; border: 1px solid var(--line);
+    background: #0f0d0b; overflow: hidden; position: relative;
+  }
+  .stage {
+    overflow-x: auto; overflow-y: hidden; padding: 18px 16px 22px;
+    scroll-behavior: auto;
+  }
+  .strings {
+    position: relative; display: inline-block; min-width: 100%;
+    font-family: var(--mono); font-size: 15px; line-height: 1.55; white-space: pre;
+    color: #d9cbb8;
+  }
+  .playhead {
+    position: absolute; top: 8px; bottom: 8px; width: 2px;
+    background: var(--amber); box-shadow: 0 0 18px rgba(255,180,84,.55);
+    left: 0; pointer-events: none; z-index: 2;
+  }
+  .labels {
+    position: absolute; left: 8px; top: 18px; z-index: 3;
+    font-family: var(--mono); font-size: 13px; color: var(--amber);
+    line-height: 1.55; pointer-events: none;
+    text-shadow: 0 0 8px #0f0d0b;
+  }
+
+  form { display: grid; gap: 12px; }
+  label { display: grid; gap: 6px; font-size: .86rem; color: var(--muted); font-weight: 600; }
+  input, textarea, select {
+    width: 100%; border-radius: 14px; border: 1px solid var(--line);
+    background: var(--panel); color: var(--text); padding: 12px 14px;
+    font: 500 1rem var(--sans);
+  }
+  textarea {
+    min-height: 180px; font-family: var(--mono); font-size: .82rem; line-height: 1.45;
+    resize: vertical;
+  }
+  .hint { color: var(--muted); font-size: .82rem; line-height: 1.45; }
+  .row2 { display: grid; gap: 10px; }
+  @media (min-width: 640px) { .row2 { grid-template-columns: 1fr 1fr; } }
+  .toast {
+    margin-top: 10px; color: var(--ok); font-size: .9rem; min-height: 1.2em;
+  }
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+  <header>
+    <a href="../mais.html">← estilos</a>
+    <strong>Queen Guitar Lab</strong>
+  </header>
+  <main>
+    <h1>Suas músicas. Tablatura correndo.</h1>
+    <p class="lead">Cola a tab de violão/guitarra, sobe o áudio (opcional), define o BPM e aperta play. A linha anda no tempo — estilo prática tipo Yousician, versão 1.</p>
+
+    <div class="tabs" id="nav">
+      <button class="on" data-view="library">Biblioteca</button>
+      <button data-view="player">Player</button>
+      <button data-view="add">Adicionar música</button>
+    </div>
+
+    <section id="view-library" class="panel">
+      <div class="list" id="songList"></div>
+    </section>
+
+    <section id="view-player" class="panel hidden">
+      <div class="player-top">
+        <div>
+          <strong id="nowTitle">Nenhuma música</strong>
+          <div class="meta" id="nowMeta">Escolha na biblioteca</div>
+        </div>
+        <div class="controls">
+          <button class="btn btn-amber" id="playBtn">Play</button>
+          <button class="btn btn-ghost" id="stopBtn">Parar</button>
+        </div>
+      </div>
+      <audio id="audio" class="hidden"></audio>
+      <div class="stage-wrap">
+        <div class="labels" id="stringLabels">e|
+B|
+G|
+D|
+A|
+E|</div>
+        <div class="stage" id="stage">
+          <div class="strings" id="tabView"></div>
+          <div class="playhead" id="playhead"></div>
+        </div>
+      </div>
+      <p class="hint" style="margin-top:12px">Dica: se tiver áudio, o play sincroniza com a música. Sem áudio, usa só o BPM.</p>
+    </section>
+
+    <section id="view-add" class="panel hidden">
+      <form id="songForm">
+        <label>Nome da música
+          <input id="title" required placeholder="Ex.: Riff da minha banda" maxlength="80" />
+        </label>
+        <div class="row2">
+          <label>BPM
+            <input id="bpm" type="number" min="40" max="240" value="90" required />
+          </label>
+          <label>Colunas por batida
+            <select id="subdiv">
+              <option value="1">1 (mais lento na tela)</option>
+              <option value="2" selected>2</option>
+              <option value="4">4 (mais detalhe)</option>
+            </select>
+          </label>
+        </div>
+        <label>Áudio (opcional, mp3/m4a)
+          <input id="audioFile" type="file" accept="audio/*" />
+        </label>
+        <label>Tablatura (texto)
+          <textarea id="tab" required spellcheck="false" placeholder="Cole no formato:
+e|----------------|
+B|----------------|
+G|----------------|
+D|----------------|
+A|----------------|
+E|----------------|"></textarea>
+        </label>
+        <p class="hint">Pode colar tab ASCII normal de violão/guitarra (6 cordas). Eu leio as linhas e faço a corrida na horizontal.</p>
+        <div class="controls">
+          <button class="btn btn-amber" type="submit">Salvar na biblioteca</button>
+          <button class="btn btn-ghost" type="button" id="loadDemo">Carregar exemplo</button>
+        </div>
+        <div class="toast" id="toast"></div>
+      </form>
+    </section>
+  </main>
+
+<script>
+const DEMO_TAB = `e|----------------|----------------|
+B|----------------|----------------|
+G|----------------|----------------|
+D|----0-----0-----|----0-----0-----|
+A|--0---0-3---3---|--0---0-3---3---|
+E|3---------------|3---------------|`;
+
+const storeKey = "queen-guitar-songs-v1";
+const state = {
+  view: "library",
+  songs: loadSongs(),
+  currentId: null,
+  playing: false,
+  col: 0,
+  timer: null,
+  audioUrl: null,
+};
+
+const $ = (id) => document.getElementById(id);
+const songList = $("songList");
+const tabView = $("tabView");
+const stage = $("stage");
+const playhead = $("playhead");
+const playBtn = $("playBtn");
+const audio = $("audio");
+
+function loadSongs() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(storeKey) || "[]");
+    if (Array.isArray(raw) && raw.length) return raw;
+  } catch {}
+  return [{
+    id: "demo-smoke",
+    title: "Riff demo (estilo clássico)",
+    bpm: 100,
+    subdiv: 2,
+    tab: DEMO_TAB,
+    hasAudio: false,
+    audioData: null,
+    createdAt: Date.now(),
+  }];
+}
+function saveSongs() {
+  const slim = state.songs.map((s) => ({
+    ...s,
+    // keep audioData only if small enough; otherwise user re-uploads
+  }));
+  try {
+    localStorage.setItem(storeKey, JSON.stringify(slim));
+  } catch (e) {
+    // quota: drop audio blobs
+    const noAudio = slim.map(({ audioData, ...rest }) => ({ ...rest, audioData: null, hasAudio: false }));
+    localStorage.setItem(storeKey, JSON.stringify(noAudio));
+    state.songs = noAudio;
+  }
+}
+
+function setView(view) {
+  state.view = view;
+  document.querySelectorAll("#nav button").forEach((b) => b.classList.toggle("on", b.dataset.view === view));
+  $("view-library").classList.toggle("hidden", view !== "library");
+  $("view-player").classList.toggle("hidden", view !== "player");
+  $("view-add").classList.toggle("hidden", view !== "add");
+}
+
+document.getElementById("nav").onclick = (e) => {
+  const b = e.target.closest("button[data-view]");
+  if (b) setView(b.dataset.view);
+};
+
+function parseTab(text) {
+  const lines = text.replace(/\r/g, "").split("\n").map((l) => l.trimEnd()).filter((l) => l.trim().length);
+  // find 6 consecutive string lines
+  const stringStart = lines.findIndex((l, i) => {
+    const chunk = lines.slice(i, i + 6);
+    if (chunk.length < 6) return false;
+    return chunk.every((x) => /\|/.test(x) || /^[eEBGDAebgda]/.test(x.trim()));
+  });
+  const six = (stringStart >= 0 ? lines.slice(stringStart, stringStart + 6) : lines.slice(0, 6));
+  while (six.length < 6) six.push("|");
+  // normalize: strip leading label like e|
+  const body = six.map((l) => {
+    const m = l.match(/^[eEBGDA]\|?(.*)$/);
+    return m ? m[1] : l.replace(/^[eEBGDA]\|/, "");
+  });
+  const width = Math.max(...body.map((l) => l.length), 8);
+  const padded = body.map((l) => l.padEnd(width, "-"));
+  return { strings: padded, width };
+}
+
+function renderList() {
+  songList.innerHTML = state.songs.map((s) => `
+    <button class="song ${s.id === state.currentId ? "active" : ""}" data-id="${s.id}">
+      <b>${escapeHtml(s.title)}</b>
+      <span>${s.bpm} BPM · ${s.hasAudio ? "com áudio" : "só metrônomo/BPM"} · tab ${s.tab.split("\n").length} linhas</span>
+    </button>
+  `).join("") || `<p class="hint">Nenhuma música ainda. Adiciona uma.</p>`;
+}
+
+songList.onclick = (e) => {
+  const b = e.target.closest("button[data-id]");
+  if (!b) return;
+  openSong(b.dataset.id);
+};
+
+function escapeHtml(str) {
+  return String(str).replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+}
+
+function openSong(id) {
+  const song = state.songs.find((s) => s.id === id);
+  if (!song) return;
+  stopPlayback();
+  state.currentId = id;
+  $("nowTitle").textContent = song.title;
+  $("nowMeta").textContent = `${song.bpm} BPM · subdiv ${song.subdiv}`;
+  const parsed = parseTab(song.tab);
+  tabView.textContent = parsed.strings.join("\n");
+  // position playhead at start of tab content (after labels area visually)
+  playhead.style.left = "0px";
+  stage.scrollLeft = 0;
+
+  if (state.audioUrl) URL.revokeObjectURL(state.audioUrl);
+  state.audioUrl = null;
+  audio.removeAttribute("src");
+  if (song.audioData) {
+    const blob = dataURLtoBlob(song.audioData);
+    state.audioUrl = URL.createObjectURL(blob);
+    audio.src = state.audioUrl;
+  }
+  renderList();
+  setView("player");
+  // wait layout
+  requestAnimationFrame(() => updatePlayhead(0));
+}
+
+function dataURLtoBlob(dataURL) {
+  const [meta, data] = dataURL.split(",");
+  const mime = meta.match(/:(.*?);/)[1];
+  const bin = atob(data);
+  const arr = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+  return new Blob([arr], { type: mime });
+}
+
+function fileToDataURL(file) {
+  return new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = () => resolve(r.result);
+    r.onerror = reject;
+    r.readAsDataURL(file);
+  });
+}
+
+function charWidthPx() {
+  // measure monospace char
+  const canvas = document.createElement("canvas");
+  const ctx = canvas.getContext("2d");
+  ctx.font = "15px JetBrains Mono, ui-monospace, monospace";
+  return ctx.measureText("0").width || 9;
+}
+
+function updatePlayhead(col) {
+  const cw = charWidthPx();
+  const x = col * cw;
+  playhead.style.left = `${x}px`;
+  const viewW = stage.clientWidth;
+  const target = Math.max(0, x - viewW * 0.35);
+  stage.scrollLeft = target;
+}
+
+function stopPlayback() {
+  state.playing = false;
+  playBtn.textContent = "Play";
+  if (state.timer) cancelAnimationFrame(state.timer);
+  state.timer = null;
+  audio.pause();
+  try { audio.currentTime = 0; } catch {}
+  state.col = 0;
+  updatePlayhead(0);
+}
+
+function startPlayback() {
+  const song = state.songs.find((s) => s.id === state.currentId);
+  if (!song) return;
+  const parsed = parseTab(song.tab);
+  const bpm = Number(song.bpm) || 90;
+  const subdiv = Number(song.subdiv) || 2;
+  // each column advances at: beat duration / subdiv
+  const msPerBeat = 60000 / bpm;
+  const msPerCol = msPerBeat / subdiv;
+  state.playing = true;
+  playBtn.textContent = "Pausar";
+  state.col = 0;
+  const t0 = performance.now();
+  const hasAudio = !!(song.audioData && audio.src);
+  if (hasAudio) {
+    audio.currentTime = 0;
+    audio.play().catch(() => {});
+  }
+
+  const tick = (now) => {
+    if (!state.playing) return;
+    let elapsed;
+    if (hasAudio && !audio.paused) {
+      elapsed = audio.currentTime * 1000;
+    } else {
+      elapsed = now - t0;
+    }
+    const col = Math.min(parsed.width - 1, Math.floor(elapsed / msPerCol));
+    state.col = col;
+    updatePlayhead(col);
+    if (col >= parsed.width - 1) {
+      stopPlayback();
+      playBtn.textContent = "Play";
+      return;
+    }
+    state.timer = requestAnimationFrame(tick);
+  };
+  state.timer = requestAnimationFrame(tick);
+}
+
+playBtn.onclick = () => {
+  if (!state.currentId) {
+    setView("library");
+    return;
+  }
+  if (state.playing) {
+    state.playing = false;
+    playBtn.textContent = "Play";
+    audio.pause();
+    if (state.timer) cancelAnimationFrame(state.timer);
+    state.timer = null;
+    return;
+  }
+  startPlayback();
+};
+$("stopBtn").onclick = () => stopPlayback();
+
+$("loadDemo").onclick = () => {
+  $("title").value = "Riff demo";
+  $("bpm").value = 100;
+  $("subdiv").value = "2";
+  $("tab").value = DEMO_TAB;
+  $("toast").textContent = "Exemplo carregado — pode salvar.";
+};
+
+$("songForm").onsubmit = async (e) => {
+  e.preventDefault();
+  const title = $("title").value.trim();
+  const bpm = Number($("bpm").value);
+  const subdiv = Number($("subdiv").value);
+  const tab = $("tab").value;
+  const file = $("audioFile").files[0];
+  let audioData = null;
+  if (file) {
+    if (file.size > 3_500_000) {
+      $("toast").textContent = "Áudio grande demais pro celular (máx ~3.5MB nesta versão). Salvei só a tab.";
+    } else {
+      audioData = await fileToDataURL(file);
+    }
+  }
+  const song = {
+    id: "s-" + Date.now(),
+    title,
+    bpm,
+    subdiv,
+    tab,
+    hasAudio: !!audioData,
+    audioData,
+    createdAt: Date.now(),
+  };
+  state.songs.unshift(song);
+  saveSongs();
+  renderList();
+  $("toast").textContent = "Salva! Abrindo no player…";
+  openSong(song.id);
+};
+
+renderList();
+if (state.songs[0]) {
+  // keep library first; don't auto-open
+}
+</script>
+</body>
+</html>

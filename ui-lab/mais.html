@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Queen · 3 estilos</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700&family=Fraunces:wght@600&display=swap" rel="stylesheet" />
+<style>
+  :root { --bg:#f4f0e8; --ink:#16140f; --a:#ff5a36; --b:#1f6bff; --c:#128a5c; }
+  *{box-sizing:border-box} body{margin:0;font-family:Manrope,system-ui,sans-serif;background:var(--bg);color:var(--ink);padding:28px 18px 48px}
+  h1{font-family:Fraunces,serif;font-size:clamp(2rem,8vw,3.2rem);line-height:1;margin:0 0 10px}
+  p{color:#5c564c;line-height:1.5;max-width:34rem}
+  .list{display:grid;gap:14px;margin-top:24px}
+  a.card{display:block;text-decoration:none;color:inherit;border-radius:22px;padding:20px;border:2px solid #16140f;background:#fff;box-shadow:6px 6px 0 #16140f;transition:transform .15s ease}
+  a.card:active{transform:translate(3px,3px);box-shadow:3px 3px 0 #16140f}
+  .tag{display:inline-block;font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:5px 10px;border-radius:999px;margin-bottom:10px}
+  .t1{background:#ffe3db;color:#9a2a12}.t2{background:#dce8ff;color:#123e99}.t3{background:#d8f5e8;color:#0b5c3c}
+  h2{margin:0 0 6px;font-size:1.35rem} .card p{margin:0;font-size:.95rem}
+</style>
+</head>
+<body>
+  <h1>3 UIs. 3 personalidades.</h1>
+  <p>Mesma Queen, caras bem diferentes. Abre cada uma, sente a vibe, volta e me diz 1, 2 ou 3 (ou mistura).</p>
+  <div class="list">
+    <a class="card" href="./brutal.html">
+      <span class="tag t1">Estilo 1</span>
+      <h2>Brutal Pop</h2>
+      <p>Bordas grossas, contraste alto, botões que “batem”. Energia de poster.</p>
+    </a>
+    <a class="card" href="./airy.html">
+      <span class="tag t2">Estilo 2</span>
+      <h2>Airy Light</h2>
+      <p>Clara, arejada, tipografia elegante. Quase uma revista interativa.</p>
+    </a>
+    <a class="card" href="./signal.html">
+      <span class="tag t3">Estilo 3</span>
+      <h2>Signal Soft</h2>
+      <p>Calma noturna suave, glow controlado, foco em fluxo e presença.</p>
+    </a>
+    <a class="card" href="./guitar/">
+      <span class="tag t1">Novo</span>
+      <h2>Guitar Lab</h2>
+      <p>Suas músicas de violão/guitarra com tablatura correndo no tempo.</p>
+    </a>
+  </div>
+</body>
+</html>

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Estilo 3 · Signal Soft</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;550;600;700&family=IBM+Plex+Sans:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root{--bg:#0b1220;--panel:#121a2b;--text:#e8eefc;--muted:#8ea0c2;--signal:#5ce1c5;--violet:#7aa2ff;--line:rgba(232,238,252,.12)}
+  *{box-sizing:border-box} body{margin:0;background:radial-gradient(900px 500px at 100% -10%,rgba(92,225,197,.16),transparent 50%),radial-gradient(700px 420px at 0% 100%,rgba(122,162,255,.14),transparent 45%),var(--bg);color:var(--text);font-family:Sora,system-ui,sans-serif;min-height:100svh}
+  .top{display:flex;justify-content:space-between;padding:18px 18px 0;color:var(--muted);font:500 .85rem "IBM Plex Sans",system-ui}
+  .top a{color:var(--signal);text-decoration:none}
+  main{max-width:780px;margin:0 auto;padding:20px 18px 70px}
+  .pill{display:inline-flex;padding:6px 12px;border-radius:999px;border:1px solid var(--line);color:var(--signal);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;font-weight:600}
+  h1{font-size:clamp(2.2rem,8vw,3.6rem);line-height:1.02;margin:14px 0 0;letter-spacing:-.03em;max-width:12ch}
+  .lead{color:var(--muted);line-height:1.55;max-width:34rem;margin-top:12px;font-family:"IBM Plex Sans",system-ui}
+  .board{margin-top:26px;display:grid;gap:12px}
+  @media(min-width:720px){.board{grid-template-columns:1.1fr .9fr}}
+  .card{background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.02));border:1px solid var(--line);border-radius:22px;padding:18px}
+  .card h2{margin:0;font-size:1.15rem}
+  .card p{color:var(--muted);font-size:.92rem;line-height:1.45;margin:8px 0 0;font-family:"IBM Plex Sans",system-ui}
+  .wave{height:120px;margin-top:14px;border-radius:16px;background:#0a101c;border:1px solid var(--line);display:flex;align-items:end;gap:4px;padding:12px}
+  .wave span{flex:1;border-radius:6px 6px 2px 2px;background:linear-gradient(180deg,var(--signal),var(--violet));transform-origin:bottom;animation:eq 1.2s ease-in-out infinite}
+  .wave span:nth-child(2n){animation-delay:.15s}.wave span:nth-child(3n){animation-delay:.3s}
+  @keyframes eq{0%,100%{height:28%}50%{height:92%}}
+  .wave.pause span{animation:none;height:35%}
+  .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+  button{border:0;border-radius:999px;padding:10px 14px;font:600 .9rem Sora,system-ui;cursor:pointer}
+  .go{background:var(--signal);color:#06231c}.ghost{background:transparent;color:var(--text);border:1px solid var(--line)}
+  .flow{display:grid;gap:8px;margin-top:12px}
+  .node{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-radius:14px;background:rgba(255,255,255,.03);border:1px solid var(--line);cursor:pointer}
+  .node.on{border-color:rgba(92,225,197,.5);background:rgba(92,225,197,.08)}
+  .node b{font-size:.92rem}.node span{color:var(--muted);font-size:.78rem}
+  .status{margin-top:12px;color:var(--muted);font-size:.88rem;font-family:"IBM Plex Sans",system-ui}
+</style>
+</head>
+<body>
+  <div class="top"><a href="./mais.html">← estilos</a><span>03 / SIGNAL</span></div>
+  <main>
+    <div class="pill">fluxo suave</div>
+    <h1>Presença sem gritaria.</h1>
+    <p class="lead">Noturno macio, acento menta/azul. Bom pra app de foco, onboarding, produto que quer parecer “vivo” sem neon de balada.</p>
+    <div class="board">
+      <section class="card">
+        <h2>Sinal ao vivo</h2>
+        <p>Play/pause no equalizer. Motion como status, não enfeite.</p>
+        <div class="wave" id="wave"></div>
+        <div class="row">
+          <button class="go" id="toggle">Pausar sinal</button>
+          <button class="ghost" id="pulse">Pulse</button>
+        </div>
+      </section>
+      <section class="card">
+        <h2>Fluxo</h2>
+        <p>Monta o caminho do produto.</p>
+        <div class="flow" id="flow">
+          <div class="node on" data-k="entrar"><b>Entrar</b><span>on</span></div>
+          <div class="node" data-k="explorar"><b>Explorar</b><span>off</span></div>
+          <div class="node" data-k="criar"><b>Criar</b><span>off</span></div>
+          <div class="node" data-k="compartilhar"><b>Compartilhar</b><span>off</span></div>
+        </div>
+        <p class="status" id="status">Ativo: entrar</p>
+      </section>
+    </div>
+  </main>
+<script>
+  const wave=document.getElementById('wave');
+  for(let i=0;i<18;i++){const s=document.createElement('span'); s.style.animationDuration=(0.8+Math.random()*0.9)+'s'; wave.appendChild(s);}
+  let playing=true;
+  document.getElementById('toggle').onclick=()=>{
+    playing=!playing; wave.classList.toggle('pause',!playing);
+    document.getElementById('toggle').textContent=playing?'Pausar sinal':'Ligar sinal';
+  };
+  document.getElementById('pulse').onclick=()=>{
+    wave.classList.remove('pause'); playing=true;
+    document.getElementById('toggle').textContent='Pausar sinal';
+    wave.style.transform='scale(1.02)'; setTimeout(()=>wave.style.transform='',180);
+  };
+  document.getElementById('flow').onclick=e=>{
+    const n=e.target.closest('.node'); if(!n)return;
+    n.classList.toggle('on');
+    n.querySelector('span').textContent=n.classList.contains('on')?'on':'off';
+    const on=[...document.querySelectorAll('.node.on')].map(x=>x.dataset.k);
+    document.getElementById('status').textContent=on.length?'Ativo: '+on.join(' → '):'Nenhum passo ativo';
+  };
+</script>
+</body>
+</html>
