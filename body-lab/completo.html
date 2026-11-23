@@ -1,0 +1,2084 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Body Lab · 10 protótipos</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Serif+Display:ital@0;1&family=IBM+Plex+Mono:wght@400;500&family=Syne:wght@500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+:root {
+  --font-sans: "DM Sans", system-ui, sans-serif;
+  --font-display: "Syne", sans-serif;
+  --font-serif: "DM Serif Display", Georgia, serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+  --font-poster: "Bebas Neue", sans-serif;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+  background: #0a0a0b;
+  color: #f2f0ea;
+  font-family: var(--font-sans);
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  border: 0;
+  background: none;
+}
+
+#app {
+  min-height: 100vh;
+}
+
+.fig {
+  width: 100%;
+  height: auto;
+  max-height: 70vh;
+  display: block;
+}
+
+.fig-wide {
+  max-height: 40vh;
+}
+
+/* ——— HUB ——— */
+.hub {
+  min-height: 100vh;
+  padding: 2rem clamp(1rem, 3vw, 2.5rem) 3rem;
+  background:
+    radial-gradient(ellipse 80% 50% at 10% -10%, #2a2418 0%, transparent 55%),
+    radial-gradient(ellipse 60% 40% at 100% 0%, #1a2228 0%, transparent 50%),
+    #0a0a0b;
+}
+
+.hub-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem 2rem;
+  justify-content: space-between;
+  align-items: end;
+  margin-bottom: 2rem;
+}
+
+.hub-brand {
+  display: flex;
+  gap: 0.85rem;
+  align-items: center;
+}
+
+.hub-mark {
+  width: 2.6rem;
+  height: 2.6rem;
+  display: grid;
+  place-items: center;
+  border-radius: 0.6rem;
+  background: linear-gradient(145deg, #e8d5a8, #a67c52);
+  color: #1a1208;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.2rem;
+}
+
+.hub-brand strong {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  letter-spacing: -0.02em;
+}
+
+.hub-brand p,
+.hub-hint {
+  margin: 0.15rem 0 0;
+  color: #9a958c;
+  font-size: 0.9rem;
+}
+
+.hub-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 0.9rem;
+}
+
+.hub-card {
+  text-align: left;
+  padding: 1.15rem 1.2rem 1.25rem;
+  border-radius: 1rem;
+  border: 1px solid color-mix(in srgb, var(--tone) 40%, #ffffff22);
+  background:
+    linear-gradient(160deg, color-mix(in srgb, var(--tone) 88%, #fff) 0%, var(--tone) 100%);
+  transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+  min-height: 190px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  animation: cardIn 0.5s ease both;
+}
+
+.hub-card:nth-child(1) { animation-delay: 0.02s; }
+.hub-card:nth-child(2) { animation-delay: 0.05s; }
+.hub-card:nth-child(3) { animation-delay: 0.08s; }
+.hub-card:nth-child(4) { animation-delay: 0.11s; }
+.hub-card:nth-child(5) { animation-delay: 0.14s; }
+.hub-card:nth-child(6) { animation-delay: 0.17s; }
+.hub-card:nth-child(7) { animation-delay: 0.2s; }
+.hub-card:nth-child(8) { animation-delay: 0.23s; }
+.hub-card:nth-child(9) { animation-delay: 0.26s; }
+.hub-card:nth-child(10) { animation-delay: 0.29s; }
+
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: none; }
+}
+
+.hub-card:hover {
+  transform: translateY(-4px);
+  border-color: #ffffff55;
+  box-shadow: 0 18px 40px #00000066;
+}
+
+.hub-num {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  opacity: 0.55;
+}
+
+.hub-mode {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  opacity: 0.7;
+}
+
+.hub-card h2 {
+  margin: 0.2rem 0 0;
+  font-family: var(--font-display);
+  font-size: 1.55rem;
+  letter-spacing: -0.03em;
+}
+
+.hub-card p {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  opacity: 0.78;
+  flex: 1;
+}
+
+.hub-fig {
+  margin-top: 0.6rem;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  opacity: 0.55;
+}
+
+.hub-card-light {
+  background:
+    linear-gradient(160deg, #f4f1ec 0%, #e8e0d4 100%);
+  color: #1c1917;
+  border-color: #1c191733;
+}
+
+.hub-card-light .hub-num,
+.hub-card-light .hub-mode,
+.hub-card-light .hub-fig,
+.hub-card-light p {
+  opacity: 0.72;
+  color: #3d3830;
+}
+
+/* ——— SHELL ——— */
+.proto-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.proto-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.65rem 1rem;
+  background: #0d0d0f;
+  border-bottom: 1px solid #ffffff14;
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+
+.bar-mid {
+  text-align: center;
+}
+
+.bar-mid strong {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+}
+
+.bar-mid span {
+  font-size: 0.72rem;
+  color: #8f8a82;
+}
+
+.bar-btn {
+  padding: 0.4rem 0.75rem;
+  border-radius: 0.5rem;
+  background: #ffffff10;
+  font-size: 0.85rem;
+}
+
+.bar-btn:hover {
+  background: #ffffff1c;
+}
+
+.bar-nav {
+  display: flex;
+  gap: 0.35rem;
+}
+
+.bar-nav .bar-btn {
+  width: 2.2rem;
+  font-size: 1.2rem;
+  line-height: 1;
+}
+
+.proto-stage {
+  flex: 1;
+}
+
+/* ——— 01 FORMA ——— */
+.forma {
+  position: relative;
+  min-height: calc(100vh - 52px);
+  display: grid;
+  grid-template-columns: 1fr 1.1fr;
+  align-items: end;
+  overflow: hidden;
+  background: #0c0f0a;
+  color: #e7e2d6;
+}
+
+.forma-bg {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 70% 60% at 70% 40%, #1d2a12 0%, transparent 60%),
+    linear-gradient(180deg, #12160e, #0c0f0a 70%);
+  animation: pulseGlow 6s ease-in-out infinite alternate;
+}
+
+@keyframes pulseGlow {
+  from { filter: brightness(1); }
+  to { filter: brightness(1.12); }
+}
+
+.forma-copy,
+.forma-body {
+  position: relative;
+  z-index: 1;
+  padding: clamp(1.5rem, 4vw, 3.5rem);
+}
+
+.forma-brand {
+  margin: 0;
+  font-family: var(--font-poster);
+  font-size: clamp(4rem, 12vw, 8rem);
+  letter-spacing: 0.04em;
+  line-height: 0.85;
+  color: #c8f542;
+  animation: brandRise 0.8s ease both;
+}
+
+@keyframes brandRise {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: none; }
+}
+
+.forma h1 {
+  margin: 0.4rem 0 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(2rem, 4vw, 3.2rem);
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+}
+
+.forma-sub {
+  max-width: 28ch;
+  color: #a8a496;
+  line-height: 1.45;
+}
+
+.forma-cta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+  margin-top: 1.5rem;
+}
+
+.forma-go {
+  padding: 0.85rem 1.4rem;
+  background: #c8f542;
+  color: #101408;
+  font-weight: 700;
+  border-radius: 999px;
+}
+
+.forma-cta span {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: #8e9480;
+}
+
+.forma-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 70vh;
+}
+
+.forma-body .fig {
+  max-height: 62vh;
+  animation: floatY 4s ease-in-out infinite;
+}
+
+@keyframes floatY {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.forma-meter {
+  width: min(220px, 50%);
+  height: 4px;
+  margin-top: 1rem;
+  background: #ffffff18;
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.forma-meter span {
+  display: block;
+  height: 100%;
+  width: 62%;
+  background: #c8f542;
+  animation: meter 2.4s ease-in-out infinite alternate;
+}
+
+@keyframes meter {
+  from { width: 35%; }
+  to { width: 78%; }
+}
+
+/* ——— 02 ATLAS ——— */
+.atlas {
+  min-height: calc(100vh - 52px);
+  display: grid;
+  grid-template-columns: minmax(240px, 0.9fr) 1.2fr;
+  background:
+    linear-gradient(135deg, #f7f3ec 0%, #ebe4d8 50%, #e2d9cb 100%);
+  color: #1c1917;
+}
+
+.atlas-side {
+  padding: clamp(1.5rem, 3vw, 2.5rem);
+  border-right: 1px solid #1c191722;
+}
+
+.atlas-kicker {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #7a7066;
+}
+
+.atlas h1 {
+  margin: 0.5rem 0 1.5rem;
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-size: clamp(2.4rem, 4vw, 3.6rem);
+  line-height: 1.05;
+}
+
+.atlas-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.4rem;
+}
+
+.atlas-list button {
+  width: 100%;
+  text-align: left;
+  padding: 0.7rem 0.85rem;
+  border-radius: 0.4rem;
+  border: 1px solid transparent;
+  font-weight: 500;
+}
+
+.atlas-list button:hover,
+.atlas-list button.on {
+  background: #1c1917;
+  color: #f4f1ec;
+}
+
+.atlas-note {
+  margin-top: 1.5rem;
+  padding-top: 1.2rem;
+  border-top: 1px solid #1c191722;
+}
+
+.atlas-note h3 {
+  margin: 0 0 0.4rem;
+  font-family: var(--font-serif);
+  font-size: 1.25rem;
+}
+
+.atlas-note p {
+  margin: 0;
+  color: #5c534a;
+  line-height: 1.45;
+}
+
+.atlas-stage {
+  position: relative;
+  display: grid;
+  place-items: center;
+  padding: 2rem;
+}
+
+.atlas-stage .fig {
+  max-height: 72vh;
+}
+
+.atlas-tags span {
+  position: absolute;
+  left: var(--x);
+  top: var(--y);
+  transform: translate(-50%, -50%);
+  padding: 0.25rem 0.55rem;
+  border-radius: 0.3rem;
+  background: #ffffffcc;
+  border: 1px solid #1c191733;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  opacity: 0.45;
+  transition: opacity 0.2s, background 0.2s;
+}
+
+.atlas-tags span.on {
+  opacity: 1;
+  background: #c45c3e;
+  color: #fff;
+  border-color: transparent;
+}
+
+/* ——— 03 LINK ——— */
+.link {
+  min-height: calc(100vh - 52px);
+  display: grid;
+  grid-template-columns: 1.3fr 0.9fr;
+  background: #101820;
+  color: #e4eef5;
+}
+
+.link-live {
+  display: grid;
+  grid-template-rows: 1fr auto;
+  gap: 0.75rem;
+  padding: 1rem;
+}
+
+.link-cam {
+  position: relative;
+  border-radius: 1rem;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 40% 30%, #1e3a4f, #0c141c 70%);
+  display: grid;
+  place-items: center;
+  min-height: 50vh;
+}
+
+.link-dot {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  background: #ff4d4d;
+  box-shadow: 0 0 0 0 #ff4d4d88;
+  animation: livePulse 1.6s infinite;
+}
+
+@keyframes livePulse {
+  0% { box-shadow: 0 0 0 0 #ff4d4d66; }
+  70% { box-shadow: 0 0 0 12px #ff4d4d00; }
+  100% { box-shadow: 0 0 0 0 #ff4d4d00; }
+}
+
+.link-cam > p {
+  position: absolute;
+  top: 0.85rem;
+  left: 2rem;
+  margin: 0;
+  font-size: 0.8rem;
+  color: #9eb6c8;
+}
+
+.link-cam-body {
+  width: min(280px, 55%);
+  opacity: 0.85;
+}
+
+.link-coach {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.65rem 0.85rem;
+  border-radius: 0.85rem;
+  background: #182430;
+}
+
+.link-coach-face {
+  width: 2.4rem;
+  height: 2.4rem;
+  border-radius: 0.55rem;
+  background: linear-gradient(145deg, #5ec8ff, #2a6f8f);
+}
+
+.link-coach p {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.link-panel {
+  padding: 1.5rem 1.25rem;
+  border-left: 1px solid #ffffff12;
+  background: #0c1218;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.link-brand {
+  margin: 0;
+  font-family: var(--font-mono);
+  letter-spacing: 0.2em;
+  font-size: 0.75rem;
+  color: #5ec8ff;
+}
+
+.link-panel h1 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.8rem;
+  letter-spacing: -0.02em;
+}
+
+.link-panel > p {
+  margin: 0;
+  color: #8aa0b2;
+  font-size: 0.92rem;
+  line-height: 1.4;
+}
+
+.link-ref {
+  width: 70%;
+  margin: 0.5rem auto;
+}
+
+.link-notes {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.4rem;
+  font-size: 0.88rem;
+}
+
+.link-notes .ok::before {
+  content: "✓ ";
+  color: #5dcf8a;
+}
+
+.link-notes .warn::before {
+  content: "! ";
+  color: #f0c14a;
+}
+
+.link-btn {
+  margin-top: auto;
+  padding: 0.8rem 1rem;
+  border-radius: 0.6rem;
+  background: #5ec8ff;
+  color: #041018;
+  font-weight: 700;
+}
+
+/* ——— 04 ACERVO ——— */
+.acervo {
+  min-height: calc(100vh - 52px);
+  padding: 1.5rem clamp(1rem, 3vw, 2.5rem) 2.5rem;
+  background:
+    linear-gradient(180deg, #221e18, #1c1915 40%, #16130f);
+  color: #f0e6d8;
+}
+
+.acervo-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: space-between;
+  align-items: end;
+  margin-bottom: 1.5rem;
+}
+
+.acervo-head p {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #a89070;
+}
+
+.acervo-head h1 {
+  margin: 0.3rem 0 0;
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-size: clamp(1.8rem, 3vw, 2.6rem);
+}
+
+.acervo-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.acervo-filters button {
+  padding: 0.4rem 0.75rem;
+  border-radius: 0.4rem;
+  border: 1px solid #ffffff22;
+  font-size: 0.8rem;
+  text-transform: capitalize;
+}
+
+.acervo-filters button.on {
+  background: #d4a574;
+  color: #1c140c;
+  border-color: transparent;
+}
+
+.acervo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 0.85rem;
+}
+
+.acervo-item {
+  padding: 1rem 0.85rem 1.1rem;
+  border-radius: 0.75rem;
+  background: #2a241c;
+  border: 1px solid #ffffff10;
+  transition: transform 0.2s ease;
+}
+
+.acervo-item:hover {
+  transform: translateY(-3px);
+}
+
+.acervo-thumb {
+  height: 140px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 0.6rem;
+}
+
+.acervo-thumb .fig {
+  max-height: 130px;
+}
+
+.acervo-item h3 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+}
+
+.acervo-item p {
+  margin: 0.2rem 0 0;
+  font-size: 0.78rem;
+  color: #a89070;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+/* ——— 05 ESTÚDIO ——— */
+.estudio {
+  min-height: calc(100vh - 52px);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  background:
+    radial-gradient(ellipse at 80% 20%, #1a3a55 0%, transparent 45%),
+    linear-gradient(160deg, #0b1c2c, #07131e);
+  color: #f3efe6;
+}
+
+.estudio-left,
+.estudio-right {
+  padding: clamp(1.5rem, 4vw, 3.5rem);
+}
+
+.estudio-left {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  border-right: 1px solid #ffffff14;
+}
+
+.estudio-issue {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #e2b857;
+}
+
+.estudio h1 {
+  margin: 0.8rem 0;
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-size: clamp(2.6rem, 5vw, 4.2rem);
+  line-height: 1.05;
+}
+
+.estudio h1 em {
+  font-style: italic;
+  color: #e2b857;
+}
+
+.estudio-lead {
+  max-width: 34ch;
+  color: #b7c0c9;
+  line-height: 1.5;
+  font-size: 1.05rem;
+}
+
+.estudio-meta {
+  display: flex;
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.estudio-meta dt {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #7f8b96;
+}
+
+.estudio-meta dd {
+  margin: 0.2rem 0 0;
+  font-family: var(--font-serif);
+  font-size: 1.8rem;
+}
+
+.estudio-right {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.estudio-right .fig {
+  max-height: 65vh;
+  animation: fadeUp 0.9s ease both;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: none; }
+}
+
+.estudio-cap {
+  margin-top: 1rem;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: #7f8b96;
+}
+
+/* ——— 06 ROLO ——— */
+.rolo {
+  min-height: calc(100vh - 52px);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(1.5rem, 4vw, 3rem);
+  padding: 1.5rem clamp(1rem, 4vw, 3rem);
+  background: #090909;
+  color: #f5f5f5;
+}
+
+.rolo-phone {
+  width: min(320px, 90vw);
+  aspect-ratio: 9 / 16;
+  border-radius: 1.6rem;
+  border: 1px solid #ffffff22;
+  background: #111;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 30px 60px #000000aa;
+}
+
+.rolo-slide {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 1.2rem;
+  background:
+    radial-gradient(ellipse at 50% 30%, #2a1a14, #0a0a0a 70%);
+}
+
+.rolo-slide .fig {
+  position: absolute;
+  inset: 8% 10% 28%;
+  max-height: none;
+  height: auto;
+  margin: auto;
+}
+
+.rolo-meta {
+  position: relative;
+  z-index: 2;
+}
+
+.rolo-meta h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+}
+
+.rolo-meta p {
+  margin: 0.25rem 0 0.8rem;
+  color: #b0b0b0;
+  font-size: 0.9rem;
+}
+
+.rolo-meta button {
+  padding: 0.65rem 1rem;
+  border-radius: 999px;
+  background: #ff7a59;
+  color: #1a0804;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.rolo-rail {
+  position: absolute;
+  right: 0.7rem;
+  top: 50%;
+  transform: translateY(-50%);
+  display: grid;
+  gap: 0.35rem;
+}
+
+.rolo-rail span {
+  width: 0.35rem;
+  height: 0.35rem;
+  border-radius: 50%;
+  background: #ffffff33;
+}
+
+.rolo-rail span.on {
+  background: #ff7a59;
+  height: 1.1rem;
+  border-radius: 99px;
+}
+
+.rolo-aside {
+  max-width: 28ch;
+}
+
+.rolo-brand {
+  margin: 0;
+  font-family: var(--font-poster);
+  font-size: 4rem;
+  letter-spacing: 0.06em;
+  line-height: 0.9;
+  color: #ff7a59;
+}
+
+.rolo-aside h1 {
+  margin: 0.5rem 0;
+  font-family: var(--font-display);
+  font-size: 2rem;
+}
+
+.rolo-aside p {
+  color: #9a9a9a;
+  line-height: 1.45;
+}
+
+/* ——— 07 TRAÇO ——— */
+.traco {
+  min-height: calc(100vh - 52px);
+  padding: 1.25rem clamp(1rem, 3vw, 2rem) 2rem;
+  background:
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 19px,
+      #0a304022 19px,
+      #0a304022 20px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 19px,
+      #0a304022 19px,
+      #0a304022 20px
+    ),
+    #041018;
+  color: #9fe9ff;
+  font-family: var(--font-mono);
+}
+
+.traco-head p {
+  margin: 0;
+  font-size: 0.75rem;
+  letter-spacing: 0.14em;
+  opacity: 0.7;
+}
+
+.traco-head h1 {
+  margin: 0.4rem 0 1.2rem;
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-size: clamp(1.2rem, 2.5vw, 1.7rem);
+  letter-spacing: 0.04em;
+}
+
+.traco-board {
+  display: grid;
+  grid-template-columns: 1fr 1fr 0.85fr;
+  gap: 0.75rem;
+  min-height: 60vh;
+}
+
+.traco-panel {
+  border: 1px solid #3dd6ff44;
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  background: #061820aa;
+}
+
+.traco-panel span {
+  font-size: 0.7rem;
+  letter-spacing: 0.16em;
+  margin-bottom: 0.5rem;
+}
+
+.traco-panel .fig {
+  flex: 1;
+  max-height: 55vh;
+}
+
+.traco-spec {
+  border: 1px dashed #3dd6ff66;
+  padding: 1rem;
+  background: #031018;
+}
+
+.traco-spec h3 {
+  margin: 0 0 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  font-size: 0.85rem;
+}
+
+.traco-spec ul {
+  margin: 0;
+  padding-left: 1.1rem;
+  display: grid;
+  gap: 0.55rem;
+  font-size: 0.82rem;
+  line-height: 1.35;
+  color: #7fdfff;
+}
+
+.traco-code {
+  margin-top: 1.5rem;
+  font-size: 0.72rem;
+  opacity: 0.65;
+}
+
+/* ——— 08 ESPELHO ——— */
+.espelho {
+  min-height: calc(100vh - 52px);
+  padding: 1.5rem clamp(1rem, 3vw, 2.5rem) 2rem;
+  background:
+    linear-gradient(180deg, #1a1714, #141210);
+  color: #e8dfd4;
+  text-align: center;
+}
+
+.espelho-title {
+  margin: 0 0 1.25rem;
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+  letter-spacing: -0.02em;
+}
+
+.espelho-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.espelho-pane {
+  padding: 1rem 1rem 1.2rem;
+  border-radius: 1rem;
+  background: #1f1b17;
+  border: 1px solid #ffffff12;
+  text-align: left;
+}
+
+.espelho-pane > p {
+  margin: 0 0 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.espelho-pane.bad > p { color: #e85d4c; }
+.espelho-pane.good > p { color: #5dcf8a; }
+
+.espelho-pane .fig {
+  max-height: 42vh;
+  margin: 0 auto;
+}
+
+.espelho-pane ul {
+  margin: 0.75rem 0 0;
+  padding-left: 1.1rem;
+  color: #b4a99a;
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.espelho-btn {
+  margin-top: 1.5rem;
+  padding: 0.8rem 1.4rem;
+  border-radius: 999px;
+  background: #e8dfd4;
+  color: #141210;
+  font-weight: 700;
+}
+
+/* ——— 09 ÓRBITA ——— */
+.orbita {
+  min-height: calc(100vh - 52px);
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.5rem;
+  background:
+    radial-gradient(circle at 35% 50%, #1a1830 0%, #0e0e12 55%);
+  color: #eceaf5;
+}
+
+.orbita-ring {
+  position: relative;
+  width: min(420px, 85vw);
+  aspect-ratio: 1;
+  margin: 0 auto;
+  border-radius: 50%;
+  border: 1px dashed #ffffff28;
+  display: grid;
+  place-items: center;
+}
+
+.orbita-core {
+  width: 55%;
+}
+
+.orbita-node {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform:
+    rotate(var(--a)) translate(0, calc(-1 * min(195px, 38vw))) rotate(calc(-1 * var(--a)));
+  padding: 0.5rem 0.75rem;
+  border-radius: 999px;
+  background: #1c1a28;
+  border: 1px solid #ffffff22;
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+
+.orbita-node.on {
+  background: #a78bfa;
+  color: #120f1c;
+  border-color: transparent;
+  font-weight: 700;
+}
+
+.orbita-info {
+  max-width: 32ch;
+}
+
+.orbita-info p:first-child {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #a78bfa;
+}
+
+.orbita-info h1 {
+  margin: 0.4rem 0;
+  font-family: var(--font-display);
+  font-size: 2.4rem;
+  letter-spacing: -0.03em;
+}
+
+.orbita-info p:last-child {
+  color: #9b97ab;
+  line-height: 1.45;
+}
+
+/* ——— 10 GIZ ——— */
+.giz {
+  min-height: calc(100vh - 52px);
+  display: grid;
+  grid-template-columns: 1.4fr 0.8fr;
+  background: #0f141c;
+  color: #f5e6c8;
+}
+
+.giz-board {
+  margin: 1rem;
+  padding: 1.25rem clamp(1rem, 3vw, 2rem);
+  border-radius: 0.4rem;
+  background:
+    radial-gradient(ellipse at 30% 20%, #243044, transparent 50%),
+    #1a2330;
+  border: 1px solid #ffffff10;
+  box-shadow: inset 0 0 80px #00000055;
+  position: relative;
+}
+
+.giz-board header p {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  opacity: 0.65;
+}
+
+.giz-board h1 {
+  margin: 0.35rem 0 1rem;
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+}
+
+.giz-body {
+  position: relative;
+  max-width: 280px;
+  margin: 0 auto;
+}
+
+.giz-marks {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.giz-notes {
+  list-style: none;
+  margin: 1.25rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+}
+
+.giz-side {
+  padding: 2rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  border-left: 1px solid #ffffff10;
+}
+
+.giz-brand {
+  margin: 0;
+  font-family: var(--font-poster);
+  font-size: 4.5rem;
+  letter-spacing: 0.08em;
+  line-height: 0.85;
+  opacity: 0.9;
+}
+
+.giz-side h2 {
+  margin: 0.6rem 0;
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+}
+
+.giz-side p {
+  color: #b8a888;
+  line-height: 1.45;
+}
+
+.giz-side button {
+  margin-top: 1.25rem;
+  align-self: start;
+  padding: 0.7rem 1.1rem;
+  border: 1px solid #f5e6c8;
+  border-radius: 0.35rem;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+}
+
+.giz-side button:hover {
+  background: #f5e6c8;
+  color: #1a2330;
+}
+
+/* ——— responsive ——— */
+@media (max-width: 860px) {
+  .forma,
+  .atlas,
+  .link,
+  .estudio,
+  .rolo,
+  .traco-board,
+  .espelho-pair,
+  .orbita,
+  .giz {
+    grid-template-columns: 1fr;
+  }
+
+  .forma {
+    align-items: stretch;
+  }
+
+  .forma-body {
+    min-height: 45vh;
+    order: -1;
+  }
+
+  .atlas-side {
+    border-right: 0;
+    border-bottom: 1px solid #1c191722;
+  }
+
+  .link-panel {
+    border-left: 0;
+    border-top: 1px solid #ffffff12;
+  }
+
+  .estudio-left {
+    border-right: 0;
+    border-bottom: 1px solid #ffffff14;
+  }
+
+  .rolo-aside {
+    text-align: center;
+    max-width: none;
+  }
+
+  .orbita-info {
+    text-align: center;
+    max-width: none;
+    justify-self: center;
+  }
+
+  .giz-side {
+    border-left: 0;
+    border-top: 1px solid #ffffff10;
+  }
+}
+
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+  <script>
+/** SVG figures: male, female, neutral × silhouette / shaded */
+window.Bodies = (() => {
+  const common = `fill="none" stroke-linecap="round" stroke-linejoin="round"`;
+
+  function maleSquat(opts = {}) {
+    const mode = opts.mode || "silhouette";
+    const accent = opts.accent || "#c8f542";
+    const ink = opts.ink || "#e8e4dc";
+    const gid = `mShade-${Math.random().toString(36).slice(2, 7)}`;
+    if (mode === "silhouette") {
+      return `
+      <svg viewBox="0 0 200 320" class="fig" aria-hidden="true">
+        <defs>
+          <linearGradient id="${gid}" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="${ink}" stop-opacity=".95"/>
+            <stop offset="100%" stop-color="${ink}" stop-opacity=".55"/>
+          </linearGradient>
+        </defs>
+        <ellipse cx="100" cy="302" rx="48" ry="8" fill="${ink}" opacity=".12"/>
+        <path fill="url(#${gid})" d="M100 28c14 0 24 11 24 26 0 12-7 22-18 25v8c22 6 38 22 42 44l8 48c2 12-4 18-14 16l-12-4v28c0 18 4 36 6 54l4 28c1 8-4 12-10 10l-18-6-8-40-6 40-18 6c-6 2-11-2-10-10l4-28c2-18 6-36 6-54v-28l-12 4c-10 2-16-4-14-16l8-48c4-22 20-38 42-44v-8c-11-3-18-13-18-25 0-15 10-26 24-26z"/>
+        <path ${common} stroke="${accent}" stroke-width="2.5" d="M78 118c8 14 22 22 36 22s28-8 36-22"/>
+        <circle cx="100" cy="54" r="3" fill="${accent}"/>
+      </svg>`;
+    }
+    return `
+    <svg viewBox="0 0 200 320" class="fig" aria-hidden="true">
+      <ellipse cx="100" cy="302" rx="48" ry="8" fill="${ink}" opacity=".1"/>
+      <g ${common} stroke="${ink}" stroke-width="2.2">
+        <circle cx="100" cy="48" r="22" fill="${ink}" fill-opacity=".08"/>
+        <path d="M86 68c4 10 10 14 14 14s10-4 14-14"/>
+        <path d="M78 92c8-6 16-8 22-8s14 2 22 8"/>
+        <path d="M72 108c10 8 18 12 28 12s18-4 28-12"/>
+        <path d="M68 130c-8 4-16 2-22-4M132 130c8 4 16 2 22-4"/>
+        <path d="M86 142v36c0 10-2 22-6 34l-10 42M114 142v36c0 10 2 22 6 34l10 42"/>
+        <path d="M70 252c8 2 14-4 16-12M130 252c-8 2-14-4-16-12"/>
+        <path d="M88 118c4 18 10 28 12 28s8-10 12-28" stroke="${accent}" stroke-width="2.8"/>
+        <path d="M92 96c6 8 10 10 8 10M108 96c-6 8-10 10-8 10" stroke="${accent}" stroke-width="1.6" opacity=".7"/>
+      </g>
+    </svg>`;
+  }
+
+  function femaleLunge(opts = {}) {
+    const mode = opts.mode || "shaded";
+    const accent = opts.accent || "#ff6b4a";
+    const ink = opts.ink || "#1a1a1a";
+    if (mode === "silhouette") {
+      return `
+      <svg viewBox="0 0 300 320" class="fig" aria-hidden="true">
+        <ellipse cx="150" cy="310" rx="80" ry="6" fill="${ink}" opacity=".12"/>
+        <g fill="${ink}">
+          <circle cx="168" cy="42" r="18"/>
+          <path d="M154 58h28l4 16-8 8v36l-6 6-16-4v-38l-6-8z"/>
+          <path d="M148 118h36l4 28-10 8-24-2-6-10z"/>
+          <path d="M150 150l-28 58-6 70h22l8-66 18-50z"/>
+          <path d="M176 152l48 46 36 70-22 8-34-64-36-48z"/>
+          <path d="M146 128l-40 8-8-14 42-12z"/>
+          <path d="M186 122l46-28 10 12-48 30z"/>
+        </g>
+        <path ${common} stroke="${accent}" stroke-width="2.6" d="M156 130c18 14 36 16 50 6"/>
+        <circle cx="196" cy="188" r="5" fill="${accent}"/>
+      </svg>`;
+    }
+    return `
+    <svg viewBox="0 0 300 320" class="fig" aria-hidden="true">
+      <ellipse cx="150" cy="310" rx="80" ry="6" fill="${ink}" opacity=".1"/>
+      <g ${common} stroke="${ink}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="168" cy="42" r="18" fill="${ink}" fill-opacity=".06"/>
+        <path d="M168 60v28"/>
+        <path d="M152 96c10-4 16-5 24-4 8 1 18 5 28 12"/>
+        <path d="M148 122c14 8 26 10 36 8 12-2 24-8 36-18"/>
+        <path d="M148 130c-16 4-34 4-50-4"/>
+        <path d="M210 116c18-8 34-20 46-34"/>
+        <path d="M162 140c-6 24-18 52-30 78l-8 48"/>
+        <path d="M182 140c16 22 36 48 56 72l28 44"/>
+        <path d="M120 268h28M264 256h28"/>
+        <path d="M164 124c12 14 24 18 30 12" stroke="${accent}" stroke-width="2.8"/>
+        <circle cx="200" cy="186" r="5" fill="${accent}"/>
+      </g>
+    </svg>`;
+  }
+
+  function neutralDeadlift(opts = {}) {
+    const mode = opts.mode || "silhouette";
+    const accent = opts.accent || "#5ec8ff";
+    const ink = opts.ink || "#f2f0ea";
+    const gid = `nShade-${Math.random().toString(36).slice(2, 7)}`;
+    if (mode === "silhouette") {
+      return `
+      <svg viewBox="0 0 240 320" class="fig" aria-hidden="true">
+        <defs>
+          <linearGradient id="${gid}" x1=".2" y1="0" x2=".8" y2="1">
+            <stop offset="0%" stop-color="${ink}" stop-opacity=".92"/>
+            <stop offset="100%" stop-color="${ink}" stop-opacity=".48"/>
+          </linearGradient>
+        </defs>
+        <ellipse cx="120" cy="304" rx="56" ry="8" fill="${ink}" opacity=".1"/>
+        <path fill="url(#${gid})" d="M120 30c13 0 23 10 23 24 0 11-7 20-16 23v8c16 3 28 14 34 30l18 52c4 12-2 18-12 16l-14-4 2 20c2 16 4 34 4 52v36c0 8-5 12-12 10l-14-4v-78l-6 78-14 4c-7 2-12-2-12-10v-36c0-18 2-36 4-52l2-20-14 4c-10 2-16-4-12-16l18-52c6-16 18-27 34-30v-8c-9-3-16-12-16-23 0-14 10-24 23-24z"/>
+        <rect x="48" y="168" width="144" height="8" rx="3" fill="${accent}" opacity=".9"/>
+        <circle cx="48" cy="172" r="14" fill="none" stroke="${accent}" stroke-width="3"/>
+        <circle cx="192" cy="172" r="14" fill="none" stroke="${accent}" stroke-width="3"/>
+      </svg>`;
+    }
+    return `
+    <svg viewBox="0 0 240 320" class="fig" aria-hidden="true">
+      <ellipse cx="120" cy="304" rx="56" ry="8" fill="${ink}" opacity=".08"/>
+      <g ${common} stroke="${ink}" stroke-width="2.1">
+        <ellipse cx="120" cy="46" rx="20" ry="22" fill="${ink}" fill-opacity=".07"/>
+        <path d="M108 66c4 8 8 12 12 12s8-4 12-12"/>
+        <path d="M98 92c12-4 20-6 28-4"/>
+        <path d="M92 114c14 6 24 8 36 6"/>
+        <path d="M84 136c-12 6-24 8-36 4M156 136c12 6 24 8 36 4"/>
+        <path d="M104 148v40c0 14 0 30-2 46l-6 40M136 148v40c0 14 0 30 2 46l6 40"/>
+        <path d="M70 172h100" stroke="${accent}" stroke-width="3"/>
+        <circle cx="58" cy="172" r="12" stroke="${accent}" stroke-width="2.5"/>
+        <circle cx="182" cy="172" r="12" stroke="${accent}" stroke-width="2.5"/>
+        <path d="M110 120c6 12 10 16 10 14s4-2 10-14" stroke="${accent}" stroke-width="2.2"/>
+      </g>
+    </svg>`;
+  }
+
+  function malePress(opts = {}) {
+    const accent = opts.accent || "#f0c14a";
+    const ink = opts.ink || "#111";
+    return `
+    <svg viewBox="0 0 200 300" class="fig" aria-hidden="true">
+      <g ${common} stroke="${ink}" stroke-width="2">
+        <circle cx="100" cy="42" r="20" fill="${ink}" fill-opacity=".06"/>
+        <path d="M86 60c4 8 10 12 14 12s10-4 14-12"/>
+        <path d="M78 84c10-4 16-6 22-6s12 2 22 6"/>
+        <path d="M70 108c12 8 20 12 30 12s18-4 30-12"/>
+        <path d="M64 100c-4-20-6-36-4-48M136 100c4-20 6-36 4-48"/>
+        <path d="M58 52h-20M142 52h20" stroke="${accent}" stroke-width="3"/>
+        <circle cx="34" cy="52" r="10" stroke="${accent}" stroke-width="2.5"/>
+        <circle cx="166" cy="52" r="10" stroke="${accent}" stroke-width="2.5"/>
+        <path d="M88 132v48c0 12-2 28-4 42l-8 36M112 132v48c0 12 2 28 4 42l8 36"/>
+        <path d="M92 108c4 10 8 14 8 12s4-2 8-12" stroke="${accent}" stroke-width="2"/>
+      </g>
+    </svg>`;
+  }
+
+  function femalePlank(opts = {}) {
+    const accent = opts.accent || "#2dd4a8";
+    const ink = opts.ink || "#0f172a";
+    return `
+    <svg viewBox="0 0 320 160" class="fig fig-wide" aria-hidden="true">
+      <g ${common} stroke="${ink}" stroke-width="2">
+        <ellipse cx="268" cy="58" rx="18" ry="16" fill="${ink}" fill-opacity=".06"/>
+        <path d="M250 66c-28 4-56 6-84 4-36-2-72-8-108-4"/>
+        <path d="M250 78c-30 2-60 2-90 0-34-2-68-6-98 2"/>
+        <path d="M58 80v36M86 82v40M230 78v42M256 74v40"/>
+        <path d="M48 116h24M76 122h24M220 120h24M246 114h24"/>
+        <path d="M140 72c8 6 16 8 24 6" stroke="${accent}" stroke-width="2.4"/>
+        <path d="M100 76c6 4 12 4 18 2" stroke="${accent}" stroke-width="1.6" opacity=".7"/>
+      </g>
+    </svg>`;
+  }
+
+  function miniPose(kind, accent, ink) {
+    const map = {
+      squat: maleSquat({ mode: "silhouette", accent, ink }),
+      lunge: femaleLunge({ mode: "silhouette", accent, ink }),
+      deadlift: neutralDeadlift({ mode: "silhouette", accent, ink }),
+      press: malePress({ accent, ink }),
+      plank: femalePlank({ accent, ink }),
+    };
+    return map[kind] || map.squat;
+  }
+
+  return { maleSquat, femaleLunge, neutralDeadlift, malePress, femalePlank, miniPose };
+})();
+
+  </script>
+  <script>
+const PROTOS = [
+  {
+    id: "forma",
+    name: "Forma",
+    mode: "treino",
+    figure: "masculino · silhueta",
+    blurb: "Fullscreen de execução — só o movimento importa.",
+    tone: "#0c0f0a",
+  },
+  {
+    id: "atlas",
+    name: "Atlas",
+    mode: "anatomia",
+    figure: "feminino · sombreado",
+    blurb: "Consulta muscular com mapa clicável.",
+    tone: "#2c2824",
+    light: true,
+  },
+  {
+    id: "link",
+    name: "Link",
+    mode: "teleconsulta",
+    figure: "neutro · referência",
+    blurb: "Sessão ao vivo com corpo-guia ao lado.",
+    tone: "#101820",
+  },
+  {
+    id: "acervo",
+    name: "Acervo",
+    mode: "catálogo",
+    figure: "misto · miniaturas",
+    blurb: "Biblioteca de movimentos pra escolher.",
+    tone: "#1c1915",
+  },
+  {
+    id: "estudio",
+    name: "Estúdio",
+    mode: "treino",
+    figure: "masculino · editorial",
+    blurb: "Spread de revista: um exercício, uma página.",
+    tone: "#0b1c2c",
+  },
+  {
+    id: "rolo",
+    name: "Rolo",
+    mode: "catálogo",
+    figure: "feminino · vertical",
+    blurb: "Feed vertical de execuções.",
+    tone: "#090909",
+  },
+  {
+    id: "traco",
+    name: "Traço",
+    mode: "anatomia",
+    figure: "neutro · blueprint",
+    blurb: "Planta técnica do movimento.",
+    tone: "#041018",
+  },
+  {
+    id: "espelho",
+    name: "Espelho",
+    mode: "treino",
+    figure: "feminino · correção",
+    blurb: "Forma certa vs forma a ajustar.",
+    tone: "#141210",
+  },
+  {
+    id: "orbita",
+    name: "Órbita",
+    mode: "anatomia",
+    figure: "neutro · radial",
+    blurb: "Seletor circular de grupos musculares.",
+    tone: "#0e0e12",
+  },
+  {
+    id: "giz",
+    name: "Giz",
+    mode: "teleconsulta",
+    figure: "masculino · anotações",
+    blurb: "Quadro do personal com corpo e notas.",
+    tone: "#1a2330",
+  },
+];
+
+const state = {
+  view: "hub",
+  proto: null,
+  atlasFocus: "gluteo",
+  orbita: "posterior",
+  acervoFilter: "todos",
+};
+
+const app = document.getElementById("app");
+const B = window.Bodies;
+
+function goHub() {
+  state.view = "hub";
+  state.proto = null;
+  render();
+}
+
+function openProto(id) {
+  state.view = "proto";
+  state.proto = id;
+  render();
+}
+
+function shiftProto(dir) {
+  const i = PROTOS.findIndex((p) => p.id === state.proto);
+  const next = PROTOS[(i + dir + PROTOS.length) % PROTOS.length];
+  state.proto = next.id;
+  render();
+}
+
+function modeLabel(m) {
+  return (
+    {
+      treino: "Treino",
+      anatomia: "Anatomia",
+      teleconsulta: "Teleconsulta",
+      catálogo: "Catálogo",
+    }[m] || m
+  );
+}
+
+function renderHub() {
+  return `
+  <div class="hub">
+    <header class="hub-head">
+      <div class="hub-brand">
+        <span class="hub-mark">B</span>
+        <div>
+          <strong>Body Lab</strong>
+          <p>10 protótipos · consulta de exercício</p>
+        </div>
+      </div>
+      <p class="hub-hint">Grade pra comparar · clique pra abrir em foco · ← → no teclado</p>
+    </header>
+    <div class="hub-grid">
+      ${PROTOS.map(
+        (p, i) => `
+        <button type="button" class="hub-card${p.light ? " hub-card-light" : ""}" data-open="${p.id}" style="--tone:${p.tone}">
+          <span class="hub-num">${String(i + 1).padStart(2, "0")}</span>
+          <span class="hub-mode">${modeLabel(p.mode)}</span>
+          <h2>${p.name}</h2>
+          <p>${p.blurb}</p>
+          <span class="hub-fig">${p.figure}</span>
+        </button>`,
+      ).join("")}
+    </div>
+  </div>`;
+}
+
+function shell(id, inner) {
+  const p = PROTOS.find((x) => x.id === id);
+  const idx = PROTOS.findIndex((x) => x.id === id);
+  return `
+  <div class="proto-shell proto-${id}">
+    <header class="proto-bar">
+      <button type="button" class="bar-btn" data-hub>← Hub</button>
+      <div class="bar-mid">
+        <strong>${p.name}</strong>
+        <span>${modeLabel(p.mode)} · ${idx + 1}/10</span>
+      </div>
+      <div class="bar-nav">
+        <button type="button" class="bar-btn" data-prev aria-label="Anterior">‹</button>
+        <button type="button" class="bar-btn" data-next aria-label="Próximo">›</button>
+      </div>
+    </header>
+    <div class="proto-stage">${inner}</div>
+  </div>`;
+}
+
+/* ——— 01 FORMA ——— */
+function renderForma() {
+  return shell(
+    "forma",
+    `
+    <section class="forma">
+      <div class="forma-bg" aria-hidden="true"></div>
+      <div class="forma-copy">
+        <p class="forma-brand">FORMA</p>
+        <h1>Agachamento<br/>livre</h1>
+        <p class="forma-sub">Controle a descida. Joelhos no rastro dos pés. Peito aberto.</p>
+        <div class="forma-cta">
+          <button type="button" class="forma-go">Iniciar set</button>
+          <span>4 × 8 · descanso 90s</span>
+        </div>
+      </div>
+      <div class="forma-body">
+        ${B.maleSquat({ mode: "silhouette", accent: "#c8f542", ink: "#e7e2d6" })}
+        <div class="forma-meter"><span></span></div>
+      </div>
+    </section>`,
+  );
+}
+
+/* ——— 02 ATLAS ——— */
+function renderAtlas() {
+  const zones = [
+    { id: "gluteo", label: "Glúteo máximo", note: "Motor principal da extensão de quadril no avanço." },
+    { id: "quad", label: "Quadríceps", note: "Estabiliza o joelho da perna da frente." },
+    { id: "core", label: "Core", note: "Trava a coluna e evita colapso lombar." },
+  ];
+  const active = zones.find((z) => z.id === state.atlasFocus) || zones[0];
+  return shell(
+    "atlas",
+    `
+    <section class="atlas">
+      <aside class="atlas-side">
+        <p class="atlas-kicker">Consulta anatômica</p>
+        <h1>Afundo<br/>reverso</h1>
+        <ul class="atlas-list">
+          ${zones
+            .map(
+              (z) => `
+            <li>
+              <button type="button" class="${z.id === state.atlasFocus ? "on" : ""}" data-atlas="${z.id}">
+                ${z.label}
+              </button>
+            </li>`,
+            )
+            .join("")}
+        </ul>
+        <article class="atlas-note">
+          <h3>${active.label}</h3>
+          <p>${active.note}</p>
+        </article>
+      </aside>
+      <div class="atlas-stage">
+        ${B.femaleLunge({ mode: "shaded", accent: "#c45c3e", ink: "#1c1917" })}
+        <div class="atlas-tags">
+          <span class="${state.atlasFocus === "gluteo" ? "on" : ""}" style="--x:58%;--y:52%">glúteo</span>
+          <span class="${state.atlasFocus === "quad" ? "on" : ""}" style="--x:42%;--y:66%">quad</span>
+          <span class="${state.atlasFocus === "core" ? "on" : ""}" style="--x:52%;--y:38%">core</span>
+        </div>
+      </div>
+    </section>`,
+  );
+}
+
+/* ——— 03 LINK ——— */
+function renderLink() {
+  return shell(
+    "link",
+    `
+    <section class="link">
+      <div class="link-live">
+        <div class="link-cam">
+          <span class="link-dot"></span>
+          <p>Você · ao vivo</p>
+          <div class="link-cam-body">${B.neutralDeadlift({ mode: "silhouette", accent: "#5ec8ff", ink: "#d9e2ea" })}</div>
+        </div>
+        <div class="link-coach">
+          <p>Marina · personal</p>
+          <div class="link-coach-face" aria-hidden="true"></div>
+        </div>
+      </div>
+      <aside class="link-panel">
+        <p class="link-brand">LINK</p>
+        <h1>Levantamento terra</h1>
+        <p>Referência neutra pra alinhar quadril e barra. Personal anota em tempo real.</p>
+        <div class="link-ref">${B.neutralDeadlift({ mode: "shaded", accent: "#5ec8ff", ink: "#9fb4c5" })}</div>
+        <ul class="link-notes">
+          <li class="ok">Barra rente à canela</li>
+          <li class="ok">Ombros à frente da barra</li>
+          <li class="warn">Evitar arredondar lombar</li>
+        </ul>
+        <button type="button" class="link-btn">Marcar rep limpa</button>
+      </aside>
+    </section>`,
+  );
+}
+
+/* ——— 04 ACERVO ——— */
+function renderAcervo() {
+  const items = [
+    { id: "squat", title: "Agachamento", tag: "pernas", kind: "squat" },
+    { id: "lunge", title: "Afundo", tag: "pernas", kind: "lunge" },
+    { id: "deadlift", title: "Terra", tag: "posterior", kind: "deadlift" },
+    { id: "press", title: "Desenvolvimento", tag: "ombro", kind: "press" },
+    { id: "plank", title: "Prancha", tag: "core", kind: "plank" },
+    { id: "squat2", title: "Goblet", tag: "pernas", kind: "squat" },
+  ];
+  const filters = ["todos", "pernas", "posterior", "ombro", "core"];
+  const filtered =
+    state.acervoFilter === "todos"
+      ? items
+      : items.filter((i) => i.tag === state.acervoFilter);
+  return shell(
+    "acervo",
+    `
+    <section class="acervo">
+      <header class="acervo-head">
+        <div>
+          <p>Catálogo</p>
+          <h1>Acervo de movimentos</h1>
+        </div>
+        <div class="acervo-filters">
+          ${filters
+            .map(
+              (f) => `
+            <button type="button" class="${state.acervoFilter === f ? "on" : ""}" data-acervo="${f}">${f}</button>`,
+            )
+            .join("")}
+        </div>
+      </header>
+      <div class="acervo-grid">
+        ${filtered
+          .map(
+            (it) => `
+          <article class="acervo-item">
+            <div class="acervo-thumb">${B.miniPose(it.kind, "#d4a574", "#f0e6d8")}</div>
+            <h3>${it.title}</h3>
+            <p>${it.tag}</p>
+          </article>`,
+          )
+          .join("")}
+      </div>
+    </section>`,
+  );
+}
+
+/* ——— 05 ESTÚDIO ——— */
+function renderEstudio() {
+  return shell(
+    "estudio",
+    `
+    <section class="estudio">
+      <div class="estudio-left">
+        <p class="estudio-issue">Vol. 03 · Sessão de força</p>
+        <h1>Desenvolvimento<br/><em>militar</em></h1>
+        <p class="estudio-lead">Empurre o teto sem perder o chão. Escápulas estáveis, costelas fechadas, caminho vertical.</p>
+        <dl class="estudio-meta">
+          <div><dt>Séries</dt><dd>5</dd></div>
+          <div><dt>Reps</dt><dd>5</dd></div>
+          <div><dt>Tempo</dt><dd>2–0–1</dd></div>
+        </dl>
+      </div>
+      <div class="estudio-right">
+        ${B.malePress({ accent: "#e2b857", ink: "#f3efe6" })}
+        <p class="estudio-cap">Figura masculina · acabamento linear</p>
+      </div>
+    </section>`,
+  );
+}
+
+/* ——— 06 ROLO ——— */
+function renderRolo() {
+  return shell(
+    "rolo",
+    `
+    <section class="rolo">
+      <div class="rolo-phone">
+        <article class="rolo-slide on">
+          ${B.femaleLunge({ mode: "silhouette", accent: "#ff7a59", ink: "#f5f5f5" })}
+          <div class="rolo-meta">
+            <h2>Afundo reverso</h2>
+            <p>3 × 10 · cada lado</p>
+            <button type="button">Salvar no treino</button>
+          </div>
+        </article>
+        <div class="rolo-rail" aria-hidden="true">
+          <span class="on"></span><span></span><span></span>
+        </div>
+      </div>
+      <aside class="rolo-aside">
+        <p class="rolo-brand">ROLO</p>
+        <h1>Catálogo em reel</h1>
+        <p>Uma execução por tela. Desliza, salva, monta a sessão.</p>
+      </aside>
+    </section>`,
+  );
+}
+
+/* ——— 07 TRAÇO ——— */
+function renderTraco() {
+  return shell(
+    "traco",
+    `
+    <section class="traco">
+      <header class="traco-head">
+        <p>DRW-07 · MOVIMENTO</p>
+        <h1>Terra · vistas ortográficas</h1>
+      </header>
+      <div class="traco-board">
+        <div class="traco-panel">
+          <span>FRONT</span>
+          ${B.neutralDeadlift({ mode: "shaded", accent: "#3dd6ff", ink: "#7fdfff" })}
+        </div>
+        <div class="traco-panel">
+          <span>SIDE</span>
+          ${B.neutralDeadlift({ mode: "silhouette", accent: "#3dd6ff", ink: "#5ad0f0" })}
+        </div>
+        <aside class="traco-spec">
+          <h3>Spec</h3>
+          <ul>
+            <li>Ângulo de quadril · 15–25°</li>
+            <li>Barra no meio do pé</li>
+            <li>Cervical neutra</li>
+            <li>Pegada pronada · ombro width</li>
+          </ul>
+          <p class="traco-code">REF · NTR-DL-01</p>
+        </aside>
+      </div>
+    </section>`,
+  );
+}
+
+/* ——— 08 ESPELHO ——— */
+function renderEspelho() {
+  return shell(
+    "espelho",
+    `
+    <section class="espelho">
+      <h1 class="espelho-title">Checagem de forma</h1>
+      <div class="espelho-pair">
+        <article class="espelho-pane bad">
+          <p>Ajustar</p>
+          ${B.femaleLunge({ mode: "silhouette", accent: "#e85d4c", ink: "#c4b8a8" })}
+          <ul>
+            <li>Joelho passa demais da ponta</li>
+            <li>Tronco cai pra frente</li>
+          </ul>
+        </article>
+        <article class="espelho-pane good">
+          <p>Alvo</p>
+          ${B.femaleLunge({ mode: "silhouette", accent: "#5dcf8a", ink: "#e8dfd4" })}
+          <ul>
+            <li>Tíbia mais vertical</li>
+            <li>Peito alto · core travado</li>
+          </ul>
+        </article>
+      </div>
+      <button type="button" class="espelho-btn">Entendi · próxima rep</button>
+    </section>`,
+  );
+}
+
+/* ——— 09 ÓRBITA ——— */
+function renderOrbita() {
+  const nodes = [
+    { id: "posterior", label: "Posterior", a: "-90" },
+    { id: "core", label: "Core", a: "0" },
+    { id: "pernas", label: "Pernas", a: "90" },
+    { id: "ombros", label: "Ombros", a: "180" },
+  ];
+  return shell(
+    "orbita",
+    `
+    <section class="orbita">
+      <div class="orbita-ring">
+        ${nodes
+          .map(
+            (n) => `
+          <button type="button" class="orbita-node ${state.orbita === n.id ? "on" : ""}" style="--a:${n.a}deg" data-orbita="${n.id}">
+            ${n.label}
+          </button>`,
+          )
+          .join("")}
+        <div class="orbita-core">
+          ${B.neutralDeadlift({ mode: "silhouette", accent: "#a78bfa", ink: "#eceaf5" })}
+        </div>
+      </div>
+      <aside class="orbita-info">
+        <p>Anatomia radial</p>
+        <h1>${nodes.find((n) => n.id === state.orbita).label}</h1>
+        <p>Gire o foco pelo anel. O corpo neutro fica no centro como âncora visual da consulta.</p>
+      </aside>
+    </section>`,
+  );
+}
+
+/* ——— 10 GIZ ——— */
+function renderGiz() {
+  return shell(
+    "giz",
+    `
+    <section class="giz">
+      <div class="giz-board">
+        <header>
+          <p>Sessão · 23 nov</p>
+          <h1>Agachamento — cues</h1>
+        </header>
+        <div class="giz-body">
+          ${B.maleSquat({ mode: "shaded", accent: "#f5e6c8", ink: "#f5e6c8" })}
+          <svg class="giz-marks" viewBox="0 0 200 320" aria-hidden="true">
+            <path d="M130 100c20-10 40-8 50 4" fill="none" stroke="#f5e6c8" stroke-width="1.5" stroke-dasharray="4 3"/>
+            <text x="150" y="88" fill="#f5e6c8" font-size="11" font-family="IBM Plex Mono, monospace">peito ↑</text>
+            <path d="M70 200c-24 10-36 28-34 46" fill="none" stroke="#f5e6c8" stroke-width="1.5" stroke-dasharray="4 3"/>
+            <text x="18" y="250" fill="#f5e6c8" font-size="11" font-family="IBM Plex Mono, monospace">joelho</text>
+          </svg>
+        </div>
+        <ul class="giz-notes">
+          <li>1. Empurra o chão</li>
+          <li>2. Respiração brace</li>
+          <li>3. Profundidade paralela</li>
+        </ul>
+      </div>
+      <aside class="giz-side">
+        <p class="giz-brand">GIZ</p>
+        <h2>Teleconsulta no quadro</h2>
+        <p>Personal desenha em cima do corpo. Você leva as cues pra casa.</p>
+        <button type="button">Exportar quadro</button>
+      </aside>
+    </section>`,
+  );
+}
+
+const RENDERERS = {
+  forma: renderForma,
+  atlas: renderAtlas,
+  link: renderLink,
+  acervo: renderAcervo,
+  estudio: renderEstudio,
+  rolo: renderRolo,
+  traco: renderTraco,
+  espelho: renderEspelho,
+  orbita: renderOrbita,
+  giz: renderGiz,
+};
+
+function render() {
+  app.innerHTML = state.view === "hub" ? renderHub() : RENDERERS[state.proto]();
+  wire();
+}
+
+function wire() {
+  app.querySelectorAll("[data-open]").forEach((el) =>
+    el.addEventListener("click", () => openProto(el.dataset.open)),
+  );
+  app.querySelectorAll("[data-hub]").forEach((el) => el.addEventListener("click", goHub));
+  app.querySelectorAll("[data-prev]").forEach((el) =>
+    el.addEventListener("click", () => shiftProto(-1)),
+  );
+  app.querySelectorAll("[data-next]").forEach((el) =>
+    el.addEventListener("click", () => shiftProto(1)),
+  );
+  app.querySelectorAll("[data-atlas]").forEach((el) =>
+    el.addEventListener("click", () => {
+      state.atlasFocus = el.dataset.atlas;
+      render();
+    }),
+  );
+  app.querySelectorAll("[data-acervo]").forEach((el) =>
+    el.addEventListener("click", () => {
+      state.acervoFilter = el.dataset.acervo;
+      render();
+    }),
+  );
+  app.querySelectorAll("[data-orbita]").forEach((el) =>
+    el.addEventListener("click", () => {
+      state.orbita = el.dataset.orbita;
+      render();
+    }),
+  );
+}
+
+document.addEventListener("keydown", (e) => {
+  if (state.view !== "proto") return;
+  if (e.key === "ArrowLeft") shiftProto(-1);
+  if (e.key === "ArrowRight") shiftProto(1);
+  if (e.key === "Escape") goHub();
+});
+
+render();
+
+  </script>
+</body>
+</html>
