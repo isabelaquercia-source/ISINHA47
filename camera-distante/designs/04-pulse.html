@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <title>04 · Pulse</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet" />
+  <style>
+    * { box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
+    html, body { margin: 0; height: 100%; overflow: hidden; font-family: "Space Grotesk", sans-serif; background: #050505; color: #f4ffe0; }
+    .frame { position: absolute; inset: 0; display: flex; flex-direction: column; }
+    canvas#highway { position: absolute; inset: 0; width: 100%; height: 100%; }
+    .scan {
+      position: absolute; inset: 0; z-index: 1; pointer-events: none;
+      background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,.08) 3px);
+      mix-blend-mode: multiply; opacity: .35;
+    }
+    .top { position: relative; z-index: 2; padding: 12px 12px 0; display: flex; justify-content: space-between; gap: 8px; pointer-events: none; }
+    .top button, .bottom button { pointer-events: auto; }
+    .ghost {
+      height: 36px; padding: 0 12px; border-radius: 0; border: 2px solid #c8ff3d;
+      background: #050505; color: #c8ff3d; font-weight: 700; font-size: 11px; text-transform: uppercase; letter-spacing: .06em;
+    }
+    .mint {
+      height: 36px; padding: 0 12px; border-radius: 0; border: 0;
+      background: #c8ff3d; color: #050505; font-weight: 800; font-size: 12px; margin-left: auto;
+    }
+    .lyrics { position: relative; z-index: 2; text-align: left; padding: 20px 16px 0; pointer-events: none; max-width: 90%; }
+    #lyricNow { font-family: Syne, sans-serif; font-weight: 800; font-size: clamp(1.1rem, 5vw, 1.6rem); text-transform: uppercase; letter-spacing: -0.02em; line-height: 1.05; }
+    .hi { color: #c8ff3d; } .lo { color: rgba(244,255,224,.28); }
+    #lyricNext { margin-top: 6px; font-size: 11px; text-transform: uppercase; letter-spacing: .14em; color: rgba(200,255,61,.55); }
+    .hint { position: relative; z-index: 2; margin-top: auto; padding: 0 16px 10px; pointer-events: none; }
+    .hint span { font-size: 11px; font-weight: 700; color: #c8ff3d; border-left: 3px solid #c8ff3d; padding-left: 8px; }
+    body.is-playing .hint { display: none; }
+    .bottom { position: relative; z-index: 3; padding: 8px 12px 16px; display: flex; align-items: center; gap: 10px; }
+    #btnPlay {
+      width: 48px; height: 48px; border: 2px solid #c8ff3d; border-radius: 0; display: grid; place-items: center;
+      background: #c8ff3d; color: #050505;
+    }
+    .hidden { display: none !important; }
+    .map {
+      flex: 1; height: 34px; border-radius: 0; background: #101010; border: 2px solid #333;
+      padding: 0 8px; display: flex; align-items: center;
+    }
+    #minimap { width: 100%; height: 22px; display: block; }
+    .tag {
+      position: absolute; right: 12px; top: 56px; z-index: 2; font-family: Syne, sans-serif;
+      font-size: 12px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: #c8ff3d; pointer-events: none;
+    }
+    #speedPanel {
+      display: none; position: absolute; left: 12px; right: 12px; top: 56px; z-index: 4;
+      background: #0a0a0a; border: 2px solid #c8ff3d; border-radius: 0;
+      padding: 8px 10px; align-items: center; gap: 8px;
+    }
+    #speedPanel.open { display: flex; }
+    #speedPanel button {
+      width: 28px; height: 28px; border-radius: 0; border: 2px solid #c8ff3d; background: #050505; color: #c8ff3d; font-weight: 800;
+    }
+    #speedSlider { flex: 1; accent-color: #c8ff3d; }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <canvas id="highway"></canvas>
+    <div class="scan"></div>
+    <div class="top">
+      <button class="ghost" id="btnBack" type="button">← Ideias</button>
+      <button class="mint" id="btnSpeed" type="button"><span data-speed>100%</span></button>
+    </div>
+    <div id="speedPanel">
+      <button id="speedDown" type="button">−</button>
+      <input id="speedSlider" type="range" min="50" max="125" step="5" value="100" />
+      <button id="speedUp" type="button">+</button>
+      <span class="mint" data-speed>100%</span>
+    </div>
+    <div class="tag">04 Pulse</div>
+    <div class="lyrics">
+      <div id="lyricNow"><span class="hi">One, two</span></div>
+      <div id="lyricNext">Oh, life is bigger</div>
+    </div>
+    <div class="hint"><span>HIT THE BLUE ZONE</span></div>
+    <div class="bottom">
+      <button id="btnPlay" type="button">
+        <svg id="iconPlay" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="6,4 20,12 6,20"/></svg>
+        <svg id="iconPause" class="hidden" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><rect x="5" y="4" width="4" height="16"/><rect x="15" y="4" width="4" height="16"/></svg>
+      </button>
+      <div class="map"><canvas id="minimap"></canvas></div>
+    </div>
+  </div>
+  <script>
+    window.CD_THEME = {
+      skyTop: "#0a0a0a", skyMid: "#111111", skyBot: "#1a1a1a",
+      seaTop: "#101808", seaMid: "#182010", seaBot: "#243018",
+      boardTop: "#1c1c1c", boardBot: "#0d0d0d",
+      stringHi: "#d9ff6a", stringLo: "#8fa33a",
+      accent: "#c8ff3d", pause: "#333333",
+      boardY: 0.52, boardH: 0.14,
+      font: "Space Grotesk, sans-serif", displayFont: "Syne, sans-serif"
+    };
+  </script>
+  <script src="../js/engine.js"></script>
+</body>
+</html>

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <title>01 · Horizonte</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,700;9..144,800&family=Outfit:wght@500;700;800&display=swap" rel="stylesheet" />
+  <style>
+    * { box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
+    html, body { margin: 0; height: 100%; overflow: hidden; font-family: Outfit, sans-serif; background: #0e7c86; color: #fff; }
+    .frame { position: absolute; inset: 0; display: flex; flex-direction: column; }
+    canvas#highway { position: absolute; inset: 0; width: 100%; height: 100%; }
+    .top { position: relative; z-index: 2; padding: 12px 14px 0; display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; pointer-events: none; }
+    .top button, .bottom button { pointer-events: auto; }
+    .ghost {
+      height: 34px; padding: 0 12px; border-radius: 999px; border: 1px solid rgba(255,255,255,.2);
+      background: rgba(8,74,62,.78); color: #fff; font-weight: 700; font-size: 12px;
+    }
+    .mint {
+      height: 34px; padding: 0 14px; border-radius: 999px; border: 1.5px solid rgba(5,46,28,.35);
+      background: #5ef29b; color: #052e1c; font-weight: 800; font-size: 12px; margin-left: auto;
+    }
+    .lyrics { position: relative; z-index: 2; text-align: center; padding: 10px 18px 0; pointer-events: none; }
+    .lyrics .hi { color: #fff; } .lyrics .lo { color: rgba(255,255,255,.45); }
+    #lyricNow { font-weight: 800; font-size: clamp(14px, 4vw, 18px); text-shadow: 0 1px 6px rgba(0,0,0,.35); }
+    #lyricNext { margin-top: 2px; font-size: 12px; color: rgba(255,255,255,.55); font-weight: 600; }
+    .hint { position: relative; z-index: 2; margin-top: auto; text-align: center; padding: 0 16px 10px; pointer-events: none; }
+    .hint span {
+      display: inline-block; font-size: 11px; font-weight: 600; color: rgba(219,234,254,.8);
+      background: rgba(2,6,23,.25); border: 1px solid rgba(255,255,255,.12); padding: 6px 14px; border-radius: 999px;
+    }
+    body.is-playing .hint { display: none; }
+    .bottom {
+      position: relative; z-index: 3; padding: 8px 14px 18px; display: flex; align-items: center; gap: 12px;
+    }
+    #btnPlay {
+      width: 46px; height: 46px; border: 0; border-radius: 999px; display: grid; place-items: center;
+      background: #4ade80; color: #052e1c; box-shadow: 0 8px 20px rgba(0,0,0,.25);
+    }
+    .hidden { display: none !important; }
+    .map {
+      flex: 1; height: 32px; border-radius: 999px; background: #151e2e; border: 1px solid rgba(255,255,255,.1);
+      overflow: hidden; padding: 0 10px; display: flex; align-items: center;
+    }
+    #minimap { width: 100%; height: 22px; display: block; }
+    .tag {
+      position: absolute; left: 14px; top: 54px; z-index: 2; font-family: Fraunces, serif;
+      font-size: 13px; opacity: .85; pointer-events: none;
+    }
+    #speedPanel {
+      display: none; position: absolute; left: 14px; right: 14px; top: 54px; z-index: 4;
+      background: rgba(8,74,62,.9); border: 1px solid rgba(255,255,255,.18); border-radius: 999px;
+      padding: 8px 12px; align-items: center; gap: 8px;
+    }
+    #speedPanel.open { display: flex; }
+    #speedPanel button {
+      width: 28px; height: 28px; border-radius: 999px; border: 1.5px solid #fff; background: transparent; color: #fff; font-weight: 800;
+    }
+    #speedSlider { flex: 1; accent-color: #5ef29b; }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <canvas id="highway"></canvas>
+    <div class="top">
+      <button class="ghost" id="btnBack" type="button">← Ideias</button>
+      <button class="mint" id="btnSpeed" type="button">⏲ <span data-speed>100%</span></button>
+    </div>
+    <div id="speedPanel">
+      <button id="speedDown" type="button">−</button>
+      <input id="speedSlider" type="range" min="50" max="125" step="5" value="100" />
+      <button id="speedUp" type="button">+</button>
+      <span class="mint" data-speed>100%</span>
+    </div>
+    <div class="tag">01 · Horizonte</div>
+    <div class="lyrics">
+      <div id="lyricNow"><span class="hi">One, two</span></div>
+      <div id="lyricNext">Oh, life is bigger</div>
+    </div>
+    <div class="hint"><span>Toque na área azul pra tocar no ritmo</span></div>
+    <div class="bottom">
+      <button id="btnPlay" type="button" aria-label="Play">
+        <svg id="iconPlay" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="6,4 20,12 6,20"/></svg>
+        <svg id="iconPause" class="hidden" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><rect x="5" y="4" width="4" height="16"/><rect x="15" y="4" width="4" height="16"/></svg>
+      </button>
+      <div class="map"><canvas id="minimap"></canvas></div>
+    </div>
+  </div>
+  <script>
+    window.CD_THEME = {
+      skyTop: "#12c98a", skyMid: "#0ea28f", skyBot: "#127391",
+      seaTop: "#0e4c9a", seaMid: "#1d47b8", seaBot: "#3b2db8",
+      accent: "#4ade80", pause: "#6366f1",
+      font: "Outfit, sans-serif", displayFont: "Fraunces, serif"
+    };
+  </script>
+  <script src="../js/engine.js"></script>
+</body>
+</html>
