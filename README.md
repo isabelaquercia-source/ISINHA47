@@ -21,3 +21,13 @@ python3 -m http.server 8766 --bind 127.0.0.1 --directory body-lab
 ```
 
 Depois acesse `http://127.0.0.1:8766`.
+
+## Câmera Distante
+
+6 ideias visuais pra treinar música no celular (highway + letra + play).
+
+```bash
+python3 -m http.server 8767 --bind 127.0.0.1 --directory camera-distante
+```
+
+Depois acesse `http://127.0.0.1:8767`.

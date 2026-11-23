@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <title>Câmera Distante · 6 ideias</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,800&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --ink: #0b1f24;
+      --paper: #e8f7f2;
+      --mint: #3dff9a;
+      --teal: #0e7c86;
+      --deep: #062a30;
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0; min-height: 100%;
+      font-family: Outfit, system-ui, sans-serif;
+      background:
+        radial-gradient(1200px 600px at 10% -10%, #1ad6b855, transparent 55%),
+        radial-gradient(900px 500px at 100% 0%, #0e7c8666, transparent 50%),
+        linear-gradient(165deg, #04161a, #0a2f36 45%, #062028);
+      color: #f2fffb;
+    }
+    .wrap { max-width: 720px; margin: 0 auto; padding: 28px 18px 48px; }
+    .brand {
+      font-family: Fraunces, Georgia, serif;
+      font-size: clamp(2rem, 8vw, 3.4rem);
+      line-height: 0.95;
+      letter-spacing: -0.03em;
+      margin: 0 0 10px;
+    }
+    .lead { margin: 0 0 28px; color: #b7e6dc; font-size: 1.05rem; max-width: 34ch; }
+    .grid { display: grid; gap: 14px; }
+    a.card {
+      display: grid;
+      grid-template-columns: 88px 1fr auto;
+      gap: 14px;
+      align-items: center;
+      text-decoration: none;
+      color: inherit;
+      padding: 14px;
+      border-radius: 22px;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(6, 30, 34, 0.72);
+      backdrop-filter: blur(10px);
+      transition: transform .15s ease, border-color .15s ease;
+    }
+    a.card:active { transform: scale(0.98); }
+    .swatch {
+      width: 88px; height: 88px; border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.18);
+      position: relative; overflow: hidden;
+    }
+    .swatch span {
+      position: absolute; inset: auto 8px 8px 8px;
+      font-size: 10px; font-weight: 800; letter-spacing: .04em;
+      text-transform: uppercase;
+    }
+    .meta h2 { margin: 0 0 4px; font-size: 1.15rem; font-weight: 800; }
+    .meta p { margin: 0; color: #9fd4c9; font-size: .9rem; line-height: 1.35; }
+    .go {
+      width: 42px; height: 42px; border-radius: 999px;
+      display: grid; place-items: center;
+      background: var(--mint); color: #052e1c; font-weight: 900;
+    }
+    .note {
+      margin-top: 22px; padding: 14px 16px; border-radius: 16px;
+      background: rgba(255,255,255,0.06); color: #c7ebe3; font-size: .88rem;
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <h1 class="brand">Câmera Distante</h1>
+    <p class="lead">Seis ideias visuais pra treinar música no celular. Abre cada uma e julga.</p>
+    <div class="grid" id="list"></div>
+    <p class="note">Toque = play no ritmo · botão verde = play/pause · pill = velocidade. Losing My Religion só de demo.</p>
+  </main>
+  <script>
+    const ideas = [
+      { file: "designs/01-horizonte.html", name: "Horizonte", blurb: "Céu teal + traste fino no meio — a vibe do vídeo.", swatch: "linear-gradient(180deg,#12c98a,#0e7c86 48%,#1d47b8)" },
+      { file: "designs/02-palco.html", name: "Palco", blurb: "Noite de show, âmbar e cordas quentes.", swatch: "linear-gradient(180deg,#1a1030,#0b1220 40%,#3b2410)" },
+      { file: "designs/03-atlas.html", name: "Atlas", blurb: "Claro, limpo, bom pra estudar acorde.", swatch: "linear-gradient(180deg,#f4f0e6,#d7e8ef 50%,#b9d2c8)" },
+      { file: "designs/04-pulse.html", name: "Pulse", blurb: "HUD gráfico, tipografia dura, score na cara.", swatch: "linear-gradient(180deg,#0a0a0a,#111 40%,#c8ff3d)" },
+      { file: "designs/05-vinil.html", name: "Vinil", blurb: "Analógico quente, capa e letra de capa.", swatch: "linear-gradient(180deg,#5c2a16,#2a1410 45%,#8b4518)" },
+      { file: "designs/06-pista.html", name: "Pista", blurb: "Estrada mais game: guias, combo, zona de tap.", swatch: "linear-gradient(180deg,#062a40,#0b3d5c 45%,#ff4d6d)" },
+    ];
+    document.getElementById("list").innerHTML = ideas.map((d, i) => `
+      <a class="card" href="${d.file}">
+        <div class="swatch" style="background:${d.swatch}"><span>0${i + 1}</span></div>
+        <div class="meta"><h2>${d.name}</h2><p>${d.blurb}</p></div>
+        <div class="go">→</div>
+      </a>`).join("");
+  </script>
+</body>
+</html>
