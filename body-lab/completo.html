@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Body Lab</title>
+<title>Body Lab · Etapa 3</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Serif+Display:ital@0;1&family=IBM+Plex+Mono:wght@400;500&family=Syne:wght@500;600;700;800&display=swap" rel="stylesheet"/>
@@ -357,8 +357,39 @@ button {
   max-height: 62vh;
 }
 
-.fig-athlete {
+.fig-athlete,
+.fig-premium {
   overflow: visible;
+}
+
+.athlete-slot {
+  width: min(100%, 360px);
+  margin: 0 auto;
+  display: grid;
+  place-items: center;
+}
+
+.athlete-slot .fig-premium {
+  width: 100%;
+  max-height: 62vh;
+}
+
+.athlete-slot-sm {
+  width: min(100%, 260px);
+}
+
+.athlete-slot-sm .fig-premium {
+  max-height: 42vh;
+}
+
+.athlete-slot-mini {
+  width: 100%;
+  height: 140px;
+}
+
+.athlete-slot-mini .fig-premium {
+  max-height: 130px;
+  width: auto;
 }
 
 .fig-athlete .b-root,
@@ -1711,6 +1742,343 @@ window.BodyMotion = (() => {
   return { squat, lunge, deadlift, press, plank, bootStage, killAll };
 })();
 </script>
+<script>/** Shared premium IK athletes for the 10 prototypes */
+window.Athletes = (() => {
+  const loops = new Set();
+  let seq = 0;
+
+  function prefersReduced() {
+    return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  }
+  function easeInOut(t) {
+    return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+  }
+  function lerp(a, b, t) {
+    return a + (b - a) * t;
+  }
+  function clamp(v, a, b) {
+    return Math.max(a, Math.min(b, v));
+  }
+  function phase(ms, cycle, down, hold) {
+    const x = (ms % cycle) / cycle;
+    if (x < down) return easeInOut(x / down);
+    if (x < down + hold) return 1;
+    const u = down + hold;
+    if (x < u + down) return 1 - easeInOut((x - u) / down);
+    return 0;
+  }
+  function ik(hipX, hipY, footX, footY, L1, L2) {
+    let dx = footX - hipX,
+      dy = footY - hipY;
+    let d = Math.hypot(dx, dy);
+    d = clamp(d, Math.abs(L1 - L2) + 1, L1 + L2 - 1);
+    const base = (Math.atan2(dx, dy) * 180) / Math.PI;
+    const cosA = (L1 * L1 + d * d - L2 * L2) / (2 * L1 * d);
+    const a = (Math.acos(clamp(cosA, -1, 1)) * 180) / Math.PI;
+    const thighDeg = base - a;
+    const kneeX = hipX + L1 * Math.sin((thighDeg * Math.PI) / 180);
+    const kneeY = hipY + L1 * Math.cos((thighDeg * Math.PI) / 180);
+    const shinDeg =
+      (Math.atan2(footX - kneeX, footY - kneeY) * 180) / Math.PI - thighDeg;
+    return { thighDeg, shinDeg, footDeg: -(thighDeg + shinDeg) };
+  }
+  function loop(fn) {
+    let id;
+    const tick = (now) => {
+      fn(now);
+      id = requestAnimationFrame(tick);
+      loops.add(id);
+    };
+    id = requestAnimationFrame(tick);
+    loops.add(id);
+  }
+  function killAll() {
+    loops.forEach((id) => cancelAnimationFrame(id));
+    loops.clear();
+  }
+
+  function skinGrad(id, c0, c1, c2) {
+    return `<linearGradient id="${id}" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="${c0}"/><stop offset="55%" stop-color="${c1}"/><stop offset="100%" stop-color="${c2}"/>
+    </linearGradient>`;
+  }
+
+  function sideAthlete({ gid, accent, tones, dualLeg = false }) {
+    const [c0, c1, c2] = tones;
+    return `
+    <svg class="fig fig-premium" viewBox="0 0 400 560" aria-hidden="true">
+      <defs>${skinGrad(gid, c0, c1, c2)}</defs>
+      <ellipse class="a-floor" cx="210" cy="522" rx="110" ry="11" fill="${accent}" opacity=".16"/>
+      <g class="a-hip" transform="translate(200 300)">
+        <g class="a-torso">
+          <path d="M-10 0 C-24 20,-30 55,-26 90 C-22 112,-10 124,4 126 L24 118 C30 96,30 68,26 42 C22 18,10 4,0 0 Z" fill="url(#${gid})"/>
+          <path class="a-glow" d="M-2 40 C4 58,8 78,10 98" fill="none" stroke="${accent}" stroke-width="3.2" stroke-linecap="round" opacity=".75"/>
+          <ellipse cx="6" cy="26" rx="15" ry="12" fill="url(#${gid})"/>
+          <g class="a-head" transform="translate(4 -4)">
+            <ellipse cx="2" cy="-32" rx="18" ry="21" fill="url(#${gid})"/>
+            <circle cx="10" cy="-34" r="2.2" fill="${accent}"/>
+          </g>
+          <g class="a-arm" transform="translate(18 24)">
+            <path d="M0 0 C8 16,12 34,8 52" fill="none" stroke="url(#${gid})" stroke-width="13" stroke-linecap="round"/>
+            <g class="a-fore" transform="translate(8 52)">
+              <path d="M0 0 C6 14,6 30,2 46" fill="none" stroke="url(#${gid})" stroke-width="11" stroke-linecap="round"/>
+              <circle cx="2" cy="52" r="6.5" fill="url(#${gid})"/>
+            </g>
+          </g>
+          ${
+            dualLeg
+              ? ""
+              : `<g class="a-arm2" opacity=".32" transform="translate(-16 20)">
+            <path d="M0 0 C-10 18,-14 38,-10 56" fill="none" stroke="${c2}" stroke-width="11" stroke-linecap="round"/>
+          </g>`
+          }
+        </g>
+        <g class="a-thighF">
+          <path d="M0 4 C-4 34,-2 64,2 94" fill="none" stroke="url(#${gid})" stroke-width="24" stroke-linecap="round"/>
+          <g class="a-shinF" transform="translate(2 94)">
+            <circle cx="0" cy="0" r="9" fill="url(#${gid})"/>
+            <path d="M0 0 C2 28,2 56,0 88" fill="none" stroke="url(#${gid})" stroke-width="18" stroke-linecap="round"/>
+            <g class="a-footF" transform="translate(0 88)">
+              <path d="M-8 0 C8 4,36 4,50 0 C54 -2,52 -6,44 -8 C24 -10,4 -6,-6 -3 Z" fill="url(#${gid})"/>
+            </g>
+          </g>
+        </g>
+        ${
+          dualLeg
+            ? `<g class="a-thighB">
+          <path d="M4 6 C12 32,22 58,34 82" fill="none" stroke="url(#${gid})" stroke-width="22" stroke-linecap="round" opacity=".92"/>
+          <g class="a-shinB" transform="translate(34 82)">
+            <circle cx="0" cy="0" r="8" fill="url(#${gid})"/>
+            <path d="M0 0 C6 24,14 48,22 74" fill="none" stroke="url(#${gid})" stroke-width="16" stroke-linecap="round"/>
+            <g class="a-footB" transform="translate(22 74)">
+              <path d="M-6 0 C10 2,28 2,38 -2 C42 -4,40 -8,32 -9 C16 -10,2 -6,-4 -3 Z" fill="url(#${gid})"/>
+            </g>
+          </g>
+        </g>`
+            : ""
+        }
+      </g>
+      <g class="a-bar" opacity="0">
+        <rect x="70" y="430" width="260" height="7" rx="3" fill="${accent}"/>
+        <circle cx="70" cy="433.5" r="14" fill="none" stroke="${accent}" stroke-width="3"/>
+        <circle cx="330" cy="433.5" r="14" fill="none" stroke="${accent}" stroke-width="3"/>
+      </g>
+    </svg>`;
+  }
+
+  function plankAthlete({ gid, accent, tones }) {
+    const [c0, c1] = tones;
+    return `
+    <svg class="fig fig-premium fig-wide" viewBox="0 0 480 320" aria-hidden="true">
+      <defs>
+        <linearGradient id="${gid}" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stop-color="${c0}"/><stop offset="100%" stop-color="${c1}"/>
+        </linearGradient>
+      </defs>
+      <ellipse class="a-floor" cx="240" cy="280" rx="180" ry="11" fill="${accent}" opacity=".16"/>
+      <g class="a-body">
+        <ellipse class="a-head" cx="378" cy="118" rx="20" ry="17" fill="url(#${gid})"/>
+        <path class="a-torso" d="M95 168 C170 138, 260 130, 358 136" fill="none" stroke="url(#${gid})" stroke-width="26" stroke-linecap="round"/>
+        <path class="a-glow" d="M160 152 C230 140, 290 138, 330 142" fill="none" stroke="${accent}" stroke-width="4" stroke-linecap="round"/>
+        <path d="M130 165 L130 250" fill="none" stroke="url(#${gid})" stroke-width="14" stroke-linecap="round"/>
+        <path d="M112 250 H150" fill="none" stroke="url(#${gid})" stroke-width="12" stroke-linecap="round"/>
+        <path d="M310 145 L310 250" fill="none" stroke="url(#${gid})" stroke-width="14" stroke-linecap="round"/>
+        <path d="M292 250 H330" fill="none" stroke="url(#${gid})" stroke-width="12" stroke-linecap="round"/>
+        <path d="M105 170 L55 250" fill="none" stroke="url(#${gid})" stroke-width="16" stroke-linecap="round"/>
+        <path d="M38 250 H72" fill="none" stroke="url(#${gid})" stroke-width="11" stroke-linecap="round"/>
+        <path d="M300 148 L250 250" fill="none" stroke="url(#${gid})" stroke-width="16" stroke-linecap="round"/>
+        <path d="M232 250 H270" fill="none" stroke="url(#${gid})" stroke-width="11" stroke-linecap="round"/>
+      </g>
+    </svg>`;
+  }
+
+  function tonesFor(move, accent) {
+    if (move === "deadlift") return ["#e4eef5", "#9fb4c5", "#5a7388"];
+    if (move === "lunge") return ["#f0dfc6", "#c9a57c", "#7d5c3f"];
+    if (move === "press") return ["#f3efe6", "#cfc4a8", "#8a7a58"];
+    if (move === "plank") return ["#f5f5f5", "#b8b0a4", "#8a8278"];
+    return ["#f0dfc6", "#c9a57c", "#7d5c3f"];
+  }
+
+  function animateSquat(root) {
+    const hip = root.querySelector(".a-hip");
+    const torso = root.querySelector(".a-torso");
+    const head = root.querySelector(".a-head");
+    const thigh = root.querySelector(".a-thighF");
+    const shin = root.querySelector(".a-shinF");
+    const foot = root.querySelector(".a-footF");
+    const arm = root.querySelector(".a-arm");
+    const fore = root.querySelector(".a-fore");
+    const floor = root.querySelector(".a-floor");
+    const glow = root.querySelector(".a-glow");
+    const FOOT = { x: 218, y: 500 };
+    const L1 = 94,
+      L2 = 88;
+    loop((now) => {
+      const t = phase(now, 2800, 0.4, 0.1);
+      const hx = lerp(200, 188, t),
+        hy = lerp(313, 392, t);
+      hip.setAttribute("transform", `translate(${hx} ${hy})`);
+      const leg = ik(hx, hy, FOOT.x, FOOT.y, L1, L2);
+      thigh.setAttribute("transform", `rotate(${leg.thighDeg})`);
+      shin.setAttribute("transform", `translate(2 94) rotate(${leg.shinDeg})`);
+      foot.setAttribute(
+        "transform",
+        `translate(0 88) rotate(${clamp(leg.footDeg, -18, 8)})`,
+      );
+      torso.setAttribute("transform", `rotate(${lerp(8, 24, t)})`);
+      head.setAttribute("transform", `translate(4 -4) rotate(${lerp(-3, -10, t)})`);
+      arm.setAttribute("transform", `translate(18 24) rotate(${lerp(12, 48, t)})`);
+      if (fore) fore.setAttribute("transform", `translate(8 52) rotate(${lerp(8, 22, t)})`);
+      if (floor) {
+        floor.setAttribute("rx", String(lerp(100, 118, t)));
+        floor.setAttribute("opacity", String(lerp(0.14, 0.26, t)));
+      }
+      if (glow) glow.setAttribute("opacity", String(lerp(0.4, 1, t)));
+    });
+  }
+
+  function animateLunge(root) {
+    const hip = root.querySelector(".a-hip");
+    const torso = root.querySelector(".a-torso");
+    const head = root.querySelector(".a-head");
+    const thighF = root.querySelector(".a-thighF");
+    const shinF = root.querySelector(".a-shinF");
+    const footF = root.querySelector(".a-footF");
+    const thighB = root.querySelector(".a-thighB");
+    const shinB = root.querySelector(".a-shinB");
+    const footB = root.querySelector(".a-footB");
+    const arm = root.querySelector(".a-arm");
+    const glow = root.querySelector(".a-glow");
+    const FRONT = { x: 150, y: 500 },
+      BACK = { x: 310, y: 500 };
+    const L1 = 92,
+      L2 = 88;
+    loop((now) => {
+      const t = phase(now, 2700, 0.4, 0.1);
+      const hx = lerp(200, 185, t),
+        hy = lerp(300, 355, t);
+      hip.setAttribute("transform", `translate(${hx} ${hy})`);
+      const f = ik(hx, hy, FRONT.x, FRONT.y, L1, L2);
+      const b = ik(hx, hy, BACK.x, BACK.y, L1, L2);
+      thighF.setAttribute("transform", `rotate(${f.thighDeg})`);
+      shinF.setAttribute("transform", `translate(2 94) rotate(${f.shinDeg})`);
+      footF.setAttribute(
+        "transform",
+        `translate(0 88) rotate(${clamp(f.footDeg, -16, 8)})`,
+      );
+      if (thighB) thighB.setAttribute("transform", `rotate(${b.thighDeg})`);
+      if (shinB) shinB.setAttribute("transform", `translate(34 82) rotate(${b.shinDeg})`);
+      if (footB)
+        footB.setAttribute(
+          "transform",
+          `translate(22 74) rotate(${clamp(b.footDeg, -16, 10)})`,
+        );
+      torso.setAttribute("transform", `rotate(${lerp(6, 14, t)})`);
+      head.setAttribute("transform", `translate(4 -4) rotate(${lerp(-2, -8, t)})`);
+      if (arm) arm.setAttribute("transform", `translate(18 24) rotate(${lerp(10, 36, t)})`);
+      if (glow) glow.setAttribute("opacity", String(lerp(0.45, 1, t)));
+    });
+  }
+
+  function animateDeadlift(root) {
+    const hip = root.querySelector(".a-hip");
+    const torso = root.querySelector(".a-torso");
+    const head = root.querySelector(".a-head");
+    const thigh = root.querySelector(".a-thighF");
+    const shin = root.querySelector(".a-shinF");
+    const foot = root.querySelector(".a-footF");
+    const arm = root.querySelector(".a-arm");
+    const bar = root.querySelector(".a-bar");
+    const glow = root.querySelector(".a-glow");
+    const FOOT = { x: 210, y: 500 };
+    const L1 = 94,
+      L2 = 88;
+    if (bar) bar.setAttribute("opacity", "1");
+    loop((now) => {
+      const t = phase(now, 2800, 0.38, 0.12);
+      const hx = lerp(200, 188, t),
+        hy = lerp(300, 340, t);
+      hip.setAttribute("transform", `translate(${hx} ${hy})`);
+      const leg = ik(hx, hy, FOOT.x, FOOT.y, L1, L2);
+      thigh.setAttribute("transform", `rotate(${leg.thighDeg})`);
+      shin.setAttribute("transform", `translate(2 94) rotate(${leg.shinDeg})`);
+      foot.setAttribute(
+        "transform",
+        `translate(0 88) rotate(${clamp(leg.footDeg, -14, 8)})`,
+      );
+      torso.setAttribute("transform", `rotate(${lerp(4, 42, t)})`);
+      head.setAttribute("transform", `translate(4 -4) rotate(${lerp(-2, -12, t)})`);
+      if (arm) arm.setAttribute("transform", `translate(18 24) rotate(${lerp(4, 18, t)})`);
+      if (bar) bar.setAttribute("transform", `translate(0 ${lerp(-112, 0, t)})`);
+      if (glow) glow.setAttribute("opacity", String(lerp(1, 0.4, t)));
+    });
+  }
+
+  function animatePress(root) {
+    const arm = root.querySelector(".a-arm");
+    const fore = root.querySelector(".a-fore");
+    const arm2 = root.querySelector(".a-arm2");
+    const bar = root.querySelector(".a-bar");
+    const hip = root.querySelector(".a-hip");
+    if (bar) bar.setAttribute("opacity", "1");
+    loop((now) => {
+      const t = phase(now, 2400, 0.4, 0.1);
+      if (arm) arm.setAttribute("transform", `translate(18 24) rotate(${lerp(-20, 155, t)})`);
+      if (fore) fore.setAttribute("transform", `translate(8 52) rotate(${lerp(100, 10, t)})`);
+      if (arm2) arm2.setAttribute("transform", `translate(-16 20) rotate(${lerp(20, -150, t)})`);
+      if (bar) bar.setAttribute("transform", `translate(0 ${lerp(-180, -330, t)})`);
+      if (hip) hip.setAttribute("transform", `translate(200 ${lerp(308, 300, t)})`);
+    });
+  }
+
+  function animatePlank(root) {
+    const body = root.querySelector(".a-body");
+    const glow = root.querySelector(".a-glow");
+    const torso = root.querySelector(".a-torso");
+    loop((now) => {
+      const w = (Math.sin(now / 550) + 1) / 2;
+      if (body) body.setAttribute("transform", `translate(0 ${-6 * w})`);
+      if (glow) glow.setAttribute("opacity", String(lerp(0.35, 1, w)));
+      if (torso) torso.setAttribute("stroke-width", String(lerp(24, 30, w)));
+    });
+  }
+
+  const animators = {
+    squat: animateSquat,
+    lunge: animateLunge,
+    deadlift: animateDeadlift,
+    press: animatePress,
+    plank: animatePlank,
+  };
+
+  function mount(el, opts = {}) {
+    const move = opts.move || el.dataset.athlete || "squat";
+    const accent = opts.accent || el.dataset.accent || "#c8f542";
+    const tones = tonesFor(move, accent);
+    const gid = `sk-${++seq}`;
+    el.innerHTML =
+      move === "plank"
+        ? plankAthlete({ gid, accent, tones })
+        : sideAthlete({
+            gid,
+            accent,
+            tones,
+            dualLeg: move === "lunge",
+          });
+    if (!prefersReduced()) (animators[move] || animateSquat)(el);
+    return el;
+  }
+
+  function bootStage(root) {
+    killAll();
+    if (!root) return;
+    root.querySelectorAll("[data-athlete]").forEach((el) => mount(el));
+  }
+
+  return { mount, bootStage, killAll };
+})();
+</script>
 <script>const PROTOS = [
   {
     id: "forma",
@@ -1810,6 +2178,10 @@ function mot(html, kind, extra = "") {
   return html.replace(/<svg\b/, `<svg data-motion="${kind}"${extra ? ` ${extra}` : ""}`);
 }
 
+function slot(move, accent, cls = "") {
+  return `<div class="athlete-slot ${cls}" data-athlete="${move}" data-accent="${accent}"></div>`;
+}
+
 function goHub() {
   state.view = "hub";
   state.proto = null;
@@ -1851,7 +2223,7 @@ function renderHub() {
           <p>10 protótipos · consulta de exercício</p>
         </div>
       </div>
-      <p class="hub-hint">Agora com GSAP: agacha, afunda, terra, press, prancha · ← → no teclado</p>
+      <p class="hub-hint">Etapa 3: atletas IK premium em todos os protos · ← → no teclado</p>
     </header>
     <div class="hub-grid">
       ${PROTOS.map(
@@ -1905,7 +2277,7 @@ function renderForma() {
         </div>
       </div>
       <div class="forma-body">
-        ${mot(B.maleSquat({ mode: "silhouette", accent: "#c8f542", ink: "#e7e2d6" }), "squat")}
+        ${slot("squat", "#c8f542")}
         <div class="forma-meter"><span></span></div>
       </div>
     </section>`,
@@ -1945,11 +2317,11 @@ function renderAtlas() {
         </article>
       </aside>
       <div class="atlas-stage">
-        ${mot(B.femaleLunge({ mode: "shaded", accent: "#c45c3e", ink: "#1c1917" }), "lunge")}
+        ${slot("lunge", "#c45c3e")}
         <div class="atlas-tags">
-          <span class="${state.atlasFocus === "gluteo" ? "on" : ""}" style="--x:58%;--y:52%">glúteo</span>
-          <span class="${state.atlasFocus === "quad" ? "on" : ""}" style="--x:42%;--y:66%">quad</span>
-          <span class="${state.atlasFocus === "core" ? "on" : ""}" style="--x:52%;--y:38%">core</span>
+          <span class="${state.atlasFocus === "gluteo" ? "on" : ""}" style="--x:48%;--y:58%">glúteo</span>
+          <span class="${state.atlasFocus === "quad" ? "on" : ""}" style="--x:36%;--y:62%">quad</span>
+          <span class="${state.atlasFocus === "core" ? "on" : ""}" style="--x:50%;--y:36%">core</span>
         </div>
       </div>
     </section>`,
@@ -1966,7 +2338,7 @@ function renderLink() {
         <div class="link-cam">
           <span class="link-dot"></span>
           <p>Você · ao vivo</p>
-          <div class="link-cam-body">${mot(B.neutralDeadlift({ mode: "silhouette", accent: "#5ec8ff", ink: "#d9e2ea" }), "deadlift")}</div>
+          <div class="link-cam-body">${slot("deadlift", "#5ec8ff", "athlete-slot-sm")}</div>
         </div>
         <div class="link-coach">
           <p>Marina · personal</p>
@@ -1977,7 +2349,7 @@ function renderLink() {
         <p class="link-brand">LINK</p>
         <h1>Levantamento terra</h1>
         <p>Referência neutra pra alinhar quadril e barra. Personal anota em tempo real.</p>
-        <div class="link-ref">${mot(B.neutralDeadlift({ mode: "shaded", accent: "#5ec8ff", ink: "#9fb4c5" }), "deadlift", 'data-delay="0.35"')}</div>
+        <div class="link-ref">${slot("deadlift", "#5ec8ff", "athlete-slot-sm")}</div>
         <ul class="link-notes">
           <li class="ok">Barra rente à canela</li>
           <li class="ok">Ombros à frente da barra</li>
@@ -2027,7 +2399,7 @@ function renderAcervo() {
           .map(
             (it) => `
           <article class="acervo-item">
-            <div class="acervo-thumb">${mot(B.miniPose(it.kind, "#d4a574", "#f0e6d8"), it.kind === "plank" ? "plank" : it.kind, `data-delay="${0.05 * filtered.indexOf(it)}" data-intensity="0.85"`)}</div>
+            <div class="acervo-thumb">${slot(it.kind === "plank" ? "plank" : it.kind, "#d4a574", "athlete-slot-mini")}</div>
             <h3>${it.title}</h3>
             <p>${it.tag}</p>
           </article>`,
@@ -2055,8 +2427,8 @@ function renderEstudio() {
         </dl>
       </div>
       <div class="estudio-right">
-        ${mot(B.malePress({ accent: "#e2b857", ink: "#f3efe6" }), "press")}
-        <p class="estudio-cap">Figura masculina · press em loop</p>
+        ${slot("press", "#e2b857")}
+        <p class="estudio-cap">Press premium · lockout em loop</p>
       </div>
     </section>`,
   );
@@ -2070,7 +2442,7 @@ function renderRolo() {
     <section class="rolo">
       <div class="rolo-phone">
         <article class="rolo-slide on">
-          ${mot(B.femaleLunge({ mode: "silhouette", accent: "#ff7a59", ink: "#f5f5f5" }), "lunge")}
+          ${slot("lunge", "#ff7a59", "athlete-slot-sm")}
           <div class="rolo-meta">
             <h2>Afundo reverso</h2>
             <p>3 × 10 · cada lado</p>
@@ -2103,11 +2475,11 @@ function renderTraco() {
       <div class="traco-board">
         <div class="traco-panel">
           <span>FRONT</span>
-          ${mot(B.neutralDeadlift({ mode: "shaded", accent: "#3dd6ff", ink: "#7fdfff" }), "deadlift")}
+          ${slot("deadlift", "#3dd6ff", "athlete-slot-sm")}
         </div>
         <div class="traco-panel">
           <span>SIDE</span>
-          ${mot(B.neutralDeadlift({ mode: "silhouette", accent: "#3dd6ff", ink: "#5ad0f0" }), "deadlift", 'data-delay="0.4"')}
+          ${slot("deadlift", "#5ad0f0", "athlete-slot-sm")}
         </div>
         <aside class="traco-spec">
           <h3>Spec</h3>
@@ -2134,7 +2506,7 @@ function renderEspelho() {
       <div class="espelho-pair">
         <article class="espelho-pane bad">
           <p>Ajustar</p>
-          ${mot(B.femaleLunge({ mode: "silhouette", accent: "#e85d4c", ink: "#c4b8a8" }), "lunge", 'data-intensity="1.15"')}
+          ${slot("lunge", "#e85d4c", "athlete-slot-sm")}
           <ul>
             <li>Joelho passa demais da ponta</li>
             <li>Tronco cai pra frente</li>
@@ -2142,7 +2514,7 @@ function renderEspelho() {
         </article>
         <article class="espelho-pane good">
           <p>Alvo</p>
-          ${mot(B.femaleLunge({ mode: "silhouette", accent: "#5dcf8a", ink: "#e8dfd4" }), "lunge", 'data-delay="0.25" data-intensity="0.9"')}
+          ${slot("lunge", "#5dcf8a", "athlete-slot-sm")}
           <ul>
             <li>Tíbia mais vertical</li>
             <li>Peito alto · core travado</li>
@@ -2176,7 +2548,7 @@ function renderOrbita() {
           )
           .join("")}
         <div class="orbita-core">
-          ${mot(B.neutralDeadlift({ mode: "silhouette", accent: "#a78bfa", ink: "#eceaf5" }), "deadlift")}
+          ${slot("deadlift", "#a78bfa", "athlete-slot-sm")}
         </div>
       </div>
       <aside class="orbita-info">
@@ -2200,7 +2572,7 @@ function renderGiz() {
           <h1>Agachamento — cues</h1>
         </header>
         <div class="giz-body">
-          ${mot(B.maleSquat({ mode: "shaded", accent: "#f5e6c8", ink: "#f5e6c8" }), "squat")}
+          ${slot("squat", "#f5e6c8", "athlete-slot-sm")}
           <svg class="giz-marks" viewBox="0 0 200 320" aria-hidden="true">
             <path d="M130 100c20-10 40-8 50 4" fill="none" stroke="#f5e6c8" stroke-width="1.5" stroke-dasharray="4 3"/>
             <text x="150" y="88" fill="#f5e6c8" font-size="11" font-family="IBM Plex Mono, monospace">peito ↑</text>
@@ -2239,10 +2611,12 @@ const RENDERERS = {
 
 function render() {
   if (window.BodyMotion) BodyMotion.killAll();
+  if (window.Athletes) Athletes.killAll();
   app.innerHTML = state.view === "hub" ? renderHub() : RENDERERS[state.proto]();
   wire();
   requestAnimationFrame(() => {
-    if (window.BodyMotion) BodyMotion.bootStage(app);
+    if (window.Athletes) Athletes.bootStage(app);
+    else if (window.BodyMotion) BodyMotion.bootStage(app);
   });
 }
 
