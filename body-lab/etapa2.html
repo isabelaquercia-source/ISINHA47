@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+<title>Body Lab · Etapa 2</title>
+<style>
+:root{
+  --bg:#050607;--ink:#f3efe6;--muted:#9aa193;
+  --lime:#c8f542;--coral:#ff7a59;--cyan:#5ec8ff;--gold:#e2b857;
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,sans-serif}
+a{color:inherit;text-decoration:none}
+.hub{padding:1.2rem 1rem 2.5rem}
+.hub h1{margin:0;font-size:1.75rem;letter-spacing:-.03em}
+.hub p{margin:.4rem 0 1.1rem;color:var(--muted);font-size:.95rem}
+.grid{display:grid;gap:.7rem}
+.card{display:block;padding:1rem 1.1rem;border-radius:1rem;border:1px solid #ffffff18;background:#121316}
+.card strong{display:block;font-size:1.15rem}
+.card span{font-size:.8rem;color:var(--muted)}
+.top{display:flex;justify-content:space-between;align-items:center;gap:.5rem;padding:.75rem .9rem;border-bottom:1px solid #ffffff10;background:#050607ee;position:sticky;top:0;z-index:5}
+.top a,.pill{padding:.4rem .65rem;border-radius:.5rem;background:#ffffff12;font-size:.82rem}
+.meta{text-align:center}
+.meta b{display:block;font-size:.92rem}
+.meta small{color:var(--muted);font-size:.7rem}
+.stage{min-height:calc(100dvh - 52px);display:grid;grid-template-rows:1.1fr auto;padding:0 .9rem 1.2rem}
+.canvas{display:grid;place-items:center}
+.fig{width:min(94vw,420px);height:auto;overflow:visible;filter:drop-shadow(0 18px 26px #00000088)}
+.copy{max-width:28rem;margin:0 auto;width:100%}
+.eyebrow{margin:0;font-size:.7rem;letter-spacing:.14em;text-transform:uppercase}
+.copy h2{margin:.3rem 0 0;font-size:clamp(1.6rem,6.5vw,2.3rem);letter-spacing:-.02em;line-height:1.08}
+.copy p{margin:.45rem 0 0;color:var(--muted);line-height:1.4;font-size:.95rem}
+.meter{margin-top:.9rem;height:4px;border-radius:99px;background:#ffffff14;overflow:hidden}
+.meter>i{display:block;height:100%;width:18%;border-radius:99px}
+#hub{display:block}
+.panel{display:none}
+body:has(.panel:target) #hub{display:none}
+.panel:target{display:grid}
+.arena-lunge{background:radial-gradient(ellipse 80% 50% at 55% 35%,#2a1812,transparent 60%)}
+.arena-dead{background:radial-gradient(ellipse 80% 50% at 55% 35%,#123044,transparent 60%)}
+.arena-press{background:radial-gradient(ellipse 80% 50% at 55% 35%,#1a3044,transparent 60%)}
+.arena-plank{background:radial-gradient(ellipse 80% 50% at 55% 35%,#241410,transparent 60%)}
+.canvas{border-radius:1.1rem;margin-top:.55rem}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+</head>
+<body>
+
+<section id="hub" class="hub">
+  <h1>Etapa 2</h1>
+  <p>Afundo · terra · press · prancha — mesmo padrão da etapa 1 (pivôs + IK).</p>
+  <div class="grid">
+    <a class="card" href="#lunge"><strong>Afundo</strong><span>Pés plantados · joelho sobe e desce</span></a>
+    <a class="card" href="#deadlift"><strong>Terra</strong><span>Dobradiça de quadril · barra sobe</span></a>
+    <a class="card" href="#press"><strong>Press</strong><span>Barra do peito ao teto</span></a>
+    <a class="card" href="#plank"><strong>Prancha</strong><span>Core em tensão contínua</span></a>
+    <a class="card" href="./perfect.html"><strong>← Etapa 1</strong><span>Agachamento</span></a>
+    <a class="card" href="./mobile.html"><strong>Hub mobile</strong><span>Telas rápidas</span></a>
+  </div>
+</section>
+
+<!-- —— LUNGE —— -->
+<section id="lunge" class="panel stage">
+  <div class="top">
+    <a href="#hub">← Hub</a>
+    <div class="meta"><b>Afundo</b><small>2A · anatomia / treino</small></div>
+    <a class="pill" href="#deadlift">›</a>
+  </div>
+  <div class="canvas arena-lunge">
+    <svg id="svg-lunge" class="fig" viewBox="0 0 420 560" aria-label="Afundo animado">
+      <defs>
+        <linearGradient id="sk" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#f0dfc6"/><stop offset="55%" stop-color="#c9a57c"/><stop offset="100%" stop-color="#7d5c3f"/>
+        </linearGradient>
+      </defs>
+      <ellipse id="l-floor" cx="210" cy="522" rx="130" ry="11" fill="#ff7a59" opacity=".16"/>
+      <g id="l-hip" transform="translate(200 300)">
+        <g id="l-torso">
+          <path d="M-10 0 C-24 20,-30 55,-26 90 C-22 112,-10 124,4 126 L24 118 C30 96,30 68,26 42 C22 18,10 4,0 0 Z" fill="url(#sk)"/>
+          <path id="l-glow" d="M-2 40 C4 58,8 78,10 98" fill="none" stroke="#ff7a59" stroke-width="3.2" stroke-linecap="round" opacity=".75"/>
+          <ellipse cx="6" cy="26" rx="15" ry="12" fill="url(#sk)"/>
+          <g id="l-head" transform="translate(4 -4)">
+            <ellipse cx="2" cy="-32" rx="18" ry="21" fill="url(#sk)"/>
+            <circle cx="10" cy="-34" r="2.2" fill="#ff7a59"/>
+          </g>
+          <g id="l-arm" transform="translate(18 24)">
+            <path d="M0 0 C8 16,12 34,8 52" fill="none" stroke="url(#sk)" stroke-width="13" stroke-linecap="round"/>
+          </g>
+        </g>
+        <!-- front leg -->
+        <g id="l-thighF"><path d="M0 4 C-6 34,-4 64,2 92" fill="none" stroke="url(#sk)" stroke-width="24" stroke-linecap="round"/>
+          <g id="l-shinF" transform="translate(2 92)">
+            <circle cx="0" cy="0" r="9" fill="url(#sk)"/>
+            <path d="M0 0 C2 28,2 56,0 88" fill="none" stroke="url(#sk)" stroke-width="18" stroke-linecap="round"/>
+            <g id="l-footF" transform="translate(0 88)"><path d="M-8 0 C8 4,36 4,50 0 C54 -2,52 -6,44 -8 C24 -10,4 -6,-6 -3 Z" fill="url(#sk)"/></g>
+          </g>
+        </g>
+        <!-- back leg -->
+        <g id="l-thighB"><path d="M4 6 C12 32,22 58,34 82" fill="none" stroke="url(#sk)" stroke-width="22" stroke-linecap="round" opacity=".92"/>
+          <g id="l-shinB" transform="translate(34 82)">
+            <circle cx="0" cy="0" r="8" fill="url(#sk)"/>
+            <path d="M0 0 C6 24,14 48,22 74" fill="none" stroke="url(#sk)" stroke-width="16" stroke-linecap="round"/>
+            <g id="l-footB" transform="translate(22 74)"><path d="M-6 0 C10 2,28 2,38 -2 C42 -4,40 -8,32 -9 C16 -10,2 -6,-4 -3 Z" fill="url(#sk)"/></g>
+          </g>
+        </g>
+      </g>
+    </svg>
+  </div>
+  <div class="copy">
+    <p class="eyebrow" style="color:var(--coral)">Etapa 2A</p>
+    <h2>Afundo reverso</h2>
+    <p>Dois pés plantados. Quadril desce no corredor entre as bases. Joelho da frente rastreia o peito do pé.</p>
+    <div class="meter"><i id="l-meter" style="background:var(--coral)"></i></div>
+  </div>
+</section>
+
+<!-- —— DEADLIFT —— -->
+<section id="deadlift" class="panel stage">
+  <div class="top">
+    <a href="#hub">← Hub</a>
+    <div class="meta"><b>Terra</b><small>2B · força</small></div>
+    <a class="pill" href="#press">›</a>
+  </div>
+  <div class="canvas arena-dead">
+    <svg id="svg-dead" class="fig" viewBox="0 0 420 560" aria-label="Levantamento terra animado">
+      <defs>
+        <linearGradient id="sk2" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#e4eef5"/><stop offset="55%" stop-color="#9fb4c5"/><stop offset="100%" stop-color="#5a7388"/>
+        </linearGradient>
+      </defs>
+      <ellipse id="d-floor" cx="210" cy="522" rx="120" ry="11" fill="#5ec8ff" opacity=".16"/>
+      <g id="d-hip" transform="translate(200 305)">
+        <g id="d-torso">
+          <path d="M-10 0 C-24 22,-30 58,-26 92 C-22 114,-8 126,6 126 L26 116 C32 94,32 66,28 40 C24 16,10 4,0 0 Z" fill="url(#sk2)"/>
+          <path id="d-glow" d="M-2 44 C4 62,8 82,10 100" fill="none" stroke="#5ec8ff" stroke-width="3.2" stroke-linecap="round"/>
+          <g id="d-head" transform="translate(4 -4)">
+            <ellipse cx="2" cy="-32" rx="18" ry="21" fill="url(#sk2)"/>
+            <circle cx="10" cy="-34" r="2.2" fill="#5ec8ff"/>
+          </g>
+          <g id="d-arm" transform="translate(16 28)">
+            <path d="M0 0 C4 22,4 44,2 66" fill="none" stroke="url(#sk2)" stroke-width="13" stroke-linecap="round"/>
+            <g id="d-hand" transform="translate(2 66)"><circle cx="0" cy="6" r="7" fill="url(#sk2)"/></g>
+          </g>
+        </g>
+        <g id="d-thigh">
+          <path d="M0 4 C-2 34,0 64,4 94" fill="none" stroke="url(#sk2)" stroke-width="24" stroke-linecap="round"/>
+          <g id="d-shin" transform="translate(4 94)">
+            <circle cx="0" cy="0" r="9" fill="url(#sk2)"/>
+            <path d="M0 0 C1 28,1 56,0 88" fill="none" stroke="url(#sk2)" stroke-width="18" stroke-linecap="round"/>
+            <g id="d-foot" transform="translate(0 88)"><path d="M-10 0 C8 4,38 4,52 0 C56 -2,54 -6,46 -8 C26 -10,4 -6,-8 -3 Z" fill="url(#sk2)"/></g>
+          </g>
+        </g>
+      </g>
+      <g id="d-bar">
+        <rect x="70" y="430" width="260" height="7" rx="3" fill="#5ec8ff"/>
+        <circle cx="70" cy="433.5" r="14" fill="none" stroke="#5ec8ff" stroke-width="3"/>
+        <circle cx="330" cy="433.5" r="14" fill="none" stroke="#5ec8ff" stroke-width="3"/>
+      </g>
+    </svg>
+  </div>
+  <div class="copy">
+    <p class="eyebrow" style="color:var(--cyan)">Etapa 2B</p>
+    <h2>Levantamento terra</h2>
+    <p>Pé fixo. Quadril em dobradiça. Barra sobe colada ao corpo até o lockout.</p>
+    <div class="meter"><i id="d-meter" style="background:var(--cyan)"></i></div>
+  </div>
+</section>
+
+<!-- —— PRESS —— -->
+<section id="press" class="panel stage">
+  <div class="top">
+    <a href="#hub">← Hub</a>
+    <div class="meta"><b>Press</b><small>2C · ombro</small></div>
+    <a class="pill" href="#plank">›</a>
+  </div>
+  <div class="canvas arena-press">
+    <svg id="svg-press" class="fig" viewBox="0 0 420 560" aria-label="Desenvolvimento animado">
+      <defs>
+        <linearGradient id="sk3" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#f3efe6"/><stop offset="55%" stop-color="#cfc4a8"/><stop offset="100%" stop-color="#8a7a58"/>
+        </linearGradient>
+      </defs>
+      <ellipse id="p-floor" cx="210" cy="522" rx="110" ry="11" fill="#e2b857" opacity=".16"/>
+      <g id="p-hip" transform="translate(200 310)">
+        <g id="p-torso">
+          <path d="M-10 0 C-24 20,-30 55,-26 90 C-22 112,-8 124,6 124 L24 116 C30 94,30 66,26 40 C22 16,10 4,0 0 Z" fill="url(#sk3)"/>
+          <g id="p-head" transform="translate(4 -4)">
+            <ellipse cx="2" cy="-32" rx="18" ry="21" fill="url(#sk3)"/>
+            <circle cx="10" cy="-34" r="2.2" fill="#e2b857"/>
+          </g>
+          <g id="p-armL" transform="translate(-18 22)">
+            <path d="M0 0 C-6 18,-6 38,-2 56" fill="none" stroke="url(#sk3)" stroke-width="13" stroke-linecap="round"/>
+            <g id="p-foreL" transform="translate(-2 56)">
+              <path d="M0 0 C-4 16,-2 34,2 48" fill="none" stroke="url(#sk3)" stroke-width="11" stroke-linecap="round"/>
+              <circle cx="2" cy="54" r="6.5" fill="url(#sk3)"/>
+            </g>
+          </g>
+          <g id="p-armR" transform="translate(18 22)">
+            <path d="M0 0 C6 18,6 38,2 56" fill="none" stroke="url(#sk3)" stroke-width="13" stroke-linecap="round"/>
+            <g id="p-foreR" transform="translate(2 56)">
+              <path d="M0 0 C4 16,2 34,-2 48" fill="none" stroke="url(#sk3)" stroke-width="11" stroke-linecap="round"/>
+              <circle cx="-2" cy="54" r="6.5" fill="url(#sk3)"/>
+            </g>
+          </g>
+        </g>
+        <g id="p-legL">
+          <path d="M-12 6 C-14 40,-12 72,-8 100" fill="none" stroke="url(#sk3)" stroke-width="22" stroke-linecap="round"/>
+          <path d="M-8 100 V185" fill="none" stroke="url(#sk3)" stroke-width="16" stroke-linecap="round"/>
+          <path d="M-22 185 H10" fill="none" stroke="url(#sk3)" stroke-width="10" stroke-linecap="round"/>
+        </g>
+        <g id="p-legR">
+          <path d="M14 6 C16 40,14 72,10 100" fill="none" stroke="url(#sk3)" stroke-width="22" stroke-linecap="round"/>
+          <path d="M10 100 V185" fill="none" stroke="url(#sk3)" stroke-width="16" stroke-linecap="round"/>
+          <path d="M-4 185 H28" fill="none" stroke="url(#sk3)" stroke-width="10" stroke-linecap="round"/>
+        </g>
+      </g>
+      <g id="p-bar">
+        <rect x="95" y="250" width="210" height="6" rx="3" fill="#e2b857"/>
+        <circle cx="95" cy="253" r="12" fill="none" stroke="#e2b857" stroke-width="3"/>
+        <circle cx="305" cy="253" r="12" fill="none" stroke="#e2b857" stroke-width="3"/>
+      </g>
+    </svg>
+  </div>
+  <div class="copy">
+    <p class="eyebrow" style="color:var(--gold)">Etapa 2C</p>
+    <h2>Desenvolvimento</h2>
+    <p>Do rack no peito até o lockout acima da cabeça. Cotovelos sob a barra.</p>
+    <div class="meter"><i id="p-meter" style="background:var(--gold)"></i></div>
+  </div>
+</section>
+
+<!-- —— PLANK —— -->
+<section id="plank" class="panel stage">
+  <div class="top">
+    <a href="#hub">← Hub</a>
+    <div class="meta"><b>Prancha</b><small>2D · core</small></div>
+    <a class="pill" href="#lunge">›</a>
+  </div>
+  <div class="canvas arena-plank">
+    <svg id="svg-plank" class="fig" viewBox="0 0 480 320" aria-label="Prancha animada">
+      <defs>
+        <linearGradient id="sk4" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stop-color="#f5f5f5"/><stop offset="100%" stop-color="#b8b0a4"/>
+        </linearGradient>
+      </defs>
+      <ellipse id="k-floor" cx="240" cy="280" rx="180" ry="11" fill="#ff7a59" opacity=".16"/>
+      <g id="k-body">
+        <ellipse id="k-head" cx="378" cy="118" rx="20" ry="17" fill="url(#sk4)"/>
+        <path id="k-torso" d="M95 168 C170 138, 260 130, 358 136" fill="none" stroke="url(#sk4)" stroke-width="26" stroke-linecap="round"/>
+        <path id="k-glow" d="M160 152 C230 140, 290 138, 330 142" fill="none" stroke="#ff7a59" stroke-width="4" stroke-linecap="round"/>
+        <!-- forearms planted -->
+        <path id="k-armF" d="M130 165 L130 250" fill="none" stroke="url(#sk4)" stroke-width="14" stroke-linecap="round"/>
+        <path id="k-handF" d="M112 250 H150" fill="none" stroke="url(#sk4)" stroke-width="12" stroke-linecap="round"/>
+        <path id="k-armB" d="M310 145 L310 250" fill="none" stroke="url(#sk4)" stroke-width="14" stroke-linecap="round"/>
+        <path id="k-handB" d="M292 250 H330" fill="none" stroke="url(#sk4)" stroke-width="12" stroke-linecap="round"/>
+        <!-- legs to toes -->
+        <path id="k-legF" d="M105 170 L55 250" fill="none" stroke="url(#sk4)" stroke-width="16" stroke-linecap="round"/>
+        <path id="k-footF" d="M38 250 H72" fill="none" stroke="url(#sk4)" stroke-width="11" stroke-linecap="round"/>
+        <path id="k-legB" d="M300 148 L250 250" fill="none" stroke="url(#sk4)" stroke-width="16" stroke-linecap="round"/>
+        <path id="k-footB" d="M232 250 H270" fill="none" stroke="url(#sk4)" stroke-width="11" stroke-linecap="round"/>
+      </g>
+    </svg>
+  </div>
+  <div class="copy">
+    <p class="eyebrow" style="color:var(--coral)">Etapa 2D</p>
+    <h2>Prancha</h2>
+    <p>Linha orelha–quadril–tornozelo. Core pulsa em isometria — sem deixar a lombar cair.</p>
+    <div class="meter"><i id="k-meter" style="background:var(--coral)"></i></div>
+  </div>
+</section>
+
+<script>
+(function () {
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+  function easeInOut(t){return t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2}
+  function lerp(a,b,t){return a+(b-a)*t}
+  function clamp(v,a,b){return Math.max(a,Math.min(b,v))}
+  function phase(ms, cycle, down, hold){
+    const x=(ms%cycle)/cycle;
+    if(x<down) return easeInOut(x/down);
+    if(x<down+hold) return 1;
+    const u=down+hold;
+    if(x<u+down) return 1-easeInOut((x-u)/down);
+    return 0;
+  }
+  function ik(hipX,hipY,footX,footY,L1,L2){
+    let dx=footX-hipX, dy=footY-hipY;
+    let d=Math.hypot(dx,dy);
+    d=clamp(d, Math.abs(L1-L2)+1, L1+L2-1);
+    const base=Math.atan2(dx,dy)*180/Math.PI;
+    const cosA=(L1*L1+d*d-L2*L2)/(2*L1*d);
+    const a=Math.acos(clamp(cosA,-1,1))*180/Math.PI;
+    const thighDeg=base-a;
+    const kneeX=hipX+L1*Math.sin(thighDeg*Math.PI/180);
+    const kneeY=hipY+L1*Math.cos(thighDeg*Math.PI/180);
+    const shinDeg=Math.atan2(footX-kneeX,footY-kneeY)*180/Math.PI-thighDeg;
+    const footDeg=-(thighDeg+shinDeg);
+    return {thighDeg,shinDeg,footDeg};
+  }
+
+  /* —— LUNGE —— */
+  (function(){
+    const hip=document.getElementById("l-hip");
+    const torso=document.getElementById("l-torso");
+    const head=document.getElementById("l-head");
+    const thighF=document.getElementById("l-thighF");
+    const shinF=document.getElementById("l-shinF");
+    const footF=document.getElementById("l-footF");
+    const thighB=document.getElementById("l-thighB");
+    const shinB=document.getElementById("l-shinB");
+    const footB=document.getElementById("l-footB");
+    const arm=document.getElementById("l-arm");
+    const meter=document.getElementById("l-meter");
+    const glow=document.getElementById("l-glow");
+    const FRONT={x:150,y:500}, BACK={x:310,y:500};
+    const L1=92,L2=88;
+    function tick(now){
+      const t=phase(now,2700,.4,.1);
+      const hx=lerp(200,185,t), hy=lerp(300,355,t);
+      hip.setAttribute("transform","translate("+hx+" "+hy+")");
+      const f=ik(hx,hy,FRONT.x,FRONT.y,L1,L2);
+      const b=ik(hx,hy,BACK.x,BACK.y,L1,L2);
+      thighF.setAttribute("transform","rotate("+f.thighDeg+")");
+      shinF.setAttribute("transform","translate(2 92) rotate("+f.shinDeg+")");
+      footF.setAttribute("transform","translate(0 88) rotate("+clamp(f.footDeg,-16,8)+")");
+      thighB.setAttribute("transform","rotate("+b.thighDeg+")");
+      shinB.setAttribute("transform","translate(34 82) rotate("+b.shinDeg+")");
+      footB.setAttribute("transform","translate(22 74) rotate("+clamp(b.footDeg,-16,10)+")");
+      torso.setAttribute("transform","rotate("+lerp(6,14,t)+")");
+      head.setAttribute("transform","translate(4 -4) rotate("+lerp(-2,-8,t)+")");
+      arm.setAttribute("transform","translate(18 24) rotate("+lerp(10,36,t)+")");
+      meter.style.width=(16+70*t)+"%";
+      glow.setAttribute("opacity",String(lerp(.45,1,t)));
+      requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  })();
+
+  /* —— DEADLIFT —— */
+  (function(){
+    const hip=document.getElementById("d-hip");
+    const torso=document.getElementById("d-torso");
+    const head=document.getElementById("d-head");
+    const thigh=document.getElementById("d-thigh");
+    const shin=document.getElementById("d-shin");
+    const foot=document.getElementById("d-foot");
+    const arm=document.getElementById("d-arm");
+    const bar=document.getElementById("d-bar");
+    const meter=document.getElementById("d-meter");
+    const glow=document.getElementById("d-glow");
+    const FOOT={x:210,y:500}, L1=94, L2=88;
+    function tick(now){
+      // t=0 lockout (standing), t=1 hinged bottom
+      const t=phase(now,2800,.38,.12);
+      const hx=lerp(200,188,t), hy=lerp(300,340,t);
+      hip.setAttribute("transform","translate("+hx+" "+hy+")");
+      const leg=ik(hx,hy,FOOT.x,FOOT.y,L1,L2);
+      thigh.setAttribute("transform","rotate("+leg.thighDeg+")");
+      shin.setAttribute("transform","translate(4 94) rotate("+leg.shinDeg+")");
+      foot.setAttribute("transform","translate(0 88) rotate("+clamp(leg.footDeg,-14,8)+")");
+      const lean=lerp(4,42,t);
+      torso.setAttribute("transform","rotate("+lean+")");
+      head.setAttribute("transform","translate(4 -4) rotate("+lerp(-2,-12,t)+")");
+      // arms hang toward bar
+      arm.setAttribute("transform","translate(16 28) rotate("+lerp(4,18,t)+")");
+      // bar follows hand approx
+      const barY=lerp(318,430,t);
+      bar.setAttribute("transform","translate(0 "+(barY-430)+")");
+      meter.style.width=(16+70*(1-t))+"%"; // full at lockout
+      glow.setAttribute("opacity",String(lerp(1,.4,t)));
+      requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  })();
+
+  /* —— PRESS —— */
+  (function(){
+    const armL=document.getElementById("p-armL");
+    const armR=document.getElementById("p-armR");
+    const foreL=document.getElementById("p-foreL");
+    const foreR=document.getElementById("p-foreR");
+    const bar=document.getElementById("p-bar");
+    const hip=document.getElementById("p-hip");
+    const meter=document.getElementById("p-meter");
+    function tick(now){
+      const t=phase(now,2400,.4,.1); // 0 rack, 1 overhead
+      armL.setAttribute("transform","translate(-18 22) rotate("+lerp(20,-155,t)+")");
+      armR.setAttribute("transform","translate(18 22) rotate("+lerp(-20,155,t)+")");
+      foreL.setAttribute("transform","translate(-2 56) rotate("+lerp(-100,-10,t)+")");
+      foreR.setAttribute("transform","translate(2 56) rotate("+lerp(100,10,t)+")");
+      const barY=lerp(250,95,t);
+      bar.setAttribute("transform","translate(0 "+(barY-250)+")");
+      // slight knee dip at bottom of press
+      hip.setAttribute("transform","translate(200 "+lerp(300,308,1-t)+")");
+      meter.style.width=(16+70*t)+"%";
+      requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  })();
+
+  /* —— PLANK —— */
+  (function(){
+    const body=document.getElementById("k-body");
+    const glow=document.getElementById("k-glow");
+    const meter=document.getElementById("k-meter");
+    const torso=document.getElementById("k-torso");
+    const head=document.getElementById("k-head");
+    function tick(now){
+      const w=(Math.sin(now/550)+1)/2;
+      // hips gently rise/fall while hands/toes stay visually planted via path ends
+      body.setAttribute("transform","translate(0 "+(-6*w)+")");
+      head.setAttribute("cy", String(118 - 2*w));
+      glow.setAttribute("opacity",String(lerp(.35,1,w)));
+      torso.setAttribute("stroke-width",String(lerp(24,30,w)));
+      meter.style.width=(25+55*w)+"%";
+      requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  })();
+})();
+</script>
+</body>
+</html>
