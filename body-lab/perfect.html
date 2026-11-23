@@ -160,8 +160,8 @@
   const L1 = 95;   // thigh length (hip → knee)
   const L2 = 92;   // shin length (knee → ankle)
   const FOOT = { x: 218, y: 500 }; // planted ankle target
-  const HIP_STAND = { x: 200, y: 313 };
-  const HIP_DEPTH = { x: 188, y: 392 };
+  const HIP_STAND = { x: 200, y: 308 };
+  const HIP_DEPTH = { x: 192, y: 368 };
 
   function easeInOut(t) {
     return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
@@ -170,11 +170,11 @@
   function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
 
   function squatPhase(ms) {
-    const cycle = 2800;
+    const cycle = 3200;
     const x = (ms % cycle) / cycle;
-    if (x < 0.4) return easeInOut(x / 0.4);
-    if (x < 0.5) return 1;
-    if (x < 0.9) return 1 - easeInOut((x - 0.5) / 0.4);
+    if (x < 0.42) return easeInOut(x / 0.42);
+    if (x < 0.54) return 1;
+    if (x < 0.94) return 1 - easeInOut((x - 0.54) / 0.4);
     return 0;
   }
 
@@ -221,12 +221,12 @@
     foot.setAttribute("transform", "translate(0 92) rotate(" + clamp(ik.footDeg, -18, 8) + ")");
 
     // torso lean scales with depth (keep athletic, not horizontal)
-    const lean = lerp(8, 24, t);
+    const lean = lerp(4, 18, t);
     torso.setAttribute("transform", "rotate(" + lean + ")");
-    head.setAttribute("transform", "translate(6 -6) rotate(" + lerp(-3, -10, t) + ")");
+    head.setAttribute("transform", "translate(6 -6) rotate(" + lerp(-2, -8, t) + ")");
 
-    arm.setAttribute("transform", "translate(18 26) rotate(" + lerp(12, 48, t) + ")");
-    forearm.setAttribute("transform", "translate(12 58) rotate(" + lerp(8, 22, t) + ")");
+    arm.setAttribute("transform", "translate(18 26) rotate(" + lerp(8, 36, t) + ")");
+    forearm.setAttribute("transform", "translate(12 58) rotate(" + lerp(6, 16, t) + ")");
 
     floor.setAttribute("cx", String(FOOT.x - 8));
     floor.setAttribute("cy", "520");

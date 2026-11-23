@@ -49,7 +49,7 @@ body:has(.panel:target) #hub{display:none}
 
 <section id="hub" class="hub">
   <h1>Etapa 2</h1>
-  <p>Afundo · terra · press · prancha — mesmo padrão da etapa 1 (pivôs + IK).</p>
+  <p>Afundo · terra · press · prancha — polish etapa 4 (mais limpo, menos extremo).</p>
   <div class="grid">
     <a class="card" href="#lunge"><strong>Afundo</strong><span>Pés plantados · joelho sobe e desce</span></a>
     <a class="card" href="#deadlift"><strong>Terra</strong><span>Dobradiça de quadril · barra sobe</span></a>
@@ -317,8 +317,8 @@ body:has(.panel:target) #hub{display:none}
     const FRONT={x:150,y:500}, BACK={x:310,y:500};
     const L1=92,L2=88;
     function tick(now){
-      const t=phase(now,2700,.4,.1);
-      const hx=lerp(200,185,t), hy=lerp(300,355,t);
+      const t=phase(now,3000,.42,.12);
+      const hx=lerp(200,190,t), hy=lerp(295,340,t);
       hip.setAttribute("transform","translate("+hx+" "+hy+")");
       const f=ik(hx,hy,FRONT.x,FRONT.y,L1,L2);
       const b=ik(hx,hy,BACK.x,BACK.y,L1,L2);
@@ -328,11 +328,11 @@ body:has(.panel:target) #hub{display:none}
       thighB.setAttribute("transform","rotate("+b.thighDeg+")");
       shinB.setAttribute("transform","translate(34 82) rotate("+b.shinDeg+")");
       footB.setAttribute("transform","translate(22 74) rotate("+clamp(b.footDeg,-16,10)+")");
-      torso.setAttribute("transform","rotate("+lerp(6,14,t)+")");
-      head.setAttribute("transform","translate(4 -4) rotate("+lerp(-2,-8,t)+")");
-      arm.setAttribute("transform","translate(18 24) rotate("+lerp(10,36,t)+")");
+      torso.setAttribute("transform","rotate("+lerp(4,10,t)+")");
+      head.setAttribute("transform","translate(4 -4) rotate("+lerp(-1,-6,t)+")");
+      arm.setAttribute("transform","translate(18 24) rotate("+lerp(8,28,t)+")");
       meter.style.width=(16+70*t)+"%";
-      glow.setAttribute("opacity",String(lerp(.45,1,t)));
+      glow.setAttribute("opacity",String(lerp(.5,.95,t)));
       requestAnimationFrame(tick);
     }
     requestAnimationFrame(tick);
@@ -353,23 +353,21 @@ body:has(.panel:target) #hub{display:none}
     const FOOT={x:210,y:500}, L1=94, L2=88;
     function tick(now){
       // t=0 lockout (standing), t=1 hinged bottom
-      const t=phase(now,2800,.38,.12);
-      const hx=lerp(200,188,t), hy=lerp(300,340,t);
+      const t=phase(now,3200,.4,.14);
+      const hx=lerp(200,192,t), hy=lerp(300,328,t);
       hip.setAttribute("transform","translate("+hx+" "+hy+")");
       const leg=ik(hx,hy,FOOT.x,FOOT.y,L1,L2);
       thigh.setAttribute("transform","rotate("+leg.thighDeg+")");
       shin.setAttribute("transform","translate(4 94) rotate("+leg.shinDeg+")");
-      foot.setAttribute("transform","translate(0 88) rotate("+clamp(leg.footDeg,-14,8)+")");
-      const lean=lerp(4,42,t);
+      foot.setAttribute("transform","translate(0 88) rotate("+clamp(leg.footDeg,-12,6)+")");
+      const lean=lerp(3,32,t);
       torso.setAttribute("transform","rotate("+lean+")");
-      head.setAttribute("transform","translate(4 -4) rotate("+lerp(-2,-12,t)+")");
-      // arms hang toward bar
-      arm.setAttribute("transform","translate(16 28) rotate("+lerp(4,18,t)+")");
-      // bar follows hand approx
+      head.setAttribute("transform","translate(4 -4) rotate("+lerp(-2,-9,t)+")");
+      arm.setAttribute("transform","translate(16 28) rotate("+lerp(4,14,t)+")");
       const barY=lerp(318,430,t);
       bar.setAttribute("transform","translate(0 "+(barY-430)+")");
-      meter.style.width=(16+70*(1-t))+"%"; // full at lockout
-      glow.setAttribute("opacity",String(lerp(1,.4,t)));
+      meter.style.width=(16+70*(1-t))+"%";
+      glow.setAttribute("opacity",String(lerp(.95,.5,t)));
       requestAnimationFrame(tick);
     }
     requestAnimationFrame(tick);
@@ -385,15 +383,14 @@ body:has(.panel:target) #hub{display:none}
     const hip=document.getElementById("p-hip");
     const meter=document.getElementById("p-meter");
     function tick(now){
-      const t=phase(now,2400,.4,.1); // 0 rack, 1 overhead
-      armL.setAttribute("transform","translate(-18 22) rotate("+lerp(20,-155,t)+")");
-      armR.setAttribute("transform","translate(18 22) rotate("+lerp(-20,155,t)+")");
-      foreL.setAttribute("transform","translate(-2 56) rotate("+lerp(-100,-10,t)+")");
-      foreR.setAttribute("transform","translate(2 56) rotate("+lerp(100,10,t)+")");
-      const barY=lerp(250,95,t);
+      const t=phase(now,2800,.42,.12);
+      armL.setAttribute("transform","translate(-18 22) rotate("+lerp(25,-130,t)+")");
+      armR.setAttribute("transform","translate(18 22) rotate("+lerp(-25,130,t)+")");
+      foreL.setAttribute("transform","translate(-2 56) rotate("+lerp(-70,-5,t)+")");
+      foreR.setAttribute("transform","translate(2 56) rotate("+lerp(70,5,t)+")");
+      const barY=lerp(250,110,t);
       bar.setAttribute("transform","translate(0 "+(barY-250)+")");
-      // slight knee dip at bottom of press
-      hip.setAttribute("transform","translate(200 "+lerp(300,308,1-t)+")");
+      hip.setAttribute("transform","translate(200 "+lerp(312,306,t)+")");
       meter.style.width=(16+70*t)+"%";
       requestAnimationFrame(tick);
     }
@@ -408,13 +405,12 @@ body:has(.panel:target) #hub{display:none}
     const torso=document.getElementById("k-torso");
     const head=document.getElementById("k-head");
     function tick(now){
-      const w=(Math.sin(now/550)+1)/2;
-      // hips gently rise/fall while hands/toes stay visually planted via path ends
-      body.setAttribute("transform","translate(0 "+(-6*w)+")");
-      head.setAttribute("cy", String(118 - 2*w));
-      glow.setAttribute("opacity",String(lerp(.35,1,w)));
-      torso.setAttribute("stroke-width",String(lerp(24,30,w)));
-      meter.style.width=(25+55*w)+"%";
+      const w=(Math.sin(now/900)+1)/2;
+      body.setAttribute("transform","translate(0 "+(-3.5*w)+")");
+      head.setAttribute("cy", String(118 - 1.5*w));
+      glow.setAttribute("opacity",String(lerp(.45,.9,w)));
+      torso.setAttribute("stroke-width",String(lerp(25,28,w)));
+      meter.style.width=(30+45*w)+"%";
       requestAnimationFrame(tick);
     }
     requestAnimationFrame(tick);

@@ -171,26 +171,27 @@ window.Athletes = (() => {
     const L1 = 94,
       L2 = 88;
     loop((now) => {
-      const t = phase(now, 2800, 0.4, 0.1);
-      const hx = lerp(200, 188, t),
-        hy = lerp(313, 392, t);
+      const t = phase(now, 3200, 0.42, 0.12);
+      // shallower depth + taller stand = less “tenso”
+      const hx = lerp(200, 192, t),
+        hy = lerp(308, 368, t);
       hip.setAttribute("transform", `translate(${hx} ${hy})`);
       const leg = ik(hx, hy, FOOT.x, FOOT.y, L1, L2);
       thigh.setAttribute("transform", `rotate(${leg.thighDeg})`);
       shin.setAttribute("transform", `translate(2 94) rotate(${leg.shinDeg})`);
       foot.setAttribute(
         "transform",
-        `translate(0 88) rotate(${clamp(leg.footDeg, -18, 8)})`,
+        `translate(0 88) rotate(${clamp(leg.footDeg, -14, 6)})`,
       );
-      torso.setAttribute("transform", `rotate(${lerp(8, 24, t)})`);
-      head.setAttribute("transform", `translate(4 -4) rotate(${lerp(-3, -10, t)})`);
-      arm.setAttribute("transform", `translate(18 24) rotate(${lerp(12, 48, t)})`);
-      if (fore) fore.setAttribute("transform", `translate(8 52) rotate(${lerp(8, 22, t)})`);
+      torso.setAttribute("transform", `rotate(${lerp(4, 18, t)})`);
+      head.setAttribute("transform", `translate(4 -4) rotate(${lerp(-2, -8, t)})`);
+      arm.setAttribute("transform", `translate(18 24) rotate(${lerp(8, 36, t)})`);
+      if (fore) fore.setAttribute("transform", `translate(8 52) rotate(${lerp(6, 16, t)})`);
       if (floor) {
-        floor.setAttribute("rx", String(lerp(100, 118, t)));
-        floor.setAttribute("opacity", String(lerp(0.14, 0.26, t)));
+        floor.setAttribute("rx", String(lerp(100, 114, t)));
+        floor.setAttribute("opacity", String(lerp(0.14, 0.22, t)));
       }
-      if (glow) glow.setAttribute("opacity", String(lerp(0.4, 1, t)));
+      if (glow) glow.setAttribute("opacity", String(lerp(0.45, 0.95, t)));
     });
   }
 
@@ -211,9 +212,9 @@ window.Athletes = (() => {
     const L1 = 92,
       L2 = 88;
     loop((now) => {
-      const t = phase(now, 2700, 0.4, 0.1);
-      const hx = lerp(200, 185, t),
-        hy = lerp(300, 355, t);
+      const t = phase(now, 3000, 0.42, 0.12);
+      const hx = lerp(200, 190, t),
+        hy = lerp(295, 340, t);
       hip.setAttribute("transform", `translate(${hx} ${hy})`);
       const f = ik(hx, hy, FRONT.x, FRONT.y, L1, L2);
       const b = ik(hx, hy, BACK.x, BACK.y, L1, L2);
@@ -230,10 +231,10 @@ window.Athletes = (() => {
           "transform",
           `translate(22 74) rotate(${clamp(b.footDeg, -16, 10)})`,
         );
-      torso.setAttribute("transform", `rotate(${lerp(6, 14, t)})`);
-      head.setAttribute("transform", `translate(4 -4) rotate(${lerp(-2, -8, t)})`);
-      if (arm) arm.setAttribute("transform", `translate(18 24) rotate(${lerp(10, 36, t)})`);
-      if (glow) glow.setAttribute("opacity", String(lerp(0.45, 1, t)));
+      torso.setAttribute("transform", `rotate(${lerp(4, 10, t)})`);
+      head.setAttribute("transform", `translate(4 -4) rotate(${lerp(-1, -6, t)})`);
+      if (arm) arm.setAttribute("transform", `translate(18 24) rotate(${lerp(8, 28, t)})`);
+      if (glow) glow.setAttribute("opacity", String(lerp(0.5, 0.95, t)));
     });
   }
 
@@ -252,22 +253,22 @@ window.Athletes = (() => {
       L2 = 88;
     if (bar) bar.setAttribute("opacity", "1");
     loop((now) => {
-      const t = phase(now, 2800, 0.38, 0.12);
-      const hx = lerp(200, 188, t),
-        hy = lerp(300, 340, t);
+      const t = phase(now, 3200, 0.4, 0.14);
+      const hx = lerp(200, 192, t),
+        hy = lerp(300, 328, t);
       hip.setAttribute("transform", `translate(${hx} ${hy})`);
       const leg = ik(hx, hy, FOOT.x, FOOT.y, L1, L2);
       thigh.setAttribute("transform", `rotate(${leg.thighDeg})`);
       shin.setAttribute("transform", `translate(2 94) rotate(${leg.shinDeg})`);
       foot.setAttribute(
         "transform",
-        `translate(0 88) rotate(${clamp(leg.footDeg, -14, 8)})`,
+        `translate(0 88) rotate(${clamp(leg.footDeg, -12, 6)})`,
       );
-      torso.setAttribute("transform", `rotate(${lerp(4, 42, t)})`);
-      head.setAttribute("transform", `translate(4 -4) rotate(${lerp(-2, -12, t)})`);
-      if (arm) arm.setAttribute("transform", `translate(18 24) rotate(${lerp(4, 18, t)})`);
+      torso.setAttribute("transform", `rotate(${lerp(3, 32, t)})`);
+      head.setAttribute("transform", `translate(4 -4) rotate(${lerp(-2, -9, t)})`);
+      if (arm) arm.setAttribute("transform", `translate(18 24) rotate(${lerp(4, 14, t)})`);
       if (bar) bar.setAttribute("transform", `translate(0 ${lerp(-112, 0, t)})`);
-      if (glow) glow.setAttribute("opacity", String(lerp(1, 0.4, t)));
+      if (glow) glow.setAttribute("opacity", String(lerp(0.95, 0.5, t)));
     });
   }
 
@@ -277,14 +278,18 @@ window.Athletes = (() => {
     const arm2 = root.querySelector(".a-arm2");
     const bar = root.querySelector(".a-bar");
     const hip = root.querySelector(".a-hip");
+    const torso = root.querySelector(".a-torso");
     if (bar) bar.setAttribute("opacity", "1");
+    if (arm2) arm2.setAttribute("opacity", "0.9");
     loop((now) => {
-      const t = phase(now, 2400, 0.4, 0.1);
-      if (arm) arm.setAttribute("transform", `translate(18 24) rotate(${lerp(-20, 155, t)})`);
-      if (fore) fore.setAttribute("transform", `translate(8 52) rotate(${lerp(100, 10, t)})`);
-      if (arm2) arm2.setAttribute("transform", `translate(-16 20) rotate(${lerp(20, -150, t)})`);
-      if (bar) bar.setAttribute("transform", `translate(0 ${lerp(-180, -330, t)})`);
-      if (hip) hip.setAttribute("transform", `translate(200 ${lerp(308, 300, t)})`);
+      const t = phase(now, 2800, 0.42, 0.12);
+      // calmer press arc — less behind-head crossing
+      if (arm) arm.setAttribute("transform", `translate(18 24) rotate(${lerp(25, 130, t)})`);
+      if (fore) fore.setAttribute("transform", `translate(8 52) rotate(${lerp(70, 5, t)})`);
+      if (arm2) arm2.setAttribute("transform", `translate(-16 20) rotate(${lerp(-25, -130, t)})`);
+      if (bar) bar.setAttribute("transform", `translate(0 ${lerp(-200, -310, t)})`);
+      if (hip) hip.setAttribute("transform", `translate(200 ${lerp(312, 306, t)})`);
+      if (torso) torso.setAttribute("transform", `rotate(${lerp(2, 0, t)})`);
     });
   }
 
@@ -293,10 +298,10 @@ window.Athletes = (() => {
     const glow = root.querySelector(".a-glow");
     const torso = root.querySelector(".a-torso");
     loop((now) => {
-      const w = (Math.sin(now / 550) + 1) / 2;
-      if (body) body.setAttribute("transform", `translate(0 ${-6 * w})`);
-      if (glow) glow.setAttribute("opacity", String(lerp(0.35, 1, w)));
-      if (torso) torso.setAttribute("stroke-width", String(lerp(24, 30, w)));
+      const w = (Math.sin(now / 900) + 1) / 2;
+      if (body) body.setAttribute("transform", `translate(0 ${-3.5 * w})`);
+      if (glow) glow.setAttribute("opacity", String(lerp(0.45, 0.9, w)));
+      if (torso) torso.setAttribute("stroke-width", String(lerp(25, 28, w)));
     });
   }
 
@@ -322,7 +327,22 @@ window.Athletes = (() => {
             tones,
             dualLeg: move === "lunge",
           });
-    if (!prefersReduced()) (animators[move] || animateSquat)(el);
+    // mini thumbs: pose only (no loop) — calmer + faster
+    const staticOnly =
+      prefersReduced() ||
+      el.classList.contains("athlete-slot-mini") ||
+      el.dataset.static === "1";
+    if (!staticOnly) (animators[move] || animateSquat)(el);
+    else {
+      // freeze at a readable mid pose once
+      const svg = el.querySelector(".fig-premium");
+      if (svg && move !== "plank") {
+        const hip = svg.querySelector(".a-hip");
+        if (hip) hip.setAttribute("transform", "translate(200 330)");
+        const torso = svg.querySelector(".a-torso");
+        if (torso) torso.setAttribute("transform", "rotate(12)");
+      }
+    }
     return el;
   }
 

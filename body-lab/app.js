@@ -142,7 +142,7 @@ function renderHub() {
           <p>10 protótipos · consulta de exercício</p>
         </div>
       </div>
-      <p class="hub-hint">Etapa 3: atletas IK premium em todos os protos · ← → no teclado</p>
+      <p class="hub-hint">Etapa 4 · motion calmo e limpo · ← → no teclado</p>
     </header>
     <div class="hub-grid">
       ${PROTOS.map(
@@ -238,9 +238,9 @@ function renderAtlas() {
       <div class="atlas-stage">
         ${slot("lunge", "#c45c3e")}
         <div class="atlas-tags">
-          <span class="${state.atlasFocus === "gluteo" ? "on" : ""}" style="--x:48%;--y:58%">glúteo</span>
-          <span class="${state.atlasFocus === "quad" ? "on" : ""}" style="--x:36%;--y:62%">quad</span>
-          <span class="${state.atlasFocus === "core" ? "on" : ""}" style="--x:50%;--y:36%">core</span>
+          <span class="${state.atlasFocus === "gluteo" ? "on" : ""}" style="--x:44%;--y:48%">glúteo</span>
+          <span class="${state.atlasFocus === "quad" ? "on" : ""}" style="--x:34%;--y:55%">quad</span>
+          <span class="${state.atlasFocus === "core" ? "on" : ""}" style="--x:48%;--y:32%">core</span>
         </div>
       </div>
     </section>`,
