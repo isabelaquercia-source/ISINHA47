@@ -345,12 +345,42 @@ button {
 
 .forma-body .fig {
   max-height: 62vh;
-  animation: floatY 4s ease-in-out infinite;
 }
 
-@keyframes floatY {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
+.fig-athlete {
+  overflow: visible;
+}
+
+.fig-athlete .b-root,
+.fig-athlete .b-torso,
+.fig-athlete .b-hip,
+.fig-athlete .b-thigh-l,
+.fig-athlete .b-thigh-r,
+.fig-athlete .b-shin-l,
+.fig-athlete .b-shin-r,
+.fig-athlete .b-arm-l,
+.fig-athlete .b-arm-r,
+.fig-athlete .b-forearm-l,
+.fig-athlete .b-forearm-r,
+.fig-athlete .b-head {
+  transform-box: fill-box;
+  transform-origin: center top;
+}
+
+.fig-athlete .b-head {
+  transform-origin: center bottom;
+}
+
+.fig-athlete .b-shadow {
+  transform-origin: center center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .forma-meter span,
+  .link-dot,
+  .hub-card {
+    animation: none !important;
+  }
 }
 
 .forma-meter {

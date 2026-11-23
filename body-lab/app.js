@@ -4,7 +4,7 @@ const PROTOS = [
     name: "Forma",
     mode: "treino",
     figure: "masculino · silhueta",
-    blurb: "Fullscreen de execução — só o movimento importa.",
+    blurb: "Agachamento em loop — motion nível máximo.",
     tone: "#0c0f0a",
   },
   {
@@ -93,6 +93,10 @@ const state = {
 const app = document.getElementById("app");
 const B = window.Bodies;
 
+function mot(html, kind, extra = "") {
+  return html.replace(/<svg\b/, `<svg data-motion="${kind}"${extra ? ` ${extra}` : ""}`);
+}
+
 function goHub() {
   state.view = "hub";
   state.proto = null;
@@ -134,7 +138,7 @@ function renderHub() {
           <p>10 protótipos · consulta de exercício</p>
         </div>
       </div>
-      <p class="hub-hint">Grade pra comparar · clique pra abrir em foco · ← → no teclado</p>
+      <p class="hub-hint">Agora com GSAP: agacha, afunda, terra, press, prancha · ← → no teclado</p>
     </header>
     <div class="hub-grid">
       ${PROTOS.map(
@@ -188,7 +192,7 @@ function renderForma() {
         </div>
       </div>
       <div class="forma-body">
-        ${B.maleSquat({ mode: "silhouette", accent: "#c8f542", ink: "#e7e2d6" })}
+        ${mot(B.maleSquat({ mode: "silhouette", accent: "#c8f542", ink: "#e7e2d6" }), "squat")}
         <div class="forma-meter"><span></span></div>
       </div>
     </section>`,
@@ -228,7 +232,7 @@ function renderAtlas() {
         </article>
       </aside>
       <div class="atlas-stage">
-        ${B.femaleLunge({ mode: "shaded", accent: "#c45c3e", ink: "#1c1917" })}
+        ${mot(B.femaleLunge({ mode: "shaded", accent: "#c45c3e", ink: "#1c1917" }), "lunge")}
         <div class="atlas-tags">
           <span class="${state.atlasFocus === "gluteo" ? "on" : ""}" style="--x:58%;--y:52%">glúteo</span>
           <span class="${state.atlasFocus === "quad" ? "on" : ""}" style="--x:42%;--y:66%">quad</span>
@@ -249,7 +253,7 @@ function renderLink() {
         <div class="link-cam">
           <span class="link-dot"></span>
           <p>Você · ao vivo</p>
-          <div class="link-cam-body">${B.neutralDeadlift({ mode: "silhouette", accent: "#5ec8ff", ink: "#d9e2ea" })}</div>
+          <div class="link-cam-body">${mot(B.neutralDeadlift({ mode: "silhouette", accent: "#5ec8ff", ink: "#d9e2ea" }), "deadlift")}</div>
         </div>
         <div class="link-coach">
           <p>Marina · personal</p>
@@ -260,7 +264,7 @@ function renderLink() {
         <p class="link-brand">LINK</p>
         <h1>Levantamento terra</h1>
         <p>Referência neutra pra alinhar quadril e barra. Personal anota em tempo real.</p>
-        <div class="link-ref">${B.neutralDeadlift({ mode: "shaded", accent: "#5ec8ff", ink: "#9fb4c5" })}</div>
+        <div class="link-ref">${mot(B.neutralDeadlift({ mode: "shaded", accent: "#5ec8ff", ink: "#9fb4c5" }), "deadlift", 'data-delay="0.35"')}</div>
         <ul class="link-notes">
           <li class="ok">Barra rente à canela</li>
           <li class="ok">Ombros à frente da barra</li>
@@ -310,7 +314,7 @@ function renderAcervo() {
           .map(
             (it) => `
           <article class="acervo-item">
-            <div class="acervo-thumb">${B.miniPose(it.kind, "#d4a574", "#f0e6d8")}</div>
+            <div class="acervo-thumb">${mot(B.miniPose(it.kind, "#d4a574", "#f0e6d8"), it.kind === "plank" ? "plank" : it.kind, `data-delay="${0.05 * filtered.indexOf(it)}" data-intensity="0.85"`)}</div>
             <h3>${it.title}</h3>
             <p>${it.tag}</p>
           </article>`,
@@ -338,8 +342,8 @@ function renderEstudio() {
         </dl>
       </div>
       <div class="estudio-right">
-        ${B.malePress({ accent: "#e2b857", ink: "#f3efe6" })}
-        <p class="estudio-cap">Figura masculina · acabamento linear</p>
+        ${mot(B.malePress({ accent: "#e2b857", ink: "#f3efe6" }), "press")}
+        <p class="estudio-cap">Figura masculina · press em loop</p>
       </div>
     </section>`,
   );
@@ -353,7 +357,7 @@ function renderRolo() {
     <section class="rolo">
       <div class="rolo-phone">
         <article class="rolo-slide on">
-          ${B.femaleLunge({ mode: "silhouette", accent: "#ff7a59", ink: "#f5f5f5" })}
+          ${mot(B.femaleLunge({ mode: "silhouette", accent: "#ff7a59", ink: "#f5f5f5" }), "lunge")}
           <div class="rolo-meta">
             <h2>Afundo reverso</h2>
             <p>3 × 10 · cada lado</p>
@@ -386,11 +390,11 @@ function renderTraco() {
       <div class="traco-board">
         <div class="traco-panel">
           <span>FRONT</span>
-          ${B.neutralDeadlift({ mode: "shaded", accent: "#3dd6ff", ink: "#7fdfff" })}
+          ${mot(B.neutralDeadlift({ mode: "shaded", accent: "#3dd6ff", ink: "#7fdfff" }), "deadlift")}
         </div>
         <div class="traco-panel">
           <span>SIDE</span>
-          ${B.neutralDeadlift({ mode: "silhouette", accent: "#3dd6ff", ink: "#5ad0f0" })}
+          ${mot(B.neutralDeadlift({ mode: "silhouette", accent: "#3dd6ff", ink: "#5ad0f0" }), "deadlift", 'data-delay="0.4"')}
         </div>
         <aside class="traco-spec">
           <h3>Spec</h3>
@@ -417,7 +421,7 @@ function renderEspelho() {
       <div class="espelho-pair">
         <article class="espelho-pane bad">
           <p>Ajustar</p>
-          ${B.femaleLunge({ mode: "silhouette", accent: "#e85d4c", ink: "#c4b8a8" })}
+          ${mot(B.femaleLunge({ mode: "silhouette", accent: "#e85d4c", ink: "#c4b8a8" }), "lunge", 'data-intensity="1.15"')}
           <ul>
             <li>Joelho passa demais da ponta</li>
             <li>Tronco cai pra frente</li>
@@ -425,7 +429,7 @@ function renderEspelho() {
         </article>
         <article class="espelho-pane good">
           <p>Alvo</p>
-          ${B.femaleLunge({ mode: "silhouette", accent: "#5dcf8a", ink: "#e8dfd4" })}
+          ${mot(B.femaleLunge({ mode: "silhouette", accent: "#5dcf8a", ink: "#e8dfd4" }), "lunge", 'data-delay="0.25" data-intensity="0.9"')}
           <ul>
             <li>Tíbia mais vertical</li>
             <li>Peito alto · core travado</li>
@@ -459,7 +463,7 @@ function renderOrbita() {
           )
           .join("")}
         <div class="orbita-core">
-          ${B.neutralDeadlift({ mode: "silhouette", accent: "#a78bfa", ink: "#eceaf5" })}
+          ${mot(B.neutralDeadlift({ mode: "silhouette", accent: "#a78bfa", ink: "#eceaf5" }), "deadlift")}
         </div>
       </div>
       <aside class="orbita-info">
@@ -483,7 +487,7 @@ function renderGiz() {
           <h1>Agachamento — cues</h1>
         </header>
         <div class="giz-body">
-          ${B.maleSquat({ mode: "shaded", accent: "#f5e6c8", ink: "#f5e6c8" })}
+          ${mot(B.maleSquat({ mode: "shaded", accent: "#f5e6c8", ink: "#f5e6c8" }), "squat")}
           <svg class="giz-marks" viewBox="0 0 200 320" aria-hidden="true">
             <path d="M130 100c20-10 40-8 50 4" fill="none" stroke="#f5e6c8" stroke-width="1.5" stroke-dasharray="4 3"/>
             <text x="150" y="88" fill="#f5e6c8" font-size="11" font-family="IBM Plex Mono, monospace">peito ↑</text>
@@ -521,8 +525,12 @@ const RENDERERS = {
 };
 
 function render() {
+  if (window.BodyMotion) BodyMotion.killAll();
   app.innerHTML = state.view === "hub" ? renderHub() : RENDERERS[state.proto]();
   wire();
+  requestAnimationFrame(() => {
+    if (window.BodyMotion) BodyMotion.bootStage(app);
+  });
 }
 
 function wire() {
