@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+<title>Body Lab · Etapa 1 · Agachamento</title>
+<style>
+  :root {
+    --bg0: #050607;
+    --bg1: #0e1410;
+    --skin: #d8c4a8;
+    --skin-deep: #b8956e;
+    --skin-shadow: #8a6a4a;
+    --accent: #c8f542;
+    --ink: #f3efe6;
+    --muted: #9aa193;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    min-height: 100%;
+    background:
+      radial-gradient(ellipse 90% 60% at 70% 35%, #1a2a14 0%, transparent 55%),
+      radial-gradient(ellipse 50% 40% at 10% 90%, #12180e 0%, transparent 50%),
+      var(--bg0);
+    color: var(--ink);
+    font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+  }
+  .top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: .85rem 1rem;
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    background: #050607cc;
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid #ffffff10;
+  }
+  .top a {
+    color: var(--ink);
+    text-decoration: none;
+    padding: .4rem .7rem;
+    border-radius: .5rem;
+    background: #ffffff12;
+    font-size: .85rem;
+  }
+  .top .meta { text-align: center; }
+  .top strong { display: block; font-size: .95rem; }
+  .top small { color: var(--muted); font-size: .72rem; }
+
+  .stage {
+    min-height: calc(100vh - 56px);
+    min-height: calc(100dvh - 56px);
+    display: grid;
+    grid-template-rows: 1fr auto;
+    padding: 0 1rem 1.5rem;
+  }
+  .canvas {
+    display: grid;
+    place-items: end center;
+    position: relative;
+    padding-top: 1rem;
+  }
+  .athlete {
+    width: min(92vw, 420px);
+    height: auto;
+    overflow: visible;
+    filter: drop-shadow(0 18px 30px #00000088);
+  }
+
+  /* —— joint animation (side-view squat) —— */
+  .j-hip   { transform-box: fill-box; transform-origin: center top; animation: hip 2.6s cubic-bezier(.45,.05,.55,.95) infinite; }
+  .j-torso { transform-box: fill-box; transform-origin: center bottom; animation: torso 2.6s cubic-bezier(.45,.05,.55,.95) infinite; }
+  .j-head  { transform-box: fill-box; transform-origin: center bottom; animation: head 2.6s cubic-bezier(.45,.05,.55,.95) infinite; }
+  .j-thigh { transform-box: fill-box; transform-origin: 50% 8%; animation: thigh 2.6s cubic-bezier(.45,.05,.55,.95) infinite; }
+  .j-shin  { transform-box: fill-box; transform-origin: 50% 5%; animation: shin 2.6s cubic-bezier(.45,.05,.55,.95) infinite; }
+  .j-foot  { transform-box: fill-box; transform-origin: 30% 40%; animation: foot 2.6s cubic-bezier(.45,.05,.55,.95) infinite; }
+  .j-arm   { transform-box: fill-box; transform-origin: 50% 8%; animation: arm 2.6s cubic-bezier(.45,.05,.55,.95) infinite; }
+  .j-fore  { transform-box: fill-box; transform-origin: 50% 8%; animation: fore 2.6s cubic-bezier(.45,.05,.55,.95) infinite; }
+  .glow    { animation: glow 2.6s ease-in-out infinite; }
+  .floor-oval { animation: floor 2.6s ease-in-out infinite; transform-origin: center; transform-box: fill-box; }
+
+  @keyframes hip {
+    0%, 100% { transform: translate(0, 0); }
+    42%, 52% { transform: translate(6px, 54px); }
+  }
+  @keyframes torso {
+    0%, 100% { transform: rotate(4deg); }
+    42%, 52% { transform: rotate(28deg); }
+  }
+  @keyframes head {
+    0%, 100% { transform: rotate(-2deg); }
+    42%, 52% { transform: rotate(-12deg); }
+  }
+  @keyframes thigh {
+    0%, 100% { transform: rotate(-8deg); }
+    42%, 52% { transform: rotate(-95deg); }
+  }
+  @keyframes shin {
+    0%, 100% { transform: rotate(10deg); }
+    42%, 52% { transform: rotate(105deg); }
+  }
+  @keyframes foot {
+    0%, 100% { transform: rotate(-2deg); }
+    42%, 52% { transform: rotate(-8deg); }
+  }
+  @keyframes arm {
+    0%, 100% { transform: rotate(18deg); }
+    42%, 52% { transform: rotate(55deg); }
+  }
+  @keyframes fore {
+    0%, 100% { transform: rotate(8deg); }
+    42%, 52% { transform: rotate(20deg); }
+  }
+  @keyframes glow {
+    0%, 100% { opacity: .55; }
+    42%, 52% { opacity: 1; }
+  }
+  @keyframes floor {
+    0%, 100% { transform: scaleX(1); opacity: .14; }
+    42%, 52% { transform: scaleX(1.22); opacity: .22; }
+  }
+
+  .copy { text-align: left; max-width: 28rem; margin: 0 auto; width: 100%; padding-top: .5rem; }
+  .eyebrow {
+    font-size: .72rem;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 .35rem;
+  }
+  .copy h1 {
+    margin: 0;
+    font-size: clamp(2rem, 8vw, 3rem);
+    letter-spacing: -.03em;
+    line-height: 1.05;
+  }
+  .copy p {
+    margin: .55rem 0 0;
+    color: var(--muted);
+    line-height: 1.45;
+    font-size: .98rem;
+  }
+  .meter {
+    margin-top: 1rem;
+    height: 4px;
+    border-radius: 99px;
+    background: #ffffff14;
+    overflow: hidden;
+  }
+  .meter > i {
+    display: block;
+    height: 100%;
+    width: 40%;
+    background: var(--accent);
+    border-radius: 99px;
+    animation: meter 2.6s cubic-bezier(.45,.05,.55,.95) infinite;
+  }
+  @keyframes meter {
+    0%, 100% { width: 18%; }
+    42%, 52% { width: 78%; }
+  }
+  .next {
+    display: inline-block;
+    margin-top: 1.1rem;
+    padding: .7rem 1rem;
+    border-radius: 999px;
+    background: var(--accent);
+    color: #101408;
+    font-weight: 700;
+    text-decoration: none;
+    font-size: .9rem;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .j-hip, .j-torso, .j-head, .j-thigh, .j-shin, .j-foot, .j-arm, .j-fore, .glow, .floor-oval, .meter > i {
+      animation: none !important;
+    }
+  }
+</style>
+</head>
+<body>
+  <header class="top">
+    <a href="./mobile.html">← Hub</a>
+    <div class="meta">
+      <strong>Etapa 1 · Forma</strong>
+      <small>Agachamento · acabamento máximo</small>
+    </div>
+    <a href="./mobile.html#atlas">Próximo ›</a>
+  </header>
+
+  <main class="stage">
+    <div class="canvas" aria-hidden="true">
+      <svg class="athlete" viewBox="0 0 360 520" role="img" aria-label="Atleta em agachamento animado">
+        <defs>
+          <linearGradient id="skin" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#e6d3b8"/>
+            <stop offset="45%" stop-color="#c9a882"/>
+            <stop offset="100%" stop-color="#8f6d4c"/>
+          </linearGradient>
+          <linearGradient id="skinSide" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#f0e0c8"/>
+            <stop offset="55%" stop-color="#c4a07a"/>
+            <stop offset="100%" stop-color="#7a5a3e"/>
+          </linearGradient>
+          <linearGradient id="muscle" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#c8f542" stop-opacity=".0"/>
+            <stop offset="40%" stop-color="#c8f542" stop-opacity=".85"/>
+            <stop offset="100%" stop-color="#c8f542" stop-opacity=".15"/>
+          </linearGradient>
+          <filter id="soft" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur stdDeviation="1.2"/>
+          </filter>
+        </defs>
+
+        <!-- floor -->
+        <ellipse class="floor-oval" cx="190" cy="488" rx="110" ry="12" fill="#c8f542"/>
+
+        <!-- athlete root: hip is master -->
+        <g class="j-hip" transform="translate(0,0)">
+          <!-- TORSO + HEAD + ARM (attached above hip) -->
+          <g class="j-torso" transform="translate(168, 168)">
+            <!-- torso volume -->
+            <path d="M-6 8
+                     C-18 22,-28 48,-30 78
+                     C-31 102,-24 122,-10 132
+                     L18 128
+                     C28 110,32 88,30 64
+                     C28 40,18 18,6 6
+                     Z" fill="url(#skinSide)" opacity=".98"/>
+            <!-- abs / core highlight -->
+            <path class="glow" d="M-4 48 C2 62,8 76,10 96" fill="none" stroke="url(#muscle)" stroke-width="4" stroke-linecap="round"/>
+            <path d="M-14 40 C-6 55,0 70,2 88" fill="none" stroke="#5a4030" stroke-width="2" opacity=".35" stroke-linecap="round"/>
+            <!-- pec / shoulder mass -->
+            <ellipse cx="4" cy="28" rx="18" ry="14" fill="url(#skin)" opacity=".95"/>
+            <ellipse cx="10" cy="24" rx="8" ry="6" fill="#f2e4d0" opacity=".35"/>
+
+            <!-- head -->
+            <g class="j-head" transform="translate(8,-8)">
+              <ellipse cx="0" cy="-28" rx="20" ry="23" fill="url(#skin)"/>
+              <ellipse cx="6" cy="-32" rx="7" ry="5" fill="#f5e9d8" opacity=".35"/>
+              <path d="M-6 -18 C0 -12,8 -12,12 -18" fill="none" stroke="#6a4e38" stroke-width="1.5" opacity=".4"/>
+              <!-- jaw / neck -->
+              <path d="M-8 -8 C-4 4,6 8,12 0" fill="url(#skin)" opacity=".9"/>
+              <circle cx="8" cy="-30" r="2.2" fill="#c8f542" class="glow"/>
+            </g>
+
+            <!-- arm (front, balance) -->
+            <g class="j-arm" transform="translate(16, 22)">
+              <path d="M0 0 C8 16,12 34,10 52" fill="none" stroke="url(#skinSide)" stroke-width="16" stroke-linecap="round"/>
+              <path d="M0 0 C8 16,12 34,10 52" fill="none" stroke="#f0e0c8" stroke-width="5" stroke-linecap="round" opacity=".25"/>
+              <g class="j-fore" transform="translate(10,52)">
+                <path d="M0 0 C6 14,8 30,4 46" fill="none" stroke="url(#skinSide)" stroke-width="13" stroke-linecap="round"/>
+                <ellipse cx="4" cy="52" rx="8" ry="6" fill="url(#skin)"/>
+              </g>
+            </g>
+          </g>
+
+          <!-- LEG: thigh → shin → foot -->
+          <g class="j-thigh" transform="translate(160, 188)">
+            <!-- glute / upper thigh mass -->
+            <ellipse cx="8" cy="10" rx="22" ry="16" fill="url(#skin)" opacity=".95"/>
+            <path d="M0 6 C-4 30,0 55,8 78" fill="none" stroke="url(#skinSide)" stroke-width="28" stroke-linecap="round"/>
+            <path d="M0 10 C0 32,4 56,10 76" fill="none" stroke="#f2e4d0" stroke-width="8" stroke-linecap="round" opacity=".22"/>
+            <!-- quad glow -->
+            <path class="glow" d="M-2 24 C4 40,8 56,10 70" fill="none" stroke="#c8f542" stroke-width="3.5" stroke-linecap="round" opacity=".8"/>
+
+            <g class="j-shin" transform="translate(8, 78)">
+              <path d="M0 0 C2 28,2 52,0 84" fill="none" stroke="url(#skinSide)" stroke-width="22" stroke-linecap="round"/>
+              <path d="M0 4 C2 30,2 54,0 80" fill="none" stroke="#f0e0c8" stroke-width="6" stroke-linecap="round" opacity=".2"/>
+              <!-- knee cap -->
+              <circle cx="2" cy="4" r="9" fill="url(#skin)"/>
+              <g class="j-foot" transform="translate(0, 84)">
+                <path d="M-8 0 C4 2,28 4,46 2 C52 1,54 -2,48 -6 C30 -10,8 -8,-6 -4 Z" fill="url(#skin)"/>
+                <path d="M0 -2 H36" stroke="#5a4030" stroke-width="1.5" opacity=".25"/>
+              </g>
+            </g>
+          </g>
+
+          <!-- trailing arm hint (depth) -->
+          <g opacity=".35" transform="translate(145, 190)">
+            <path d="M0 0 C-18 20,-28 40,-24 58" fill="none" stroke="#8a6a4a" stroke-width="12" stroke-linecap="round"/>
+          </g>
+        </g>
+      </svg>
+    </div>
+
+    <div class="copy">
+      <p class="eyebrow">Etapa 1 de 4 · motion premium</p>
+      <h1>Agachamento<br/>com forma limpa</h1>
+      <p>Vista lateral, articulação por junta (quadril → joelho → tornozelo), volume com degradê e cues musculares no fundo do movimento.</p>
+      <div class="meter" aria-hidden="true"><i></i></div>
+      <a class="next" href="./mobile.html">Ver as 5 telas mobile ›</a>
+    </div>
+  </main>
+</body>
+</html>
