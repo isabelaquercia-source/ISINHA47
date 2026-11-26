@@ -1,13 +1,17 @@
 /* Peça `body` — corpo "fantasma": a silhueta pálida e translúcida de um tronco musculoso (cabeça, pescoço, ombros,
-   braços, cintura e quadril) que fica ATRÁS de todos os ossos e músculos, como no render de atlas da referência.
+   braços, cintura e quadril) que fica ATRÁS de todos os ossos e músculos, como no render de atlas da referência
+   (lá o fantasma é um boneco de músculos desbotado: fibras, tendões e aponeuroses claros, sulcos entre os músculos).
 
-   Geometria: uma SDF própria, simétrica em X (avaliada com |x|):
-     · tronco e pescoço = "loft" de seções horizontais em superelipse (tabela SEC), com relevo muscular somado por dois
-       mapas de altura (costas e frente);
+   Geometria: uma SDF própria, simétrica em X (avaliada com |x|) e malhada por EV.mesh.fromSDF:
+     · tronco e pescoço = "loft" de seções horizontais em superelipse (tabela SEC), com o relevo muscular somado por
+       dois mapas de altura (costas e frente);
      · cabeça, ombros, braços e antebraços = cones arredondados e elipsoides unidos com concordância suave.
-   A silhueta foi ajustada sobre a máscara da referência na vista 'ref'.
-   Pintura por vértice: oclusão (sulcos), "brancura" (tendões, fáscias, aponeuroses) e a direção das fibras.
-   Material próprio (não usa EV.mats.ghost): ver MATERIAL, mais abaixo. Estático: sem update. */
+   A silhueta foi ajustada sobre a máscara da referência na vista 'ref' (o contorno do corpo passa rente ao crânio,
+   ao acrômio e à mandíbula, como lá). As coxas somem aos poucos e os punhos também (não há mãos).
+   Pintura: por vértice (oclusão dos sulcos, "brancura" de tendões e fáscias, coordenada das fibras de cada músculo)
+   e, no shader, riscos nítidos (crista ilíaca, tendão do tríceps, tendões do antebraço, bordas do deltoide…).
+   Material próprio (não usa EV.mats.ghost): ver MATERIAL. A malha é estática; update(state) só muda uniformes
+   (ombros e braços acompanham a escápula; o tórax enche na inspiração). */
 (() => {
 EV.register('body', ({THREE, EV, quality}) => {
   const sk = EV.skull, sstep = EV.smoothstep;
@@ -317,7 +321,7 @@ EV.register('body', ({THREE, EV, quality}) => {
   /* brancuras em 3D (elipsoides): [centro, raios, valor] */
   const BR = [
     [[21.2, -10, -9], [4.0, 7.5, 4.5], 0.45],                          // tendões do dorso do antebraço
-    [[15.2, -3, -3], [3.5, 7.5, 5.0], 0.55],                           // aponeurose glútea / fáscia lata
+    [[15.8, -4.5, -4.5], [3.0, 7.5, 4.2], 0.5],                        // aponeurose glútea / fáscia lata
     [H(0, 5.6, 0.5), [6.5, 3.6, 8.0], 0.3]                             // gálea aponeurótica
   ];
   const DQ = [19.8, 26, 0.6], DA = new THREE.Vector3(9.5 - DQ[0], 46 - DQ[1], 0 - DQ[2]).normalize();
@@ -473,7 +477,7 @@ EV.register('body', ({THREE, EV, quality}) => {
   const uniforms = {
     uMus: {value: cor(0xb78d74)}, uTen: {value: cor(0xd9d6c4)},
     uLuz: {value: new THREE.Vector4(0.71, 0.54, 0.04, 0.0)},         // ambiente, principal, preenchimento, escurecimento na borda
-    uAlfa: {value: new THREE.Vector3(0.30, 0.37, 2.5)},              // alfa no miolo, na borda, expoente
+    uAlfa: {value: new THREE.Vector3(0.30, 0.40, 3.0)},              // alfa no miolo, na borda, expoente
     uFib: {value: new THREE.Vector3(3.0, 0.16, 0.9)},                // estrias por cm, contraste das estrias, peso da oclusão
     uGl: {value: new THREE.Vector3()}, uAc: {value: new THREE.Vector3()}, uResp: {value: 0}   // ver update
   };

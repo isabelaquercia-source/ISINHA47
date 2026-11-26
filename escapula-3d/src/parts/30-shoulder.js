@@ -21,7 +21,6 @@
 (() => {
 EV.register('shoulder', ({THREE, EV, quality}) => {
   const S = EV.sdf, L = EV.scap.L, group = new THREE.Group(), osso = EV.mats.bone();
-  const TT = window.EV_SH_T = {}, T0 = performance.now(); let nEval = 0;
   const K = -L.infAngle.y / 13.4, IK = 1 / K;                        // escala das medidas nominais
   const q = EV.clamp(quality || 1, 0.3, 1.5);
   const PI = Math.PI;
@@ -160,9 +159,7 @@ EV.register('shoulder', ({THREE, EV, quality}) => {
       borda.push([a.x * IK - ty * il * fora, a.y * IK + tx * il * fora, 0.20 + 0.26 * ai + 0.08 * as, 0.75 + 0.3 * ai, -0.11 + 0.19 * ai + 0.07 * as]);
     }
   }
-  TT.antesFL = performance.now() - T0;
-  const FL = campo2D(contorno(borda, 0.22), -2.2, -15.2, 11.2, 5.2, 0.14);
-  TT.FL = performance.now() - T0; TT.pontosContorno = contorno(borda, 0.22).length; TT.grade = FL.nx * FL.ny;
+  const FL = campo2D(contorno(borda, 0.3), -1.9, -14.9, 10.9, 4.8, 0.17);
   const HFD = 0.20, HFV = 0.21;                                       // meia-espessura da lâmina nas fossas (dorsal / costal)
   const relevo = (x, y) => {                                          // ondulação suave da face dorsal (fossa infraespinal)
     const a = (x - 3.3) / 2.7, b = (y + 5.8) / 4.2, c = (x - 5.6) / 1.3, d = (y + 3.2) / 2.2;
@@ -280,17 +277,15 @@ EV.register('shoulder', ({THREE, EV, quality}) => {
     b = caixa(BC, x, y, z); if (b < MARG) d = smin(d, coracoide(x, y, z), 0.45); else if (b < d) d = b;
     return d;
   };
-  const fEsc = (x, y, z) => { nEval++; return K * fNom(x * IK, y * IK, z * IK); };
-  TT.antesMalha = performance.now() - T0;
+  const fEsc = (x, y, z) => K * fNom(x * IK, y * IK, z * IK);
   const geom = EV.mesh.fromSDF(fEsc, {
     min: [-1.5 * K, -14.6 * K, -5.4 * K], max: [14.3 * K, 4.6 * K, 2.4 * K], cell: 0.215 / Math.sqrt(q),
     ao: true, aoColor: [0.55, 0.53, 0.68], aoRadius: 1.6, aoStrength: 1.15
   });
-  TT.fromSDF = performance.now() - T0; TT.evalSDF = nEval;
   {
     /* acabamento da malha: os vértices da "surface nets" são médias dos cruzamentos e nas bordas finas (borda
-       superior, borda medial) saem serrilhados. Duas passadas de alisamento tangencial (média dos vizinhos) seguidas
-       de projeção de volta para f = 0 ao longo do gradiente; no fim as normais são refeitas pelo gradiente. */
+       superior, borda medial) saem serrilhados. Duas passadas de alisamento tangencial (média dos vizinhos), cada uma
+       seguida de projeção de volta para f = 0 ao longo da normal; na última as normais são refeitas pelo gradiente. */
     const P = geom.attributes.position.array, Nn = geom.attributes.normal.array, I = geom.index.array, nV = P.length / 3;
     const acc = new Float32Array(P.length), cnt = new Float32Array(nV), h = 0.09;
     const grad = (x, y, z, o) => {
@@ -308,12 +303,31 @@ EV.register('shoulder', ({THREE, EV, quality}) => {
       for (let v = 0; v < nV; v++){
         const o = v * 3, ic = 1 / (cnt[v] || 1);
         let x = P[o] + 0.55 * (acc[o] * ic - P[o]), y = P[o + 1] + 0.55 * (acc[o + 1] * ic - P[o + 1]), z = P[o + 2] + 0.55 * (acc[o + 2] * ic - P[o + 2]);
-        for (let n = 0; n < 2; n++){
-          if (n === 0 || it === 1) grad(x, y, z, o);                    // na última passada a normal final é a do ponto já projetado
-          const d = EV.clamp(fEsc(x, y, z), -0.12, 0.12);
+        let d = EV.clamp(fEsc(x, y, z), -0.12, 0.12);
+        x -= d * Nn[o]; y -= d * Nn[o + 1]; z -= d * Nn[o + 2];
+        if (it === 1){                                                  // última passada: normal refeita no ponto e mais um passo
+          grad(x, y, z, o);
+          d = EV.clamp(fEsc(x, y, z), -0.12, 0.12);
           x -= d * Nn[o]; y -= d * Nn[o + 1]; z -= d * Nn[o + 2];
         }
         P[o] = x; P[o + 1] = y; P[o + 2] = z;
+      }
+    }
+    /* normais: nas superfícies largas e quase planas (lâmina, acrômio) o gradiente tem um ruído pequeno (os campos 2D
+       são lidos com interpolação bilinear) que, visto de raspão, vira risquinhos no contorno do material. Média com
+       os vizinhos de normal parecida (≤ ~20°): alisa o plano e não toca nas bordas arredondadas nem nas quinas. */
+    for (let it = 0; it < 3; it++){
+      acc.fill(0);
+      for (let t = 0; t < I.length; t += 3){
+        for (let k = 0; k < 3; k++){
+          const a = I[t + k] * 3, b = I[t + (k + 1) % 3] * 3;
+          const w = (Nn[a] * Nn[b] + Nn[a + 1] * Nn[b + 1] + Nn[a + 2] * Nn[b + 2] - 0.94) / 0.06;
+          if (w > 0){ acc[a] += Nn[b] * w; acc[a + 1] += Nn[b + 1] * w; acc[a + 2] += Nn[b + 2] * w; acc[b] += Nn[a] * w; acc[b + 1] += Nn[a + 1] * w; acc[b + 2] += Nn[a + 2] * w; }
+        }
+      }
+      for (let o = 0; o < P.length; o += 3){
+        const x = Nn[o] + 0.5 * acc[o], y = Nn[o + 1] + 0.5 * acc[o + 1], z = Nn[o + 2] + 0.5 * acc[o + 2], il = 1 / (Math.sqrt(x * x + y * y + z * z) || 1);
+        Nn[o] = x * il; Nn[o + 1] = y * il; Nn[o + 2] = z * il;
       }
     }
     /* triângulos minúsculos que ficaram dobrados nas bordas finas (normal geométrica contra a do vértice): desvira,
@@ -334,7 +348,6 @@ EV.register('shoulder', ({THREE, EV, quality}) => {
     geom.computeBoundingSphere();
   }
 
-  TT.acab = performance.now() - T0; TT.evalTotal = nEval;
   /* =================================================================================== CLAVÍCULA (rígida) */
   /* referencial próprio: X = esternoclavicular → acromioclavicular, Y = para cima, Z = X × Y (para trás, à direita).
      Dois terços mediais convexos para a frente (−Z), terço lateral convexo para trás (+Z). */
@@ -366,7 +379,6 @@ EV.register('shoulder', ({THREE, EV, quality}) => {
     const clav = new THREE.Mesh(geomClav, osso); clav.castShadow = clav.receiveShadow = true; group.add(clav);
     return {side, esc, clav};
   });
-  TT.fim = performance.now() - T0;
   const e1 = new THREE.Vector3(), e2 = new THREE.Vector3(), e3 = new THREE.Vector3(), M = new THREE.Matrix4(), ESP_X = new THREE.Matrix4().makeScale(-1, 1, 1);
   return {group,
     update(state){

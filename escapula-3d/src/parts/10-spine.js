@@ -215,9 +215,10 @@ EV.register('spine', ({THREE, EV, quality}) => {
     const topoS = lim(uni(0.4, cap(sapB, sapT, 0.75, 0.5), sph([sapT[0] + 0.3, sapT[1] - 0.5, sapT[2] + 0.3], 0.34), sph([5.0, 1.0, 1.7], 1.0)),
       [1.0, -0.2, 0.4], [6.1, sapT[1] + 0.6, sapT[2] + 0.7], 0.8);
     /* cóccix: Co1 com cornos e 3 segmentos pequenos, curvando para a frente; cornos sacrais */
-    const coccix = lim(uni(0.15, cap([0, -10.3, -1.3], [0, -11.4, -2.1], 0.82, 0.68), cap([0.75, -10.4, -1.1], [1.25, -10.7, -1.4], 0.3, 0.24), cap([0.55, -9.9, -0.6], [0.6, -10.7, -1.05], 0.26, 0.22),
-      sph([0, -12.2, -2.8], 0.58), sph([0, -12.9, -3.4], 0.46), sph([0, -13.45, -3.95], 0.34),
-      cap([0.8, -8.3, zd(0.8, -8.3) - 0.1], [0.75, -9.6, zd(0.75, -9.6) - 0.05], 0.3, 0.24)),
+    const finos = Q >= 0.8 ? [cap([0.75, -10.4, -1.1], [1.25, -10.7, -1.4], 0.3, 0.24), cap([0.55, -9.9, -0.6], [0.6, -10.7, -1.05], 0.26, 0.22),
+      cap([0.8, -8.3, zd(0.8, -8.3) - 0.1], [0.75, -9.6, zd(0.75, -9.6) - 0.05], 0.3, 0.24)] : [];        // cornos: finos demais para a malha grossa
+    const coccix = lim(uni(0.15, cap([0, -10.3, -1.3], [0, -11.4, -2.1], 0.82, 0.68),
+      sph([0, -12.2, -2.8], 0.58), sph([0, -12.9, -3.4], 0.46), sph([0, -13.45, -3.95], 0.34), ...finos),
       [-0.9, -13.9, -4.4], [1.6, -7.9, 1.2], 0.7);
     const cristas = lim(uni(0.45, cristaM, cristaI, cristaL), [-0.6, -8.5, 0.2], [5.0, 0.1, 3.7], 0.85);
     let f = uni(0.2, uni(0.45, uni(0.3, base, corpoS1), cristas, topoS), coccix);
@@ -226,10 +227,10 @@ EV.register('spine', ({THREE, EV, quality}) => {
     const caixaE = (c, r) => [[c[0] - r[0], c[1] - r[1], c[2] - r[2]], [c[0] + r[0], c[1] + r[1], c[2] + r[2]]];
     const oco = (c, r) => { const q = caixaE(c, r); return lim(ell(c, r), q[0], q[1], 0.5); };
     const furos = [];
-    for (const [fx, fy, fr] of [[3.1, -2.3, 0.4], [2.85, -4.75, 0.38], [2.45, -6.85, 0.33], [2.0, -8.6, 0.28]])
+    for (const [fx, fy, fr] of [[3.1, -2.3, 0.4], [2.85, -4.75, 0.38], [2.35, -6.85, 0.33], [1.7, -8.5, 0.27]])
       furos.push(lim(uni(0.2, cap([fx, fy + 0.2, -6], [fx, fy + 0.2, 5], fr), cap([fx - 0.1, fy - 0.24, -6], [fx - 0.1, fy - 0.24, 5], fr * 0.9), sph([fx, fy, zd(fx, fy) + 0.35], fr + 0.32)),
         [fx - fr - 0.4, fy - fr - 0.4, -6], [fx + fr + 0.4, fy + fr + 0.4, 5], 0.45));
-    f = sub(f, lim(S.union(...furos), [1.25, -9.4, -6], [3.95, -1.45, 5], 0.5), 0.22);
+    f = sub(f, lim(S.union(...furos), [1.0, -9.3, -6], [3.95, -1.45, 5], 0.5), 0.22);
     /* dorso: duas fossas laterais (atrás da face auricular) */
     f = sub(f, lim(S.union(oco([5.6, -1.7, zd(5.6, -1.7) + 0.75], [1.5, 1.5, 0.95]), oco([5.0, -4.4, zd(5.0, -4.4) + 0.6], [1.2, 1.25, 0.85])),
       [3.7, -5.7, 0.2], [7.1, -0.2, 3.6], 0.5), 0.3);
@@ -237,9 +238,9 @@ EV.register('spine', ({THREE, EV, quality}) => {
     f = sub(f, lim(S.union(oco([3.5, 2.15, 1.5], [1.15, 1.05, 2.3]), oco([0, 1.5, 2.9], [2.2, 1.9, 1.5]),
       lim(cap(mais(enc, [0, 1, 0.05], 1.4), mais(enc, [0, 1, 0.05], -0.35), 0.52), [enc[0] - 0.6, enc[1] - 1.0, enc[2] - 0.6], [enc[0] + 0.6, enc[1] + 2.0, enc[2] + 0.7], 0.4)),
       [-2.2, -0.4, -0.8], [4.65, 3.6, 4.4], 0.5), 0.25);
-    /* canal sacral e hiato */
-    f = sub(f, lim(uni(0.2, cap([0, 2.6, 2.2], [0, -4.6, 1.35], 0.62, 0.4), ell([0, -9.0, zd(0, -9.0) + 0.2], [0.5, 0.95, 0.55])),
-      [-0.7, -10.1, -0.6], [0.7, 3.3, 2.9], 0.4), 0.15);
+    /* canal sacral e hiato (com malha grossa o hiato deixaria paredes finas demais: fica de fora) */
+    const canalS = cap([0, 2.6, 2.2], [0, -4.6, 1.35], 0.62, 0.4);
+    f = sub(f, lim(Q >= 0.8 ? uni(0.2, canalS, ell([0, -9.0, zd(0, -9.0) + 0.2], [0.5, 0.95, 0.55])) : canalS, [-0.7, -10.1, -0.6], [0.7, 3.3, 2.9], 0.4), 0.15);
     return {f: sim(f), min: [-8.0, -14.5, -5.2], max: [8.0, 4.0, 4.4], cell: 0.28, R: 2.8, h: 3.0, hb: 1.5, sp: [-0.6, 3.4], tp: [7.0, 1.0, -1.0],
       zc: 2.2, rc: 0.55, disco: {rx: 2.7, rz: 1.85, flat: 0.2, e: 1}, aoR: 2.2, aoS: 1.9, aoC: [0.42, 0.38, 0.33]};
   }
