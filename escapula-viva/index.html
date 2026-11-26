@@ -2,61 +2,73 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Instrument+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
-/* Layout: prancha de atlas à esquerda (fixa enquanto rola), painel de leitura e controles à direita; empilha no celular. */
+/* Layout: tela única de aplicativo. Prancha anatômica ocupa a tela; controles numa gaveta com abas embaixo (vira coluna lateral em tela larga). */
 :root{
-  --bg:#e7ebe9; --plate:#f5f6f3; --panel:#fbfcfb; --ink:#16252b; --muted:#55676d; --line:#cdd6d3;
+  --bg:#e7ebe9; --plate:#f3f5f2; --panel:#fbfcfb; --ink:#16252b; --muted:#55676d; --line:#cdd6d3;
   --accent:#0f5c63; --on-accent:#ffffff;
-  --short:#a3202f; --long:#2b7ba6; --muscle:#c9623a;
-  --bone:#efe7d2; --bone-hi:#fbf7ea; --bone-edge:#a39473; --ghost:#d9a98c;
+  --short:#a3202f; --long:#2b7ba6; --muscle:#c4572f;
+  --bone:#ebe2c9; --bone-hi:#fdfaf0; --bone-edge:#8f8060; --skin:#d7a283; --cavity:#5b3a30;
   --display:"Bricolage Grotesque","Trebuchet MS",sans-serif;
   --body:"Instrument Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
   --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
 }
 @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
-  --bg:#0f1619; --plate:#172126; --panel:#1a252a; --ink:#e7eeec; --muted:#9db0b3; --line:#2d3c42;
+  --bg:#0f1619; --plate:#141d21; --panel:#1a252a; --ink:#e7eeec; --muted:#9db0b3; --line:#2d3c42;
   --accent:#72c7cc; --on-accent:#0b1b1e;
-  --short:#e45b6c; --long:#6bb6dc; --muscle:#d2703f;
-  --bone:#ddd4bc; --bone-hi:#efe8d6; --bone-edge:#6f6450; --ghost:#8a6a5a; color-scheme:dark } }
+  --short:#e45b6c; --long:#6bb6dc; --muscle:#cf6a3c;
+  --bone:#d9cfb5; --bone-hi:#f3ecd9; --bone-edge:#5f553f; --skin:#8f6753; --cavity:#05090a; color-scheme:dark } }
 :root[data-theme="dark"]{
-  --bg:#0f1619; --plate:#172126; --panel:#1a252a; --ink:#e7eeec; --muted:#9db0b3; --line:#2d3c42;
+  --bg:#0f1619; --plate:#141d21; --panel:#1a252a; --ink:#e7eeec; --muted:#9db0b3; --line:#2d3c42;
   --accent:#72c7cc; --on-accent:#0b1b1e;
-  --short:#e45b6c; --long:#6bb6dc; --muscle:#d2703f;
-  --bone:#ddd4bc; --bone-hi:#efe8d6; --bone-edge:#6f6450; --ghost:#8a6a5a; color-scheme:dark }
+  --short:#e45b6c; --long:#6bb6dc; --muscle:#cf6a3c;
+  --bone:#d9cfb5; --bone-hi:#f3ecd9; --bone-edge:#5f553f; --skin:#8f6753; --cavity:#05090a; color-scheme:dark }
 
 *{box-sizing:border-box}
-body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.5;
-  padding-block:20px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
-.wrap{max-width:1120px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
-header h1{font-family:var(--display);font-weight:700;font-size:clamp(28px,5vw,40px);line-height:1.05;margin:0;letter-spacing:-.01em}
-header p{margin:6px 0 0;color:var(--muted);max-width:62ch}
-.grid{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:22px;align-items:start}
-@media (max-width:820px){.grid{grid-template-columns:minmax(0,1fr)}}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.5;overflow:hidden}
+.gut{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.app{height:100%;display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(0,1.12fr) minmax(0,1fr)}
+.app[data-open="0"]{grid-template-rows:auto minmax(0,1fr) auto}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-block:8px;flex-wrap:wrap}
+.top h1{font-family:var(--display);font-weight:700;font-size:20px;line-height:1.1;margin:0}
+.legend{display:flex;gap:12px;font-size:12px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:5px}
+.legend i{width:14px;height:7px;border-radius:2px;display:inline-block}
 
-.stage{position:sticky;top:calc(env(safe-area-inset-top,0px) + 12px);display:flex;flex-direction:column;gap:10px}
-@media (max-width:820px){.stage{position:static}}
-.plate{position:relative;background:var(--plate);border:1px solid var(--line);border-radius:6px;overflow:hidden}
-canvas{display:block;width:100%;height:auto;touch-action:pan-y;cursor:grab}
+.stage{position:relative;background:var(--plate);border-block:1px solid var(--line);min-height:0;overflow:hidden}
+canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:pan-y;cursor:grab}
 canvas.drag{cursor:grabbing}
-.breath{position:absolute;left:10px;top:10px;display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12px;color:var(--muted);
+.breath{position:absolute;left:max(10px,env(safe-area-inset-left,0px));top:10px;display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12px;color:var(--muted);
   background:var(--panel);border:1px solid var(--line);border-radius:99px;padding:4px 10px}
 .breath i{display:block;width:44px;height:4px;border-radius:2px;background:var(--line);overflow:hidden}
 .breath i b{display:block;height:100%;width:0;background:var(--accent)}
-.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;color:var(--muted)}
-.legend span{display:inline-flex;align-items:center;gap:6px}
-.legend i{width:18px;height:8px;border-radius:2px;display:inline-block}
-.hint{font-size:13px;color:var(--muted);margin:0}
 
-.panel{display:flex;flex-direction:column;gap:20px;min-width:0}
+.sheet{display:flex;flex-direction:column;min-height:0;background:var(--bg)}
+.tabs{display:flex;align-items:stretch;border-bottom:1px solid var(--line);flex:none}
+.tabs button{flex:1;border:0;background:none;padding:11px 4px 9px;font:inherit;font-weight:600;font-size:14px;color:var(--muted);cursor:pointer;border-bottom:3px solid transparent}
+.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+.tabs .grip{flex:none;width:46px;font-size:18px;line-height:1}
+.app[data-open="0"] .panes{display:none}
+.panes{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain}
+.pane{display:flex;flex-direction:column;gap:18px;padding-block:14px 22px}
+@media (min-width:900px){
+  .app,.app[data-open="0"]{grid-template-columns:minmax(0,1fr) 430px;grid-template-rows:auto minmax(0,1fr)}
+  .top{grid-column:1/-1}
+  .stage{border:1px solid var(--line);border-left:0}
+  .tabs .grip{display:none}
+  .app[data-open="0"] .panes{display:block}
+}
+
 section{display:flex;flex-direction:column;gap:10px;min-width:0}
-h2{font-family:var(--display);font-weight:500;font-size:19px;margin:0;line-height:1.2}
+h2{font-family:var(--display);font-weight:500;font-size:18px;margin:0;line-height:1.2}
 .lab{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
 .chips{display:flex;flex-wrap:wrap;gap:8px}
 button{font:inherit;color:inherit}
 .chip{border:1px solid var(--line);background:var(--panel);border-radius:99px;padding:7px 13px;cursor:pointer;font-weight:500;font-size:14px}
 .chip:hover{border-color:var(--accent)}
 .chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
-:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-.sl{display:grid;grid-template-columns:1fr;gap:2px}
+:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.sl{display:grid;gap:2px}
 .sl label{font-weight:600;font-size:14px}
 .sl .ends{display:flex;justify-content:space-between;font-size:12px;color:var(--muted)}
 input[type=range]{width:100%;accent-color:var(--accent);margin:2px 0}
@@ -68,106 +80,128 @@ input[type=range]{width:100%;accent-color:var(--accent);margin:2px 0}
 .seg button[aria-pressed="true"]{background:var(--accent);color:var(--on-accent)}
 
 .rows{display:flex;flex-direction:column;border-top:1px solid var(--line)}
-.row{display:grid;grid-template-columns:22px minmax(0,1.25fr) minmax(60px,1fr) 52px;gap:8px;align-items:center;
+.row{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(60px,1fr) 48px;gap:8px;align-items:center;
   padding:8px 4px;border:0;border-bottom:1px solid var(--line);background:none;text-align:left;cursor:pointer;width:100%}
 .row:hover,.row[aria-pressed="true"]{background:var(--panel)}
 .row[aria-pressed="true"] .nm{font-weight:600}
-.num{width:20px;height:20px;border-radius:50%;background:var(--ink);color:var(--bg);font-family:var(--mono);font-size:11px;display:grid;place-items:center}
 .nm{font-size:14px;min-width:0}
 .track{position:relative;height:8px;background:var(--line);border-radius:4px}
 .track::after{content:"";position:absolute;left:50%;top:-3px;bottom:-3px;width:1px;background:var(--muted)}
 .fill{position:absolute;top:0;bottom:0;border-radius:4px}
 .pct{font-family:var(--mono);font-size:12px;text-align:right;font-variant-numeric:tabular-nums}
-.axis{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);padding:0 60px 0 30px}
-
+.axis{display:flex;justify-content:flex-end;gap:10px;font-size:12px;color:var(--muted)}
 .air{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(60px,1fr) auto;gap:6px 10px;align-items:center;font-size:14px}
 .air .bar{height:8px;background:var(--line);border-radius:4px;overflow:hidden}
 .air .bar b{display:block;height:100%;background:var(--accent);border-radius:4px}
 .air em{font-style:normal;font-family:var(--mono);font-size:12px;color:var(--muted);text-align:right}
-
 .read{display:flex;flex-direction:column;gap:12px}
 .read div{border-left:3px solid var(--accent);padding-left:12px}
 .read h3{margin:0 0 2px;font-size:15px;font-weight:600}
 .read p{margin:0;max-width:62ch}
 .read p + p{margin-top:6px;color:var(--muted)}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:14px 16px;display:flex;flex-direction:column;gap:8px}
-.card h3{margin:0;font-family:var(--display);font-weight:700;font-size:18px;display:flex;align-items:center;gap:8px}
-.card dl{margin:0;display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 12px;font-size:14px}
+.card h3{margin:0 0 8px;font-family:var(--display);font-weight:700;font-size:20px}
+.card dl{margin:0;display:grid;grid-template-columns:auto minmax(0,1fr);gap:6px 12px;font-size:14px}
 .card dt{color:var(--muted)}
 .card dd{margin:0}
 .note{font-size:13px;color:var(--muted);max-width:66ch;margin:0}
+
+.steps{display:flex;gap:4px}
+.steps i{flex:1;height:5px;border-radius:3px;background:var(--line)}
+.steps i.done{background:var(--accent)}
+.steps i.now{background:var(--ink)}
+.now-row{display:flex;align-items:flex-end;justify-content:space-between;gap:12px}
+.now-row h2{font-size:21px;font-weight:700}
+.clock{font-family:var(--mono);font-size:34px;line-height:1;font-variant-numeric:tabular-nums;white-space:nowrap}
+.side{font-family:var(--mono);font-size:12px;color:var(--accent);min-height:18px}
+.sess p{margin:0;max-width:60ch}
+.sess .why{color:var(--muted)}
+.ctl{display:flex;gap:8px;flex-wrap:wrap}
+.btn{border:1px solid var(--line);background:var(--panel);border-radius:8px;padding:10px 16px;font-weight:600;cursor:pointer}
+.btn.main{background:var(--accent);border-color:var(--accent);color:var(--on-accent);flex:1;min-width:140px}
+.btn:disabled{opacity:.45;cursor:default}
 </style>
 
-<div class="wrap">
-  <header>
+<div class="app" id="app" data-open="1">
+  <header class="top gut">
     <h1>Escápula Viva</h1>
-    <p>Trapézio, elevador, romboides e serrátil vistos de costas. Mexa a escápula e veja quem encurta, quem estica e o que muda na respiração.</p>
+    <div class="legend" id="legend">
+      <span><i style="background:var(--short)"></i>encurta</span>
+      <span><i style="background:var(--muscle)"></i>repouso</span>
+      <span><i style="background:var(--long)"></i>estica</span>
+    </div>
   </header>
 
-  <div class="grid">
-    <div class="stage">
-      <div class="plate">
-        <canvas id="cv" role="img" aria-label="Desenho anatômico das costas com coluna, costelas, escápulas e os músculos trapézio, elevador da escápula, romboides e serrátil anterior, animado com a respiração."></canvas>
-        <div class="breath" aria-hidden="true"><span id="bphase">inspira</span><i><b id="bbar"></b></i></div>
-      </div>
-      <div class="legend">
-        <span><i style="background:var(--short)"></i>encurtado</span>
-        <span><i style="background:var(--muscle)"></i>comprimento de repouso</span>
-        <span><i style="background:var(--long)"></i>esticado</span>
-      </div>
-      <p class="hint">Arraste a escápula no desenho para juntar ou afastar. Toque num músculo para ver a ficha dele.</p>
+  <div class="stage" id="stage">
+    <canvas id="cv" role="img" aria-label="Desenho anatômico das costas com coluna, costelas, escápulas e os músculos trapézio, elevador da escápula, romboides e serrátil anterior, animado com a respiração."></canvas>
+    <div class="breath" aria-hidden="true"><span id="bphase">inspira</span><i><b id="bbar"></b></i></div>
+  </div>
+
+  <div class="sheet">
+    <div class="tabs" role="tablist" id="tabs">
+      <button role="tab" data-t="mover">Mover</button>
+      <button role="tab" data-t="leitura">Leitura</button>
+      <button role="tab" data-t="sessao">Sessão</button>
+      <button role="tab" data-t="musculo">Músculo</button>
+      <button class="grip" id="grip" aria-label="Recolher ou abrir o painel">⌄</button>
     </div>
-
-    <div class="panel">
-      <section>
-        <span class="lab">Posições</span>
-        <div class="chips" id="presets"></div>
-      </section>
-
-      <section>
-        <div class="sl"><label for="s-elev">Subir e descer o ombro</label>
-          <input type="range" id="s-elev" min="-100" max="100" value="0">
-          <div class="ends"><span>desce</span><span>sobe até a orelha</span></div></div>
-        <div class="sl"><label for="s-retr">Juntar e afastar as escápulas</label>
-          <input type="range" id="s-retr" min="-100" max="100" value="0">
-          <div class="ends"><span>afasta (empurra)</span><span>junta (espreme)</span></div></div>
-        <div class="sl"><label for="s-rot">Levantar o braço</label>
-          <input type="range" id="s-rot" min="0" max="100" value="0">
-          <div class="ends"><span>braço ao lado</span><span>braço acima</span></div></div>
-      </section>
-
-      <section>
-        <div class="opts">
+    <div class="panes gut">
+      <div class="pane" id="p-mover">
+        <section><span class="lab">Posições</span><div class="chips" id="presets"></div></section>
+        <section>
+          <div class="sl"><label for="s-elev">Subir e descer o ombro</label>
+            <input type="range" id="s-elev" min="-100" max="100" value="0">
+            <div class="ends"><span>desce</span><span>sobe até a orelha</span></div></div>
+          <div class="sl"><label for="s-retr">Juntar e afastar as escápulas</label>
+            <input type="range" id="s-retr" min="-100" max="100" value="0">
+            <div class="ends"><span>afasta (empurra)</span><span>junta (espreme)</span></div></div>
+          <div class="sl"><label for="s-rot">Levantar o braço</label>
+            <input type="range" id="s-rot" min="0" max="100" value="0">
+            <div class="ends"><span>braço ao lado</span><span>braço acima</span></div></div>
+        </section>
+        <section><div class="opts">
           <div class="opt"><span class="lab">Respiração</span>
             <div class="seg" id="seg-breath"><button data-v="1">Respirando</button><button data-v="0">Parada</button></div></div>
           <div class="opt"><span class="lab">Camadas</span>
             <div class="seg" id="seg-layer"><button data-v="half">Meio a meio</button><button data-v="sup">Trapézio</button><button data-v="deep">Profunda</button></div></div>
           <div class="opt"><span class="lab">Cores</span>
             <div class="seg" id="seg-color"><button data-v="state">Estado</button><button data-v="anat">Atlas</button></div></div>
+        </div></section>
+        <p class="note">Também dá para arrastar a escápula direto no desenho e tocar num músculo ou no nome dele para abrir a ficha.</p>
+      </div>
+
+      <div class="pane" id="p-leitura" hidden>
+        <section><h2>Quem encurta e quem estica agora</h2>
+          <div class="rows" id="rows"></div>
+          <div class="axis"><span>← encurta</span><span>estica →</span></div></section>
+        <section><h2>O ar nessa posição</h2><div class="air" id="air"></div></section>
+        <section><h2>O que está acontecendo</h2><div class="read" id="read"></div></section>
+        <p class="note">Modelo simplificado para enxergar o mecanismo: as porcentagens saem da geometria do desenho, e as barras de respiração mostram a tendência, sem medir um corpo real.</p>
+      </div>
+
+      <div class="pane sess" id="p-sessao" hidden>
+        <section>
+          <span class="lab">Sessão guiada · soltar e reequilibrar o trapézio · 8 min</span>
+          <div class="steps" id="steps"></div>
+        </section>
+        <section>
+          <span class="lab" id="ss-fase"></span>
+          <div class="now-row"><h2 id="ss-title"></h2><span class="clock" id="ss-clock">0:00</span></div>
+          <span class="side" id="ss-side"></span>
+          <p id="ss-how"></p>
+          <p class="why" id="ss-why"></p>
+        </section>
+        <div class="ctl">
+          <button class="btn" id="ss-prev" aria-label="Etapa anterior">←</button>
+          <button class="btn main" id="ss-go">Começar</button>
+          <button class="btn" id="ss-next" aria-label="Próxima etapa">→</button>
         </div>
-      </section>
+        <p class="note" id="ss-after"></p>
+        <p class="note">Desconforto de alongar é esperado. Dor em pontada, formigamento ou tontura: pare e procure fisioterapeuta ou médico.</p>
+      </div>
 
-      <section>
-        <h2>Quem encurta e quem estica agora</h2>
-        <div class="rows" id="rows"></div>
-        <div class="axis"><span>encurta</span><span>estica</span></div>
-      </section>
-
-      <section>
-        <h2>O ar nessa posição</h2>
-        <div class="air" id="air"></div>
-      </section>
-
-      <section>
-        <h2>O que está acontecendo</h2>
-        <div class="read" id="read"></div>
-      </section>
-
-      <section>
+      <div class="pane" id="p-musculo" hidden>
         <div class="card" id="card"></div>
-      </section>
-
-      <p class="note">Modelo simplificado para enxergar o mecanismo: as porcentagens saem da geometria do desenho, e as barras de respiração mostram a tendência, sem medir um corpo real. Dor em pontada, formigamento ou perda de força pedem avaliação de fisioterapeuta ou médico.</p>
+      </div>
     </div>
   </div>
 </div>
@@ -175,11 +209,12 @@ input[type=range]{width:100%;accent-color:var(--accent);margin:2px 0}
 <script>
 (() => {
 const $ = s => document.querySelector(s);
-const cv = $('#cv'), ctx = cv.getContext('2d');
-const VW = 520, VH = 640, VX = -260, VY = -350;
+const app = $('#app'), cv = $('#cv'), ctx = cv.getContext('2d');
+const VFW = 480, VFH = 620, CY = -45;
 const clamp = (v,a,b) => Math.max(a, Math.min(b, v));
 const lerp = (a,b,t) => a + (b-a)*t;
 const rad = d => d*Math.PI/180;
+const osc = (s,per) => .5 - .5*Math.cos(2*Math.PI*s/per);
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 /* ---------- esqueleto ---------- */
@@ -191,37 +226,37 @@ const C0 = [98,-30];                    // centro da escápula direita em repous
 
 /* ---------- músculos ---------- */
 const MUS = [
-  {k:'lev', n:1, nome:'Elevador da escápula', O:[[15,yC(0)],[18,yC(3)]], I:[[-30,-68],[-34,-44]], nf:8,
+  {k:'lev', nome:'Elevador da escápula', curto:'Elevador', ly:-224, O:[[15,yC(0)],[18,yC(3)]], I:[[-30,-68],[-34,-44]], nf:8,
    org:'Processos transversos de C1 a C4', ins:'Ângulo superior da escápula',
    acao:'Sobe a escápula e gira a ponta dela para baixo; também inclina o pescoço.',
    tenso:'Trabalha colado ao trapézio superior. É o ponto duro no canto entre o pescoço e o ombro.',
    cuidar:'Soltar com bolinha suave, inclinação lateral do pescoço por 30 s, depois ativar o trapézio inferior.'},
-  {k:'rmin', n:2, nome:'Romboide menor', O:[[3,-142],[3,-117]], I:[[-34,-47],[-33,-29]], nf:6,
+  {k:'rmin', nome:'Romboide menor', curto:'Romb. menor', ly:-194, O:[[3,-142],[3,-117]], I:[[-34,-47],[-33,-29]], nf:6,
    org:'Processos espinhosos de C7 e T1', ins:'Borda medial da escápula, na raiz da espinha',
    acao:'Puxa a escápula para a coluna e ajuda a girá-la para baixo.',
    tenso:'Fica encurtado quando as escápulas vivem espremidas para trás.',
    cuidar:'Gato-camelo e abraço em si mesma para abrir; flexão "plus" para o serrátil dividir o trabalho.'},
-  {k:'rmaj', n:3, nome:'Romboide maior', O:[[3,-97],[3,-28]], I:[[-33,-27],[-23,77]], nf:16,
+  {k:'rmaj', nome:'Romboide maior', curto:'Romb. maior', ly:-164, O:[[3,-97],[3,-28]], I:[[-33,-27],[-23,77]], nf:16,
    org:'Processos espinhosos de T2 a T5', ins:'Borda medial da escápula, até o ângulo inferior',
    acao:'Junta as escápulas e segura a borda delas contra as costelas.',
    tenso:'Encurta junto com o trapézio médio na retração forte; estica quando o braço sobe ou empurra.',
    cuidar:'Remada com pausa para fortalecer; posição da criança respirando nas costas para soltar.'},
-  {k:'ser', n:4, nome:'Serrátil anterior',
+  {k:'ser', nome:'Serrátil anterior', curto:'Serrátil', ly:228,
    org:'Costelas 1 a 9, na lateral do tórax', ins:'Face da frente da borda medial da escápula',
    acao:'Leva a escápula para frente contornando as costelas, gira para cima quando o braço sobe e mantém a escápula colada ao tórax.',
    tenso:'Como nasce nas costelas, sente cada respiração. Com a escápula presa para trás ou para cima ele fica esticado e fraco, e o trapézio superior assume.',
    cuidar:'Flexão "plus" (no fim da flexão, empurrar o chão afastando as escápulas) e deslizar os braços na parede.'},
-  {k:'tsup', n:5, nome:'Trapézio superior', O:[[9,-236],[3,-165]], I:[[58,-88],[72,-78]], nf:16, bow:[-10,16],
+  {k:'tsup', nome:'Trapézio superior', curto:'Trap. superior', ly:-224, O:[[9,-236],[3,-165]], I:[[58,-88],[72,-78]], nf:16, bow:[-10,16],
    org:'Osso occipital e ligamento nucal', ins:'Terço lateral da clavícula e acrômio',
    acao:'Sobe o ombro e ajuda a girar a escápula para cima.',
    tenso:'Encurtado, segura o ombro perto da orelha e puxa a respiração para o alto do peito.',
    cuidar:'Expiração longa deixando o ombro pesar, bolinha suave, e fortalecer serrátil e trapézio inferior, que são os parceiros que faltam.'},
-  {k:'tmed', n:6, nome:'Trapézio médio', O:[[3,-165],[3,-62]], I:[[72,-78],[6,-55]], nf:14,
+  {k:'tmed', nome:'Trapézio médio', curto:'Trap. médio', ly:-190, O:[[3,-165],[3,-62]], I:[[72,-78],[6,-55]], nf:14,
    org:'Ligamento nucal baixo e processos espinhosos de C7 a T3', ins:'Acrômio e espinha da escápula',
    acao:'Junta as escápulas em direção à coluna.',
    tenso:'É o motor da retração. Muito tempo espremido, prende a escápula e aperta a parte de trás das costelas.',
    cuidar:'T deitada para fortalecer com controle; abrir as costas na respiração para soltar.'},
-  {k:'tinf', n:7, nome:'Trapézio inferior', O:[[3,-62],[3,199]], I:[[6,-55],[-31,-37]], nf:22, bow:[6,0],
+  {k:'tinf', nome:'Trapézio inferior', curto:'Trap. inferior', ly:228, O:[[3,-62],[3,199]], I:[[6,-55],[-31,-37]], nf:22, bow:[6,0],
    org:'Processos espinhosos de T4 a T12', ins:'Raiz da espinha da escápula',
    acao:'Desce a escápula e gira para cima; é o contrapeso do trapézio superior.',
    tenso:'Fica esticado e desligado quando o ombro mora lá em cima.',
@@ -232,8 +267,8 @@ const TRAP = ['tsup','tmed','tinf'];
 
 /* ---------- estado ---------- */
 const P = {elev:0, retr:0, rot:0}, T = {elev:0, retr:0, rot:0};
-let breathOn = !reduced, ph = 0, layer = 'half', colorMode = 'state', sel = 'tsup';
-let G = null, REST = {}, col = {}, hit = {}, scapHit = null;
+let breathOn = !reduced, ph = 0, btime = [2.6,2.6], layer = 'half', colorMode = 'state', sel = 'tsup';
+let G = null, REST = {}, col = {}, hit = {}, parts = {}, scapHit = null, labHit = [], view = {sc:1, ox:0, oy:0};
 
 function scapPt(p, pose){
   const a = -pose.theta, c = Math.cos(a), s = Math.sin(a), x = p[0]*pose.sx, y = p[1];
@@ -268,8 +303,7 @@ function geom(p, b){
       const I = m.I.map(q => scapPt(q, pose));
       for (let k = 0; k < m.nf; k++){ const t = k/(m.nf-1); fibers.push([along(m.O,t), along(I,t)]); }
     }
-    const len = fibers.reduce((s,f) => s + dist(f[0],f[1]), 0)/fibers.length;
-    mus[m.k] = {fibers, len};
+    mus[m.k] = {fibers, len: fibers.reduce((s,f) => s + dist(f[0],f[1]), 0)/fibers.length};
   }
   return {pose, ribs, mus, back, low, high};
 }
@@ -278,67 +312,76 @@ function geom(p, b){
 const probe = document.createElement('canvas').getContext('2d');
 function rgb(v){ probe.fillStyle = '#000'; probe.fillStyle = v; const h = probe.fillStyle;
   return h[0] === '#' ? [1,3,5].map(i => parseInt(h.slice(i,i+2),16)) : (h.match(/[\d.]+/g)||[0,0,0]).slice(0,3).map(Number); }
-const css = c => `rgb(${c.map(Math.round).join(',')})`;
+const css = (c,a=1) => `rgba(${c.map(Math.round).join(',')},${a})`;
 const mix = (a,b,t) => a.map((v,i) => lerp(v,b[i],t));
 function readTheme(){
-  const s = getComputedStyle(document.documentElement), g = n => s.getPropertyValue(n).trim();
-  col = {ink:g('--ink'), plate:g('--plate'), bone:g('--bone'), boneHi:g('--bone-hi'), boneEdge:g('--bone-edge'), ghost:g('--ghost'),
-    base:rgb(g('--muscle')), short:rgb(g('--short')), long:rgb(g('--long')), tendon:rgb(g('--bone-hi'))};
+  const s = getComputedStyle(document.documentElement), g = n => s.getPropertyValue(n).trim(), R = n => rgb(g(n));
+  const bone = R('--bone'), hi = R('--bone-hi'), edge = R('--bone-edge');
+  col = {ink:g('--ink'), inkR:R('--ink'), plateR:R('--plate'), accent:g('--accent'), onAccent:g('--on-accent'),
+    bone:css(bone), boneHi:css(hi), boneEdge:css(edge), boneR:bone, hiR:hi, edgeR:edge, shade:css(mix(bone,edge,.55)),
+    skin:R('--skin'), cavity:R('--cavity'), base:R('--muscle'), short:R('--short'), long:R('--long')};
 }
 const delta = k => G.mus[k].len/REST[k] - 1;
 function musColor(k){
   if (colorMode === 'anat') return col.base;
-  const s = clamp(delta(k)/.2, -1, 1), a = Math.pow(Math.abs(s), .8);
-  return mix(col.base, s < 0 ? col.short : col.long, a);
+  const s = clamp(delta(k)/.2, -1, 1);
+  return mix(col.base, s < 0 ? col.short : col.long, Math.pow(Math.abs(s), .8));
 }
 
 /* ---------- desenho ---------- */
-function bone(path, w){
+function bone(path, w, lx = 0, ly = -1, shadow = true){
   ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-  ctx.strokeStyle = col.boneEdge; ctx.lineWidth = w + 2.2; ctx.stroke(path);
+  ctx.save(); if (shadow){ ctx.shadowColor = 'rgba(0,0,0,.32)'; ctx.shadowBlur = 5; ctx.shadowOffsetY = 2; }
+  ctx.strokeStyle = col.boneEdge; ctx.lineWidth = w + 2; ctx.stroke(path); ctx.restore();
   ctx.strokeStyle = col.bone; ctx.lineWidth = w; ctx.stroke(path);
-  ctx.strokeStyle = col.boneHi; ctx.lineWidth = w*.3; ctx.globalAlpha = .7; ctx.stroke(path); ctx.globalAlpha = 1;
+  ctx.save(); ctx.translate(-lx*w*.24, -ly*w*.24); ctx.strokeStyle = col.shade; ctx.globalAlpha = .55; ctx.lineWidth = w*.34; ctx.stroke(path); ctx.restore();
+  ctx.save(); ctx.translate(lx*w*.2, ly*w*.2); ctx.strokeStyle = col.boneHi; ctx.globalAlpha = .9; ctx.lineWidth = w*.3; ctx.stroke(path); ctx.restore();
 }
-function boneFill(path){ ctx.fillStyle = col.bone; ctx.fill(path); ctx.strokeStyle = col.boneEdge; ctx.lineWidth = 1.3; ctx.stroke(path); }
-
 const ctrl = (f, bow) => [(f[0][0]+f[1][0])/2 + (bow?bow[0]:0), (f[0][1]+f[1][1])/2 + (bow?bow[1]:0)];
 function fanPath(fibers, bow){
   const p = new Path2D(), a = fibers[0], z = fibers[fibers.length-1], ca = ctrl(a,bow), cz = ctrl(z,bow);
   p.moveTo(...a[0]); p.quadraticCurveTo(...ca, ...a[1]); p.lineTo(...z[1]); p.quadraticCurveTo(...cz, ...z[0]); p.closePath();
   return p;
 }
-function musclePath(k){
+function buildMuscle(k){
   const m = byK[k], f = G.mus[k].fibers;
-  if (k !== 'ser') return fanPath(f, m.bow);
-  const p = new Path2D();
-  for (let i = 0; i < 9; i++) p.addPath(fanPath(f.slice(i*4, i*4+4)));
-  return p;
+  if (k !== 'ser'){ hit[k] = fanPath(f, m.bow); parts[k] = [[f, hit[k]]]; return; }
+  const p = new Path2D(); parts[k] = [];
+  for (let i = 0; i < 9; i++){ const g = f.slice(i*4, i*4+4), q = fanPath(g); p.addPath(q); parts[k].push([g, q]); }
+  hit[k] = p;
 }
 function drawMuscle(k){
-  const m = byK[k], f = G.mus[k].fibers, c = musColor(k), path = hit[k];
-  const dark = css(mix(c,[0,0,0],.32)), light = css(mix(c,[255,255,255],.3)), s = clamp(delta(k)/.2,-1,1);
-  ctx.save();
-  ctx.shadowColor = 'rgba(0,0,0,.28)'; ctx.shadowBlur = 5; ctx.shadowOffsetY = 1.5;
-  ctx.fillStyle = css(c); ctx.fill(path);
-  ctx.restore();
-  ctx.lineCap = 'butt'; ctx.lineWidth = 1.1 + .5*Math.max(-s,0);
-  f.forEach((fb, i) => {
-    const cp = ctrl(fb, m.bow);
-    ctx.strokeStyle = i % 2 ? dark : light; ctx.globalAlpha = i % 2 ? .55 : .5;
-    ctx.beginPath(); ctx.moveTo(...fb[0]); ctx.quadraticCurveTo(...cp, ...fb[1]); ctx.stroke();
-  });
-  ctx.globalAlpha = .75; ctx.strokeStyle = css(col.tendon); ctx.lineWidth = 1.6;
-  f.forEach(fb => { const cp = ctrl(fb, m.bow), e = k === 'ser' ? 1 : 0, q = [lerp(fb[e][0],cp[0],.14), lerp(fb[e][1],cp[1],.14)];
-    ctx.beginPath(); ctx.moveTo(...fb[e]); ctx.lineTo(...q); ctx.stroke(); });
-  ctx.globalAlpha = 1; ctx.strokeStyle = dark; ctx.lineWidth = .9; ctx.stroke(path);
-  if (sel === k){ ctx.strokeStyle = col.ink; ctx.lineWidth = 2.6; ctx.lineJoin = 'round'; ctx.stroke(path); }
+  const m = byK[k], c = musColor(k), path = hit[k], s = clamp(delta(k)/.2,-1,1);
+  const dark = mix(c,[25,0,0],.45), light = mix(c,[255,236,214],.42), tend = col.hiR;
+  ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.38)'; ctx.shadowBlur = 7; ctx.shadowOffsetY = 2.5;
+  ctx.fillStyle = css(c); ctx.fill(path); ctx.restore();
+  for (const [g, gp] of parts[k]){
+    const a = ctrl(g[0], m.bow), z = ctrl(g[g.length-1], m.bow);
+    if (dist(a,z) > 1){ const gr = ctx.createLinearGradient(a[0],a[1],z[0],z[1]);   // volume do ventre
+      gr.addColorStop(0, css(dark,.5)); gr.addColorStop(.38, css(light,.34)); gr.addColorStop(.62, css(light,.12)); gr.addColorStop(1, css(dark,.6));
+      ctx.fillStyle = gr; ctx.fill(gp); }
+    ctx.lineCap = 'butt';
+    for (let j = 0; j <= (g.length-1)*2; j++){   // fibras, com uma interpolada entre cada par
+      const i0 = Math.floor(j/2), i1 = Math.min(g.length-1, i0 + (j%2)), A = g[i0], B = g[i1];
+      const o = [(A[0][0]+B[0][0])/2, (A[0][1]+B[0][1])/2], e = [(A[1][0]+B[1][0])/2, (A[1][1]+B[1][1])/2], cp = ctrl([o,e], m.bow);
+      ctx.strokeStyle = j % 2 ? css(light,.3) : css(dark,.42); ctx.lineWidth = j % 2 ? .7 : .9 + .4*Math.max(-s,0);
+      ctx.beginPath(); ctx.moveTo(...o); ctx.quadraticCurveTo(...cp, ...e); ctx.stroke();
+      if (j % 2 === 0){ const end = k === 'ser' ? e : o, q = [lerp(end[0],cp[0],.16), lerp(end[1],cp[1],.16)];   // tendão
+        const tg = ctx.createLinearGradient(end[0],end[1],q[0],q[1]); tg.addColorStop(0, css(tend,.95)); tg.addColorStop(1, css(tend,0));
+        ctx.strokeStyle = tg; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(...end); ctx.lineTo(...q); ctx.stroke(); }
+    }
+  }
+  ctx.strokeStyle = css(dark,.9); ctx.lineWidth = .9; ctx.stroke(path);
+  if (sel === k){ ctx.strokeStyle = col.ink; ctx.lineWidth = 2.4; ctx.lineJoin = 'round'; ctx.stroke(path); }
 }
 function scapulaPaths(){
-  const q = p => scapPt(p, G.pose), b = new Path2D(), s = new Path2D();
+  const q = p => scapPt(p, G.pose), b = new Path2D(), s = new Path2D(), lat = new Path2D(), fos = new Path2D();
   const M = (pa,p) => pa.moveTo(...q(p)), L = (pa,p) => pa.lineTo(...q(p)), Q = (pa,c,p) => pa.quadraticCurveTo(...q(c), ...q(p));
   M(b,[-30,-68]); Q(b,[0,-66],[22,-58]); L(b,[40,-58]); Q(b,[56,-48],[46,-32]); Q(b,[20,20],[-22,80]); Q(b,[-32,74],[-30,64]); L(b,[-34,-36]); Q(b,[-36,-56],[-30,-68]); b.closePath();
   M(s,[-34,-41]); L(s,[30,-66]); Q(s,[52,-86],[70,-82]); Q(s,[78,-71],[62,-63]); L(s,[36,-53]); L(s,[-32,-30]); s.closePath();
-  return {b, s};
+  M(lat,[42,-26]); Q(lat,[18,22],[-18,72]);
+  M(fos,[-20,-14]); Q(fos,[8,-6],[-14,54]);
+  return {b, s, lat, fos, top:q([0,-62]), bot:q([-18,78])};
 }
 function ribPaths(i){
   const r = G.ribs[i], {W,D,y} = r, back = new Path2D(), front = new Path2D();
@@ -348,112 +391,149 @@ function ribPaths(i){
   return {back, front};
 }
 function vertebra(y, h, bw, tw){
+  ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.3)'; ctx.shadowBlur = 4; ctx.shadowOffsetY = 1.5;
   ctx.fillStyle = col.bone; ctx.strokeStyle = col.boneEdge; ctx.lineWidth = 1.1;
-  ctx.beginPath(); ctx.ellipse(0, y, tw, 4.6, 0, 0, 7); ctx.fill(); ctx.stroke();
-  ctx.beginPath(); ctx.roundRect(-bw/2, y-h/2, bw, h, 4); ctx.fill(); ctx.stroke();
+  ctx.beginPath(); ctx.ellipse(0, y, tw, 4.6, 0, 0, 7); ctx.fill(); ctx.stroke(); ctx.restore();
+  const g = ctx.createLinearGradient(-bw/2,0,bw/2,0); g.addColorStop(0,col.shade); g.addColorStop(.4,col.boneHi); g.addColorStop(1,col.shade);
+  ctx.fillStyle = g; ctx.beginPath(); ctx.roundRect(-bw/2, y-h/2, bw, h, 4); ctx.fill(); ctx.stroke();
   ctx.fillStyle = col.boneHi; ctx.beginPath(); ctx.ellipse(0, y+3, 4.2, h*.42, 0, 0, 7); ctx.fill(); ctx.stroke();
 }
 function mirrored(sign, fn){ ctx.save(); ctx.scale(sign,1); fn(); ctx.restore(); }
 const trapOn = sign => layer === 'sup' || (layer === 'half' && sign < 0);
 
 function draw(){
-  const dpr = Math.min(window.devicePixelRatio||1, 2.5), cw = cv.clientWidth; if (!cw) return;
-  const W = Math.round(cw*dpr), H = Math.round(cw*VH/VW*dpr);
+  const dpr = Math.min(window.devicePixelRatio||1, 2.5), cw = cv.clientWidth, ch = cv.clientHeight; if (!cw || !ch) return;
+  const W = Math.round(cw*dpr), H = Math.round(ch*dpr);
   if (cv.width !== W || cv.height !== H){ cv.width = W; cv.height = H; }
-  const sc = W/VW; ctx.setTransform(sc,0,0,sc,-VX*sc,-VY*sc); ctx.clearRect(VX,VY,VW,VH);
+  const sc = Math.min(cw/VFW, ch/VFH); view = {sc, ox: cw/2, oy: ch/2 - CY*sc};
+  ctx.setTransform(1,0,0,1,0,0); ctx.clearRect(0,0,W,H);
+  ctx.setTransform(sc*dpr,0,0,sc*dpr,view.ox*dpr,view.oy*dpr);
 
-  for (const k in G.mus) hit[k] = musclePath(k);
+  for (const k in G.mus) buildMuscle(k);
   const sp = scapulaPaths(); scapHit = sp.b;
   const acr = scapPt([66,-78], G.pose), gl = scapPt([56,-42], G.pose);
-  const phi = rad(130*P.rot), arm = [gl[0] + Math.sin(phi)*230, gl[1] + Math.cos(phi)*230];
+  const phi = rad(130*P.rot), arm = [gl[0] + Math.sin(phi)*260, gl[1] + Math.cos(phi)*260];
 
-  // silhueta
+  // pele
   for (const s of [1,-1]) mirrored(s, () => {
-    ctx.fillStyle = col.ghost; ctx.globalAlpha = .2; ctx.beginPath();
-    ctx.moveTo(0,-250); ctx.lineTo(36,-250); ctx.bezierCurveTo(42,-170, 70,acr[1]-30, acr[0]+6,acr[1]-14);
-    ctx.quadraticCurveTo(acr[0]+44,acr[1]-4, acr[0]+44,acr[1]+60); ctx.lineTo(acr[0]+40,300); ctx.lineTo(0,300); ctx.closePath(); ctx.fill(); ctx.globalAlpha = 1;
+    const g = ctx.createLinearGradient(0,0,acr[0]+44,0); g.addColorStop(0, css(col.skin,.34)); g.addColorStop(.8, css(col.skin,.24)); g.addColorStop(1, css(col.skin,.1));
+    ctx.fillStyle = g; ctx.beginPath();
+    ctx.moveTo(0,-262); ctx.lineTo(34,-262); ctx.bezierCurveTo(42,-170, 70,acr[1]-30, acr[0]+6,acr[1]-14);
+    ctx.quadraticCurveTo(acr[0]+44,acr[1]-4, acr[0]+44,acr[1]+60); ctx.lineTo(acr[0]+38,520); ctx.lineTo(0,520); ctx.closePath(); ctx.fill();
   });
-  // costelas da frente, clavícula
+  // cavidade do tórax, costelas da frente, clavícula
   for (const s of [1,-1]) mirrored(s, () => {
-    ctx.globalAlpha = .5; for (let i = 0; i < 10; i++) bone(ribPaths(i).front, 6); ctx.globalAlpha = .8;
-    const c = new Path2D(); c.moveTo(14,-112); c.bezierCurveTo(60,-128, 100,acr[1]-22, acr[0]-4,acr[1]-2); bone(c, 7); ctx.globalAlpha = 1;
+    ctx.beginPath(); ctx.moveTo(0,-128); G.ribs.forEach(r => ctx.lineTo(r.W*.98, r.y + r.D*.7)); ctx.lineTo(0,236); ctx.closePath();
+    const cg = ctx.createLinearGradient(0,0,140,0); cg.addColorStop(0, css(col.cavity,.5)); cg.addColorStop(1, css(col.cavity,.22)); ctx.fillStyle = cg; ctx.fill();
+    ctx.globalAlpha = .55; for (let i = 0; i < 10; i++) bone(ribPaths(i).front, 6, 0, -1, false); ctx.globalAlpha = .85;
+    const c = new Path2D(); c.moveTo(14,-112); c.bezierCurveTo(60,-128, 100,acr[1]-22, acr[0]-4,acr[1]-2); bone(c, 7.5); ctx.globalAlpha = 1;
   });
-  // crânio
-  ctx.fillStyle = col.bone; ctx.strokeStyle = col.boneEdge; ctx.lineWidth = 1.3;
-  for (const s of [1,-1]){ ctx.beginPath(); ctx.ellipse(s*50,-246,13,15,0,0,7); ctx.fill(); ctx.stroke(); }
-  const sg = ctx.createRadialGradient(-18,-330,10, 0,-306,90); sg.addColorStop(0,col.boneHi); sg.addColorStop(1,col.bone);
-  ctx.fillStyle = sg; ctx.beginPath(); ctx.ellipse(0,-306,70,77,0,0,7); ctx.fill(); ctx.stroke();
-  ctx.globalAlpha = .45; ctx.beginPath(); ctx.moveTo(-52,-256); ctx.quadraticCurveTo(0,-238,52,-256); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(-62,-300); ctx.quadraticCurveTo(-30,-322,0,-350); ctx.quadraticCurveTo(30,-322,62,-300); ctx.stroke(); ctx.globalAlpha = 1;
-  // costelas de trás
-  for (const s of [1,-1]) mirrored(s, () => { for (let i = 11; i >= 0; i--) bone(ribPaths(i).back, i > 9 ? 6.5 : 8); });
-  // coluna
+  // mandíbula e crânio
+  { const j = new Path2D(); j.moveTo(-53,-268); j.quadraticCurveTo(-52,-226,-30,-220); j.quadraticCurveTo(0,-214,30,-220); j.quadraticCurveTo(52,-226,53,-268); bone(j, 9); }
+  ctx.strokeStyle = col.boneEdge; ctx.lineWidth = 1.3;
+  for (const s of [1,-1]){ ctx.fillStyle = col.shade; ctx.beginPath(); ctx.ellipse(s*50,-248,12,15,s*.2,0,7); ctx.fill(); ctx.stroke(); }
+  const sg = ctx.createRadialGradient(-22,-340,8, 0,-306,84);
+  sg.addColorStop(0,col.boneHi); sg.addColorStop(.55,col.bone); sg.addColorStop(1,col.shade);
+  ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.3)'; ctx.shadowBlur = 8; ctx.shadowOffsetY = 3;
+  ctx.fillStyle = sg; ctx.beginPath(); ctx.ellipse(0,-306,70,77,0,0,7); ctx.fill(); ctx.restore(); ctx.stroke();
+  ctx.globalAlpha = .4; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(-54,-258); ctx.quadraticCurveTo(0,-240,54,-258); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(-40,-268); ctx.quadraticCurveTo(0,-256,40,-268); ctx.stroke();
+  ctx.globalAlpha = .22; ctx.beginPath(); ctx.moveTo(-60,-292); ctx.bezierCurveTo(-40,-318,-14,-340,0,-344); ctx.bezierCurveTo(14,-340,40,-318,60,-292); ctx.stroke(); ctx.globalAlpha = 1;
+  ctx.fillStyle = col.shade; ctx.beginPath(); ctx.ellipse(0,-249,7,4,0,0,7); ctx.fill();
+  // costelas de trás e coluna
+  for (const s of [1,-1]) mirrored(s, () => { for (let i = 11; i >= 0; i--) bone(ribPaths(i).back, i > 9 ? 6.5 : 8.5); });
   for (let i = 0; i < 7; i++) vertebra(yC(i), 11, 15, 17);
   for (let i = 0; i < 12; i++) vertebra(yT(i), 22, 19 + i*.5, 22);
-  for (let i = 0; i < 3; i++) vertebra(234 + i*33, 26, 27, 30);
+  for (let i = 0; i < 5; i++) vertebra(234 + i*33, 26, 27, 30);
 
   for (const s of [1,-1]) mirrored(s, () => {
     drawMuscle('ser');
-    const h = new Path2D(); h.moveTo(...gl); h.lineTo(...arm); bone(h, 17);
-    ctx.beginPath(); ctx.arc(gl[0], gl[1], 16, 0, 7); ctx.fillStyle = col.bone; ctx.fill(); ctx.strokeStyle = col.boneEdge; ctx.lineWidth = 1.3; ctx.stroke();
-    ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.25)'; ctx.shadowBlur = 6; ctx.shadowOffsetY = 2; boneFill(sp.b); ctx.restore();
-    ctx.fillStyle = col.boneHi; ctx.fill(sp.s); ctx.strokeStyle = col.boneEdge; ctx.lineWidth = 1.2; ctx.stroke(sp.s);
+    const h = new Path2D(); h.moveTo(...gl); h.lineTo(...arm); bone(h, 18, -Math.cos(phi)*.7 - .3, Math.sin(phi)*.7 - .3);
+    const hg = ctx.createRadialGradient(gl[0]-5, gl[1]-6, 2, gl[0], gl[1], 17); hg.addColorStop(0,col.boneHi); hg.addColorStop(.6,col.bone); hg.addColorStop(1,col.shade);
+    ctx.beginPath(); ctx.arc(gl[0], gl[1], 16.5, 0, 7); ctx.fillStyle = hg; ctx.fill(); ctx.strokeStyle = col.boneEdge; ctx.lineWidth = 1.3; ctx.stroke();
+    // escápula
+    const bg = ctx.createLinearGradient(sp.top[0], sp.top[1], sp.bot[0], sp.bot[1]); bg.addColorStop(0,col.boneHi); bg.addColorStop(.45,col.bone); bg.addColorStop(1,col.shade);
+    ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.4)'; ctx.shadowBlur = 9; ctx.shadowOffsetY = 3; ctx.fillStyle = bg; ctx.fill(sp.b); ctx.restore();
+    ctx.lineCap = 'round'; ctx.strokeStyle = col.shade; ctx.globalAlpha = .45; ctx.lineWidth = 13; ctx.stroke(sp.fos);
+    ctx.strokeStyle = col.boneHi; ctx.globalAlpha = .8; ctx.lineWidth = 3.5; ctx.stroke(sp.lat); ctx.globalAlpha = 1;
+    ctx.strokeStyle = col.boneEdge; ctx.lineWidth = 1.3; ctx.stroke(sp.b);
+    ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.4)'; ctx.shadowBlur = 5; ctx.shadowOffsetY = 3; ctx.fillStyle = col.boneHi; ctx.fill(sp.s); ctx.restore();
+    ctx.lineWidth = 1.2; ctx.stroke(sp.s);
     drawMuscle('lev'); drawMuscle('rmaj'); drawMuscle('rmin');
     if (trapOn(s)){
       TRAP.forEach(drawMuscle);
-      // aponeurose junto à coluna
-      ctx.fillStyle = css(col.tendon); ctx.globalAlpha = .85; ctx.beginPath();
-      ctx.moveTo(0,-236); ctx.lineTo(5,-236); ctx.lineTo(4,-158); ctx.quadraticCurveTo(16,-132, 4,-104); ctx.lineTo(3,199); ctx.lineTo(0,199); ctx.closePath(); ctx.fill(); ctx.globalAlpha = 1;
+      ctx.fillStyle = css(col.hiR,.9); ctx.beginPath();   // aponeurose junto à coluna
+      ctx.moveTo(0,-236); ctx.lineTo(5,-236); ctx.lineTo(4,-158); ctx.quadraticCurveTo(17,-132, 4,-104); ctx.lineTo(3,199); ctx.lineTo(0,199); ctx.closePath(); ctx.fill();
     }
   });
-  // marcadores numerados
-  const marks = [];
+
+  // nomes com linhas de chamada
+  labHit = [];
+  const fs = clamp(12/sc, 11, 19), short = cw < 520, edge = Math.min(cw/(2*sc) - 8/sc, 262);
+  ctx.textBaseline = 'middle'; ctx.lineCap = 'round';
   for (const m of MUS){
-    const isT = TRAP.includes(m.k);
+    const isT = TRAP.includes(m.k), side = isT ? -1 : 1;
     if (isT && layer === 'deep') continue;
     if (!isT && m.k !== 'ser' && layer === 'sup') continue;
-    const f = G.mus[m.k].fibers, fb = m.k === 'ser' ? f[26] : f[Math.floor(f.length/2)], t = m.k === 'ser' ? .75 : .5;
-    marks.push([m, (isT ? -1 : 1)*lerp(fb[0][0],fb[1][0],t), lerp(fb[0][1],fb[1][1],t) + (m.bow ? m.bow[1]*.5 : 0)]);
-  }
-  ctx.font = '600 11px "IBM Plex Mono", monospace'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-  for (const [m,x,y] of marks){
-    ctx.beginPath(); ctx.arc(x,y,9.5,0,7); ctx.fillStyle = col.ink; ctx.globalAlpha = sel === m.k ? 1 : .82; ctx.fill(); ctx.globalAlpha = 1;
-    ctx.fillStyle = col.plate; ctx.fillText(m.n, x, y+.5);
+    const f = G.mus[m.k].fibers, fb = m.k === 'ser' ? f[26] : f[Math.floor(f.length/2)], t = m.k === 'ser' ? .75 : m.k === 'tinf' ? .35 : .5;
+    const px = side*lerp(fb[0][0],fb[1][0],t), py = lerp(fb[0][1],fb[1][1],t) + (m.bow ? m.bow[1]*.5 : 0), on = sel === m.k;
+    ctx.font = `${on ? 600 : 500} ${fs}px "Instrument Sans", system-ui, sans-serif`;
+    const txt = short ? m.curto : m.nome, tw = ctx.measureText(txt).width, pad = fs*.45, bw = tw + pad*2, bh = fs*1.55;
+    const bx = side < 0 ? -edge : edge - bw, by = m.ly - bh/2, ax = side < 0 ? bx + bw : bx;
+    ctx.strokeStyle = col.ink; ctx.globalAlpha = on ? 1 : .6; ctx.lineWidth = (on ? 1.6 : 1)/Math.max(sc,.6);
+    ctx.beginPath(); ctx.moveTo(ax, m.ly); ctx.lineTo(px, py); ctx.stroke();
+    ctx.globalAlpha = 1; ctx.fillStyle = col.ink; ctx.beginPath(); ctx.arc(px, py, on ? 3.4 : 2.6, 0, 7); ctx.fill();
+    ctx.fillStyle = on ? col.accent : css(col.plateR,.88); ctx.beginPath(); ctx.roundRect(bx, by, bw, bh, bh/2); ctx.fill();
+    if (!on){ ctx.strokeStyle = css(col.inkR,.25); ctx.lineWidth = 1/sc; ctx.stroke(); }
+    ctx.fillStyle = on ? col.onAccent : col.ink; ctx.textAlign = 'left'; ctx.fillText(txt, bx + pad, m.ly + fs*.04);
+    labHit.push([m.k, bx, by, bw, bh]);
   }
 }
 
-/* ---------- painel ---------- */
+/* ---------- gaveta e abas ---------- */
+const tabs = [...$('#tabs').querySelectorAll('[role=tab]')];
+let tab = 'mover';
+function showTab(t, open = true){
+  tab = t; tabs.forEach(b => b.setAttribute('aria-selected', b.dataset.t === t));
+  for (const b of tabs) $('#p-' + b.dataset.t).hidden = b.dataset.t !== t;
+  if (open) setOpen(true);
+}
+function setOpen(o){ app.dataset.open = o ? 1 : 0; $('#grip').textContent = o ? '⌄' : '⌃'; }
+tabs.forEach(b => b.onclick = () => showTab(b.dataset.t));
+$('#grip').onclick = () => setOpen(app.dataset.open !== '1');
+
+/* ---------- aba Mover ---------- */
 const PRESETS = [
   ['Neutro', 0, 0, 0], ['Ombros na orelha', .9, .15, 0], ['Escápulas espremidas', .1, 1, 0],
   ['Empurrar', 0, -1, .1], ['Braço acima', .15, -.2, 1], ['Descer e encaixar', -.85, .2, 0]
 ];
 const pre = $('#presets');
 PRESETS.forEach((p,i) => { const b = document.createElement('button'); b.className = 'chip'; b.textContent = p[0]; b.setAttribute('aria-pressed', i === 0);
-  b.onclick = () => { T.elev = p[1]; T.retr = p[2]; T.rot = p[3]; syncSliders(); markPreset(i); if (reduced) Object.assign(P, T); updateRead(); }; pre.append(b); });
+  b.onclick = () => { pauseSession(); T.elev = p[1]; T.retr = p[2]; T.rot = p[3]; syncSliders(); markPreset(i); if (reduced) Object.assign(P, T); updateRead(); }; pre.append(b); });
 const markPreset = i => [...pre.children].forEach((b,j) => b.setAttribute('aria-pressed', i === j));
 const SL = {elev:$('#s-elev'), retr:$('#s-retr'), rot:$('#s-rot')};
 const syncSliders = () => { for (const k in SL) SL[k].value = Math.round(T[k]*100); };
-for (const k in SL) SL[k].oninput = () => { T[k] = SL[k].value/100; markPreset(-1); updateRead(); };
-
+for (const k in SL) SL[k].oninput = () => { pauseSession(); T[k] = SL[k].value/100; markPreset(-1); updateRead(); };
 function seg(id, get, set){
   const el = $(id), paint = () => [...el.children].forEach(b => b.setAttribute('aria-pressed', b.dataset.v === String(get())));
-  [...el.children].forEach(b => b.onclick = () => { set(b.dataset.v); paint(); }); paint();
+  [...el.children].forEach(b => b.onclick = () => { set(b.dataset.v); paint(); }); return paint;
 }
-seg('#seg-breath', () => breathOn ? 1 : 0, v => breathOn = v === '1');
-seg('#seg-layer', () => layer, v => layer = v);
-seg('#seg-color', () => colorMode, v => colorMode = v);
+const paintBreath = seg('#seg-breath', () => breathOn ? 1 : 0, v => breathOn = v === '1'); paintBreath();
+const paintLayer = seg('#seg-layer', () => layer, v => layer = v); paintLayer();
+seg('#seg-color', () => colorMode, v => { colorMode = v; $('#legend').hidden = v !== 'state'; })();
 
+/* ---------- aba Leitura ---------- */
 const rows = $('#rows'), rowEl = {};
 MUS.forEach(m => { const b = document.createElement('button'); b.className = 'row';
-  b.innerHTML = `<span class="num">${m.n}</span><span class="nm">${m.nome}</span><span class="track"><span class="fill"></span></span><span class="pct">0%</span>`;
-  b.onclick = () => select(m.k); rows.append(b); rowEl[m.k] = b; });
+  b.innerHTML = `<span class="nm">${m.nome}</span><span class="track"><span class="fill"></span></span><span class="pct">0%</span>`;
+  b.onclick = () => select(m.k, true); rows.append(b); rowEl[m.k] = b; });
 function updateRows(){
   for (const m of MUS){ const d = delta(m.k)*100, r = rowEl[m.k], f = r.querySelector('.fill'), w = clamp(Math.abs(d)/30,0,1)*50;
     f.style.width = w + '%'; f.style.left = d < 0 ? (50-w) + '%' : '50%'; f.style.background = d < 0 ? 'var(--short)' : 'var(--long)';
     const v = Math.round(d); r.querySelector('.pct').textContent = (v > 0 ? '+' : v < 0 ? '−' : '') + Math.abs(v) + '%'; }
 }
-const air = $('#air');
-air.innerHTML = ['Costelas de trás','Costelas de baixo e dos lados','Ombro sobe ao inspirar'].map((t,i) => `<span>${t}</span><span class="bar"><b id="a${i}"></b></span><em id="e${i}"></em>`).join('');
+$('#air').innerHTML = ['Costelas de trás','Costelas de baixo e dos lados','Ombro sobe ao inspirar'].map((t,i) => `<span>${t}</span><span class="bar"><b id="a${i}"></b></span><em id="e${i}"></em>`).join('');
 function updateAir(){
   const g = geom(T, 0), w = v => v > .9 ? 'abrem livres' : v > .65 ? 'abrem menos' : 'bem presas';
   $('#a0').style.width = clamp(g.back/1.15,0,1)*100 + '%'; $('#e0').textContent = w(g.back);
@@ -479,23 +559,96 @@ function updateRead(){
     'Teste: suba os braços encostada na parede e veja se o ombro encolhe antes de o braço passar da altura do rosto.']);
   if (!out.length) out.push(['Repouso com respiração',
     'A escápula descansa sobre as costelas 2 a 7 e escorrega um pouco a cada respiração. Quando o ar entra, as costelas abrem para os lados e para trás e o serrátil, preso nelas, é esticado de leve. Nenhum músculo precisa segurar o ombro: ele fica pendurado.',
-    'Escolha uma posição acima ou arraste a escápula para comparar com este repouso.']);
+    'Escolha uma posição na aba Mover ou arraste a escápula para comparar com este repouso.']);
   $('#read').innerHTML = out.map(o => `<div><h3>${o[0]}</h3><p>${o[1]}</p><p>${o[2]}</p></div>`).join('');
   updateAir();
 }
-function select(k){
+
+/* ---------- aba Músculo ---------- */
+function select(k, openCard){
   sel = k; const m = byK[k];
   for (const q in rowEl) rowEl[q].setAttribute('aria-pressed', q === k);
-  if (TRAP.includes(k) && layer === 'deep'){ layer = 'half'; $('#seg-layer').children[0].click(); }
-  if (!TRAP.includes(k) && k !== 'ser' && layer === 'sup'){ $('#seg-layer').children[0].click(); }
-  $('#card').innerHTML = `<h3><span class="num">${m.n}</span>${m.nome}</h3><dl>
+  if (TRAP.includes(k) && layer === 'deep'){ layer = 'half'; paintLayer(); }
+  if (!TRAP.includes(k) && k !== 'ser' && layer === 'sup'){ layer = 'half'; paintLayer(); }
+  $('#card').innerHTML = `<h3>${m.nome}</h3><dl>
     <dt>Origem</dt><dd>${m.org}</dd><dt>Inserção</dt><dd>${m.ins}</dd><dt>Faz</dt><dd>${m.acao}</dd>
     <dt>Com o trapézio tenso</dt><dd>${m.tenso}</dd><dt>Como cuidar</dt><dd>${m.cuidar}</dd></dl>`;
+  if (openCard && !S.run) showTab('musculo');
+}
+
+/* ---------- aba Sessão ---------- */
+const ease = u => u*u*(3 - 2*u);
+const rep = (s, up, hold, down) => { const x = s % (up+hold+down); return x < up ? ease(x/up) : x < up+hold ? 1 : 1 - ease((x-up-hold)/down); };
+const SESS = [
+  {fase:'Soltar', t:'Respirar e deixar o ombro pesar', dur:60, mus:'tsup', br:[4,6],
+   how:'Sentada ou em pé. Inspire pelo nariz em 4 tempos e solte o ar em 6. No fim de cada expiração, deixe os ombros descerem sozinhos.',
+   why:'A expiração longa baixa o tônus do trapézio superior antes de mexer nele.',
+   pose:(s,d) => ({elev:lerp(.85,0,ease(s/d)), retr:.1, rot:0})},
+  {fase:'Soltar', t:'Bolinha no trapézio e no canto do pescoço', dur:90, mus:'lev', sides:true,
+   how:'Bolinha entre a parede e o músculo, pressão média. Role devagar ou pare no ponto sensível respirando. Nunca em cima de osso.',
+   why:'Diminui a sensação de rigidez por alguns minutos e abre espaço para o alongamento.',
+   pose:s => ({elev:.25 - .2*osc(s,6), retr:0, rot:0})},
+  {fase:'Alongar', t:'Inclinação lateral do pescoço', dur:60, mus:'tsup', sides:true,
+   how:'Sente sobre a mão do lado que vai alongar para ancorar o ombro embaixo. Leve a orelha em direção ao ombro oposto e fique, tensão de 6 em 10.',
+   why:'Com o ombro ancorado, o trapézio superior e o elevador alongam de verdade em vez de o ombro subir junto.',
+   pose:s => ({elev:-.55 - .15*osc(s,8), retr:0, rot:0})},
+  {fase:'Mobilizar', t:'Gato-camelo abrindo as costas', dur:45, mus:'rmaj',
+   how:'Em quatro apoios. Solte o ar empurrando o chão e arredondando as costas, afastando as escápulas. Inspire voltando e deixando o peito descer.',
+   why:'Devolve o deslize da escápula sobre as costelas e solta romboides e trapézio médio.',
+   pose:s => ({elev:0, retr:lerp(.7,-1,osc(s,6)), rot:0})},
+  {fase:'Ativar', t:'Y deitada de bruços', dur:70, mus:'tinf',
+   how:'De bruços, braços em Y, polegares para cima. Suba os braços puxando as escápulas para baixo, segure 2 s e desça em 3. Pescoço longo.',
+   why:'Acorda o trapézio inferior, o contrapeso que tira trabalho do trapézio superior.',
+   pose:s => { const k = rep(s,2,2,3); return {elev:-.6*k, retr:.3*k, rot:.7*k}; }},
+  {fase:'Ativar', t:'Flexão "plus" na parede', dur:60, mus:'ser',
+   how:'Mãos na parede, braços esticados. Sem dobrar os cotovelos, deixe o peito afundar entre os ombros e depois empurre a parede afastando as escápulas.',
+   why:'É o serrátil que faz esse empurrão final e mantém a escápula colada nas costelas.',
+   pose:s => ({elev:0, retr:lerp(.45,-1,rep(s,2,1,2)), rot:.1})},
+  {fase:'Integrar', t:'Deslizar os braços na parede', dur:50, mus:'ser',
+   how:'Antebraços na parede na largura dos ombros. Deslize para cima até esticar, sem encolher os ombros, e volte devagar.',
+   why:'Junta tudo: serrátil e trapézio inferior giram a escápula enquanto o superior fica quieto.',
+   pose:s => { const k = rep(s,3,1,3); return {elev:.05*k, retr:-.2*k, rot:k}; }},
+  {fase:'Voltar à calma', t:'Respirar nas costas', dur:60, mus:'tmed', br:[4,6],
+   how:'Posição da criança ou sentada abraçando os joelhos. Inspire mandando o ar para o meio das costas, entre as escápulas. Solte em 6 tempos.',
+   why:'Com as escápulas afastadas, as costelas de trás têm espaço para abrir, o contrário do padrão espremido.',
+   pose:() => ({elev:-.1, retr:-.6, rot:0})}
+];
+const S = {i:0, s:0, run:false, done:false};
+$('#steps').innerHTML = SESS.map(() => '<i></i>').join('');
+function paintSession(){
+  const st = SESS[S.i], left = Math.max(0, Math.ceil(st.dur - S.s));
+  [...$('#steps').children].forEach((el,j) => el.className = j < S.i || S.done ? 'done' : j === S.i ? 'now' : '');
+  $('#ss-fase').textContent = S.done ? 'Sessão concluída' : `Etapa ${S.i+1} de ${SESS.length} · ${st.fase}`;
+  $('#ss-title').textContent = S.done ? 'Refaça o teste do braço na parede' : st.t;
+  $('#ss-clock').textContent = S.done ? '0:00' : Math.floor(left/60) + ':' + String(left%60).padStart(2,'0');
+  $('#ss-side').textContent = S.done || !st.sides ? '' : S.s < st.dur/2 ? 'lado direito' : 'troque: lado esquerdo';
+  $('#ss-how').textContent = S.done ? 'Suba os braços encostada na parede e repare se o ombro encolhe menos do que antes. Essa janela dura alguns minutos: é a hora boa para treinar remada, flexão ou desenvolvimento.' : st.how;
+  $('#ss-why').textContent = S.done ? 'Repetir 3 a 5 vezes por semana é o que fixa a mudança.' : st.why;
+  $('#ss-go').textContent = S.done ? 'Recomeçar' : S.run ? 'Pausar' : S.s > 0 || S.i > 0 ? 'Continuar' : 'Começar';
+  $('#ss-prev').disabled = S.i === 0 && !S.done; $('#ss-next').disabled = S.done;
+  const nx = SESS[S.i+1]; $('#ss-after').textContent = S.done ? '' : nx ? `A seguir: ${nx.t} (${nx.fase.toLowerCase()}, ${nx.dur} s).` : 'Última etapa.';
+}
+function enterStep(i){ S.i = i; S.s = 0; S.done = false; const st = SESS[i]; select(st.mus, false); btime = st.br || [2.6,2.6]; ph = 0; markPreset(-1); applySession(); paintSession(); }
+function applySession(){ const st = SESS[S.i]; Object.assign(T, st.pose(S.s, st.dur)); }
+function pauseSession(){ if (S.run){ S.run = false; paintSession(); } btime = [2.6,2.6]; }
+$('#ss-go').onclick = () => {
+  if (S.done){ enterStep(0); S.run = true; }
+  else { S.run = !S.run; if (S.run){ breathOn = true; paintBreath(); if (S.s === 0) enterStep(S.i); else btime = SESS[S.i].br || [2.6,2.6]; } }
+  paintSession();
+};
+$('#ss-prev').onclick = () => enterStep(S.done ? SESS.length-1 : Math.max(0, S.i-1));
+$('#ss-next').onclick = () => { if (S.i < SESS.length-1) enterStep(S.i+1); else { S.done = true; S.run = false; paintSession(); } };
+function tickSession(dt){
+  if (!S.run) return;
+  S.s += dt; const st = SESS[S.i];
+  if (S.s >= st.dur){ if (S.i < SESS.length-1) enterStep(S.i+1); else { S.done = true; S.run = false; Object.assign(T, {elev:0,retr:0,rot:0}); btime = [2.6,2.6]; } }
+  else applySession();
 }
 
 /* ---------- toque e arraste ---------- */
-const toModel = e => { const r = cv.getBoundingClientRect(); return [(e.clientX-r.left)/r.width*VW + VX, (e.clientY-r.top)/r.height*VH + VY]; };
+const toModel = e => { const r = cv.getBoundingClientRect(); return [(e.clientX - r.left - view.ox)/view.sc, (e.clientY - r.top - view.oy)/view.sc]; };
 function pick(mx, my){
+  for (const [k,x,y,w,h] of labHit) if (mx >= x && mx <= x+w && my >= y-4 && my <= y+h+4) return {found:k, onScap:false, sign:mx < 0 ? -1 : 1, label:true};
   const sign = mx < 0 ? -1 : 1, x = Math.abs(mx); let found = null, onScap = false;
   ctx.save(); ctx.setTransform(1,0,0,1,0,0);
   for (const k of [...(trapOn(sign) ? TRAP : []), 'lev','rmin','rmaj','ser']) if (ctx.isPointInPath(hit[k], x, my)){ found = k; break; }
@@ -505,13 +658,13 @@ function pick(mx, my){
 let dragS = null;
 cv.addEventListener('pointerdown', e => { const [mx,my] = toModel(e), p = pick(mx,my);
   dragS = {mx, my, ...p, retr:T.retr, elev:T.elev, moved:false}; if (p.found || p.onScap) cv.setPointerCapture(e.pointerId); });
-cv.addEventListener('pointermove', e => { if (!dragS || !(dragS.found || dragS.onScap)) return;
+cv.addEventListener('pointermove', e => { if (!dragS || dragS.label || !(dragS.found || dragS.onScap)) return;
   const [mx,my] = toModel(e), dx = mx - dragS.mx, dy = my - dragS.my;
-  if (!dragS.moved && Math.hypot(dx,dy) < 5) return; dragS.moved = true; cv.classList.add('drag');
+  if (!dragS.moved && Math.hypot(dx,dy) < 5) return; dragS.moved = true; cv.classList.add('drag'); pauseSession();
   T.retr = P.retr = clamp(dragS.retr - dragS.sign*dx/26, -1, 1);
   if (e.pointerType !== 'touch') T.elev = P.elev = clamp(dragS.elev - dy/30, -1, 1);
   syncSliders(); markPreset(-1); updateRead(); });
-const endDrag = e => { if (dragS && !dragS.moved && dragS.found && e.type === 'pointerup') select(dragS.found); dragS = null; cv.classList.remove('drag'); };
+const endDrag = e => { if (dragS && !dragS.moved && dragS.found && e.type === 'pointerup') select(dragS.found, true); dragS = null; cv.classList.remove('drag'); };
 cv.addEventListener('pointerup', endDrag); cv.addEventListener('pointercancel', endDrag);
 
 /* ---------- laço ---------- */
@@ -523,14 +676,21 @@ let last = 0, tick = 0;
 function frame(ts){
   const dt = Math.min((ts - last)/1000 || 0, .05); last = ts;
   if (breathOn) ph += dt;
-  const b = .5 - .5*Math.cos(2*Math.PI*ph/5.2), k = Math.min(1, dt*7);
+  tickSession(dt);
+  const per = btime[0] + btime[1], x = ph % per;
+  const b = x < btime[0] ? .5 - .5*Math.cos(Math.PI*x/btime[0]) : .5 + .5*Math.cos(Math.PI*(x - btime[0])/btime[1]);
+  const k = Math.min(1, dt*7);
   for (const q in P) P[q] += (T[q] - P[q])*k;
   G = geom(P, b); draw();
-  if (tick++ % 4 === 0){ updateRows(); $('#bbar').style.width = b*100 + '%';
-    $('#bphase').textContent = !breathOn ? 'parada' : (ph % 5.2) < 2.6 ? 'inspira' : 'expira'; }
+  if (tick++ % 4 === 0){
+    if (tab === 'leitura') updateRows();
+    if (S.run || S.done){ paintSession(); if (tick % 16 === 1){ syncSliders(); if (tab === 'leitura') updateRead(); } }
+    $('#bbar').style.width = b*100 + '%';
+    $('#bphase').textContent = !breathOn ? 'parada' : x < btime[0] ? 'inspira' : 'expira';
+  }
   requestAnimationFrame(frame);
 }
-select('tsup'); updateRead();
+select('tsup', false); showTab('mover'); updateRead(); paintSession();
 (document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve()).then(readTheme);
 requestAnimationFrame(frame);
 })();
