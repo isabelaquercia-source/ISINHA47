@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+<title>Body Lab · Motion</title>
+<style>
+  :root { --bg:#070708; --fg:#f2f0ea; --lime:#c8f542; --coral:#ff7a59; --cyan:#5ec8ff; --gold:#e2b857; }
+  * { box-sizing: border-box; }
+  html, body { margin:0; background:var(--bg); color:var(--fg); font-family: system-ui, -apple-system, Segoe UI, sans-serif; min-height:100%; }
+  a { color: inherit; text-decoration: none; }
+  .hub { padding: 1.25rem 1rem 3rem; }
+  .hub h1 { font-size: 1.8rem; margin: 0 0 .35rem; letter-spacing: -.03em; }
+  .hub p { margin:0 0 1.25rem; opacity:.7; font-size:.95rem; }
+  .grid { display:grid; gap:.75rem; }
+  .card {
+    display:block; padding:1rem 1.1rem; border-radius:1rem;
+    border:1px solid #ffffff22; background:#141416;
+  }
+  .card strong { display:block; font-size:1.25rem; margin-bottom:.2rem; }
+  .card span { font-size:.8rem; opacity:.65; }
+  .stage {
+    min-height: 100vh; min-height: 100dvh;
+    display:flex; flex-direction:column;
+    padding: .75rem .85rem 1.5rem;
+  }
+  .bar { display:flex; justify-content:space-between; align-items:center; gap:.5rem; margin-bottom:.5rem; }
+  .bar a, .bar .pill {
+    padding:.45rem .7rem; border-radius:.55rem; background:#ffffff14; font-size:.85rem;
+  }
+  .title { text-align:center; }
+  .title b { display:block; font-size:1rem; }
+  .title small { opacity:.6; font-size:.75rem; }
+  .arena {
+    flex:1; display:grid; place-items:center;
+    border-radius:1.2rem; position:relative; overflow:hidden;
+    background: radial-gradient(ellipse at 50% 40%, #1a2410, #070708 70%);
+    min-height: 58vh;
+  }
+  .arena.atlas { background: radial-gradient(ellipse at 50% 40%, #2a221c, #120e0c 70%); }
+  .arena.link { background: radial-gradient(ellipse at 50% 40%, #123044, #070d12 70%); }
+  .arena.press { background: radial-gradient(ellipse at 50% 40%, #1a3048, #071018 70%); }
+  .arena.lunge { background: radial-gradient(ellipse at 50% 40%, #2a1814, #0a0706 70%); }
+  .fig { width: min(78vw, 320px); height: auto; overflow: visible; }
+  .cue { text-align:center; margin-top:1rem; }
+  .cue h2 { margin:0; font-size:1.6rem; letter-spacing:-.02em; }
+  .cue p { margin:.35rem 0 0; opacity:.7; line-height:1.4; }
+  .brand { font-size: clamp(2.8rem, 14vw, 4.5rem); font-weight:800; letter-spacing:.04em; color:var(--lime); line-height:.9; margin:0; }
+
+  /* —— SQUAT —— */
+  .sq-hip { transform-origin: 110px 170px; animation: squatHip 2.2s ease-in-out infinite; }
+  .sq-thigh-l { transform-origin: 96px 180px; animation: squatTL 2.2s ease-in-out infinite; }
+  .sq-thigh-r { transform-origin: 124px 180px; animation: squatTR 2.2s ease-in-out infinite; }
+  .sq-shin-l { transform-origin: 92px 250px; animation: squatSL 2.2s ease-in-out infinite; }
+  .sq-shin-r { transform-origin: 128px 250px; animation: squatSR 2.2s ease-in-out infinite; }
+  .sq-torso { transform-origin: 110px 90px; animation: squatTorso 2.2s ease-in-out infinite; }
+  @keyframes squatHip { 0%,100%{transform:translateY(0)} 45%{transform:translateY(36px)} 55%{transform:translateY(36px)} }
+  @keyframes squatTL { 0%,100%{transform:rotate(0)} 45%,55%{transform:rotate(48deg)} }
+  @keyframes squatTR { 0%,100%{transform:rotate(0)} 45%,55%{transform:rotate(-48deg)} }
+  @keyframes squatSL { 0%,100%{transform:rotate(0)} 45%,55%{transform:rotate(-55deg)} }
+  @keyframes squatSR { 0%,100%{transform:rotate(0)} 45%,55%{transform:rotate(55deg)} }
+  @keyframes squatTorso { 0%,100%{transform:rotate(0)} 45%,55%{transform:rotate(8deg)} }
+
+  /* —— LUNGE —— */
+  .ln-hip { transform-origin: 120px 165px; animation: lnHip 2.5s ease-in-out infinite; }
+  .ln-fl { transform-origin: 100px 175px; animation: lnFL 2.5s ease-in-out infinite; }
+  .ln-fs { transform-origin: 88px 245px; animation: lnFS 2.5s ease-in-out infinite; }
+  .ln-bl { transform-origin: 140px 175px; animation: lnBL 2.5s ease-in-out infinite; }
+  .ln-arm { transform-origin: 120px 100px; animation: lnArm 2.5s ease-in-out infinite; }
+  @keyframes lnHip { 0%,100%{transform:translate(0,0)} 45%,55%{transform:translate(-4px,18px)} }
+  @keyframes lnFL { 0%,100%{transform:rotate(0)} 45%,55%{transform:rotate(38deg)} }
+  @keyframes lnFS { 0%,100%{transform:rotate(0)} 45%,55%{transform:rotate(-42deg)} }
+  @keyframes lnBL { 0%,100%{transform:rotate(0)} 45%,55%{transform:rotate(-20deg)} }
+  @keyframes lnArm { 0%,100%{transform:rotate(0)} 45%,55%{transform:rotate(-22deg)} }
+
+  /* —— DEADLIFT —— */
+  .dl-torso { transform-origin: 110px 100px; animation: dlTorso 2.4s ease-in-out infinite; }
+  .dl-bar { transform-origin: 110px 200px; animation: dlBar 2.4s ease-in-out infinite; }
+  .dl-thigh { transform-origin: 110px 180px; animation: dlThigh 2.4s ease-in-out infinite; }
+  @keyframes dlTorso { 0%,100%{transform:rotate(0)} 40%,50%{transform:rotate(38deg)} }
+  @keyframes dlBar { 0%,100%{transform:translateY(0)} 40%,50%{transform:translateY(28px)} }
+  @keyframes dlThigh { 0%,100%{transform:rotate(0)} 40%,50%{transform:rotate(12deg)} }
+
+  /* —— PRESS —— */
+  .pr-arms { transform-origin: 110px 110px; animation: prArms 2.3s ease-in-out infinite; }
+  .pr-bar { animation: prBar 2.3s ease-in-out infinite; }
+  @keyframes prArms { 0%,100%{transform:rotate(0)} 45%,55%{transform:translateY(-70px)} }
+  @keyframes prBar { 0%,100%{transform:translateY(0)} 45%,55%{transform:translateY(-90px)} }
+
+  /* —— PLANK pulse —— */
+  .pk-body { transform-origin: 160px 80px; animation: pkPulse 1.6s ease-in-out infinite; }
+  @keyframes pkPulse { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-4px)} }
+
+  .panel:not(:target) { display:none; }
+  #hub:target, #hub { display:block; }
+  .panel:target ~ #hub, #hub:not(:target) { display:none; }
+  /* show hub by default when nothing targeted */
+  body:not(:has(:target)) #hub { display:block; }
+  body:not(:has(:target)) .panel { display:none; }
+  body:has(.panel:target) #hub { display:none; }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<section id="hub" class="hub">
+  <h1>Body Lab</h1>
+  <p>Foco: boneco + movimentação</p>
+  <div class="grid">
+    <a class="card" href="./index.html" style="border-color:#c8f54255;background:linear-gradient(160deg,#1a2410,#141416)"><strong>✦ Boneco</strong><span>Figura principal · movimento</span></a>
+    <a class="card" href="./perfect.html" style="border-color:#c8f54255;background:linear-gradient(160deg,#1a2410,#141416)"><strong>Etapa 1</strong><span>Agachamento IK</span></a>
+    <a class="card" href="./etapa2.html" style="border-color:#5ec8ff55;background:linear-gradient(160deg,#102028,#141416)"><strong>Etapa 2</strong><span>Afundo · terra · press · prancha</span></a>
+    <a class="card" href="./lab.html" style="border-color:#e2b85755;background:linear-gradient(160deg,#241c10,#141416)"><strong>10 protos</strong><span>Lab de interfaces</span></a>
+    <a class="card" href="#forma"><strong>Forma</strong><span>Agachamento em loop</span></a>
+    <a class="card" href="#atlas"><strong>Atlas</strong><span>Afundo</span></a>
+    <a class="card" href="#link"><strong>Link</strong><span>Levantamento terra</span></a>
+    <a class="card" href="#estudio"><strong>Estúdio</strong><span>Desenvolvimento / press</span></a>
+    <a class="card" href="#rolo"><strong>Rolo</strong><span>Prancha com pulse</span></a>
+  </div>
+</section>
+
+<section id="forma" class="panel stage">
+  <div class="bar">
+    <a href="#hub">← Hub</a>
+    <div class="title"><b>Forma</b><small>1/5 · treino</small></div>
+    <a class="pill" href="#atlas">›</a>
+  </div>
+  <div class="arena">
+    <svg class="fig" viewBox="0 0 220 340" aria-hidden="true">
+      <ellipse cx="110" cy="320" rx="50" ry="6" fill="#fff" opacity=".1"/>
+      <g class="sq-torso" fill="#e7e2d6">
+        <circle cx="110" cy="58" r="20"/>
+        <path d="M86 84 C80 120,82 150,90 175 L130 175 C138 150,140 120,134 84 Z" opacity=".92"/>
+        <path d="M94 130 C104 142,116 142,126 130" fill="none" stroke="#c8f542" stroke-width="3" stroke-linecap="round"/>
+        <path d="M78 100 L70 155" stroke="#e7e2d6" stroke-width="11" stroke-linecap="round"/>
+        <path d="M142 100 L150 155" stroke="#e7e2d6" stroke-width="11" stroke-linecap="round"/>
+      </g>
+      <g class="sq-hip">
+        <ellipse cx="110" cy="180" rx="22" ry="10" fill="#e7e2d6" opacity=".9"/>
+        <g class="sq-thigh-l"><path d="M98 185 L92 250" stroke="#e7e2d6" stroke-width="15" stroke-linecap="round"/>
+          <g class="sq-shin-l"><path d="M92 250 L94 310" stroke="#e7e2d6" stroke-width="13" stroke-linecap="round"/><path d="M80 310 H112" stroke="#e7e2d6" stroke-width="9" stroke-linecap="round"/></g>
+        </g>
+        <g class="sq-thigh-r"><path d="M122 185 L128 250" stroke="#e7e2d6" stroke-width="15" stroke-linecap="round"/>
+          <g class="sq-shin-r"><path d="M128 250 L126 310" stroke="#e7e2d6" stroke-width="13" stroke-linecap="round"/><path d="M108 310 H140" stroke="#e7e2d6" stroke-width="9" stroke-linecap="round"/></g>
+        </g>
+      </g>
+    </svg>
+  </div>
+  <div class="cue">
+    <p class="brand">FORMA</p>
+    <h2>Agachamento livre</h2>
+    <p>Desce com controle. Sobe empurrando o chão.</p>
+  </div>
+</section>
+
+<section id="atlas" class="panel stage">
+  <div class="bar">
+    <a href="#hub">← Hub</a>
+    <div class="title"><b>Atlas</b><small>2/5 · anatomia</small></div>
+    <a class="pill" href="#link">›</a>
+  </div>
+  <div class="arena atlas">
+    <svg class="fig" viewBox="0 0 240 340" aria-hidden="true">
+      <ellipse cx="120" cy="320" rx="55" ry="6" fill="#fff" opacity=".08"/>
+      <g fill="#e8dfd4">
+        <circle cx="130" cy="55" r="18"/>
+        <path d="M110 78 C104 120,108 150,116 170 L148 168 C154 140,156 110,150 78 Z" opacity=".9"/>
+        <path d="M120 125 C130 138,142 136,150 124" fill="none" stroke="#ff7a59" stroke-width="3"/>
+        <g class="ln-arm"><path d="M108 95 L75 130" stroke="#e8dfd4" stroke-width="10" stroke-linecap="round"/><path d="M152 95 L190 120" stroke="#e8dfd4" stroke-width="10" stroke-linecap="round"/></g>
+      </g>
+      <g class="ln-hip">
+        <ellipse cx="130" cy="172" rx="20" ry="9" fill="#e8dfd4"/>
+        <g class="ln-fl"><path d="M118 178 L95 245" stroke="#e8dfd4" stroke-width="14" stroke-linecap="round"/>
+          <g class="ln-fs"><path d="M95 245 L98 310" stroke="#e8dfd4" stroke-width="12" stroke-linecap="round"/><path d="M84 310 H116" stroke="#e8dfd4" stroke-width="8" stroke-linecap="round"/></g>
+        </g>
+        <g class="ln-bl"><path d="M142 178 L175 250" stroke="#e8dfd4" stroke-width="14" stroke-linecap="round"/><path d="M175 250 L205 300" stroke="#e8dfd4" stroke-width="12" stroke-linecap="round"/><path d="M190 300 H220" stroke="#e8dfd4" stroke-width="8" stroke-linecap="round"/></g>
+      </g>
+    </svg>
+  </div>
+  <div class="cue">
+    <h2>Afundo reverso</h2>
+    <p>Glúteo e quad trabalhando · joelho estável.</p>
+  </div>
+</section>
+
+<section id="link" class="panel stage">
+  <div class="bar">
+    <a href="#hub">← Hub</a>
+    <div class="title"><b>Link</b><small>3/5 · teleconsulta</small></div>
+    <a class="pill" href="#estudio">›</a>
+  </div>
+  <div class="arena link">
+    <svg class="fig" viewBox="0 0 220 340" aria-hidden="true">
+      <ellipse cx="110" cy="320" rx="55" ry="6" fill="#5ec8ff" opacity=".15"/>
+      <g class="dl-torso" fill="#d9e2ea">
+        <circle cx="110" cy="55" r="19"/>
+        <path d="M86 80 C80 120,84 155,92 175 L128 175 C136 155,140 120,134 80 Z" opacity=".92"/>
+        <path d="M70 110 L55 160" stroke="#d9e2ea" stroke-width="11" stroke-linecap="round"/>
+        <path d="M150 110 L165 160" stroke="#d9e2ea" stroke-width="11" stroke-linecap="round"/>
+      </g>
+      <g class="dl-thigh">
+        <path d="M96 180 L90 250" stroke="#d9e2ea" stroke-width="14" stroke-linecap="round"/>
+        <path d="M124 180 L130 250" stroke="#d9e2ea" stroke-width="14" stroke-linecap="round"/>
+        <path d="M90 250 L92 310" stroke="#d9e2ea" stroke-width="12" stroke-linecap="round"/>
+        <path d="M130 250 L128 310" stroke="#d9e2ea" stroke-width="12" stroke-linecap="round"/>
+      </g>
+      <g class="dl-bar">
+        <rect x="30" y="195" width="160" height="7" rx="3" fill="#5ec8ff"/>
+        <circle cx="30" cy="198" r="12" fill="none" stroke="#5ec8ff" stroke-width="3"/>
+        <circle cx="190" cy="198" r="12" fill="none" stroke="#5ec8ff" stroke-width="3"/>
+      </g>
+    </svg>
+  </div>
+  <div class="cue">
+    <h2>Levantamento terra</h2>
+    <p>Dobradiça de quadril · barra sobe com o tronco.</p>
+  </div>
+</section>
+
+<section id="estudio" class="panel stage">
+  <div class="bar">
+    <a href="#hub">← Hub</a>
+    <div class="title"><b>Estúdio</b><small>4/5 · treino</small></div>
+    <a class="pill" href="#rolo">›</a>
+  </div>
+  <div class="arena press">
+    <svg class="fig" viewBox="0 0 220 340" aria-hidden="true">
+      <ellipse cx="110" cy="320" rx="50" ry="6" fill="#e2b857" opacity=".12"/>
+      <circle cx="110" cy="55" r="19" fill="#f3efe6"/>
+      <path d="M86 80 C80 125,84 155,92 175 L128 175 C136 155,140 125,134 80 Z" fill="#f3efe6" opacity=".92"/>
+      <path d="M96 180 L92 250 L94 310" fill="none" stroke="#f3efe6" stroke-width="13" stroke-linecap="round"/>
+      <path d="M124 180 L128 250 L126 310" fill="none" stroke="#f3efe6" stroke-width="13" stroke-linecap="round"/>
+      <g class="pr-arms">
+        <path d="M84 100 L60 70" stroke="#f3efe6" stroke-width="11" stroke-linecap="round"/>
+        <path d="M136 100 L160 70" stroke="#f3efe6" stroke-width="11" stroke-linecap="round"/>
+      </g>
+      <g class="pr-bar">
+        <rect x="40" y="62" width="140" height="6" rx="3" fill="#e2b857"/>
+        <circle cx="40" cy="65" r="10" fill="none" stroke="#e2b857" stroke-width="3"/>
+        <circle cx="180" cy="65" r="10" fill="none" stroke="#e2b857" stroke-width="3"/>
+      </g>
+    </svg>
+  </div>
+  <div class="cue">
+    <h2>Desenvolvimento</h2>
+    <p>Barra sobe no eixo · escápulas estáveis.</p>
+  </div>
+</section>
+
+<section id="rolo" class="panel stage">
+  <div class="bar">
+    <a href="#hub">← Hub</a>
+    <div class="title"><b>Rolo</b><small>5/5 · core</small></div>
+    <a class="pill" href="#forma">›</a>
+  </div>
+  <div class="arena lunge">
+    <svg class="fig" viewBox="0 0 320 180" aria-hidden="true">
+      <g class="pk-body" fill="none" stroke="#f5f5f5" stroke-width="14" stroke-linecap="round">
+        <ellipse cx="250" cy="55" rx="16" ry="14" fill="#f5f5f5" stroke="none"/>
+        <path d="M70 85 C130 70, 190 68, 235 60"/>
+        <path d="M90 90 V135 M90 135 H70"/>
+        <path d="M210 78 V130 M210 130 H230"/>
+        <path d="M130 78 C160 88, 180 86, 200 78" stroke="#ff7a59" stroke-width="3"/>
+      </g>
+    </svg>
+  </div>
+  <div class="cue">
+    <h2>Prancha</h2>
+    <p>Core travado · respiração firme.</p>
+  </div>
+</section>
+
+</body>
+</html>
