@@ -41,3 +41,11 @@ python3 -m http.server 8768 --bind 127.0.0.1 --directory escapula-viva
 ```
 
 Depois acesse `http://127.0.0.1:8768`.
+
+## Caderno Escápula Viva
+
+Página de ideias meio prototipadas para o aplicativo (cabo de guerra da escápula, para onde o ar vai, onde aperta hoje, teste do braço na parede) e fila de esboços.
+
+```bash
+python3 -m http.server 8769 --bind 127.0.0.1 --directory escapula-ideias
+```

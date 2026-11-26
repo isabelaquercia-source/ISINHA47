@@ -1,0 +1,272 @@
+<title>Caderno Escápula Viva</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Instrument+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: caderno de ideias. Cabeçalho curto, grade de fichas (cada uma com um mini-protótipo que funciona), fila de esboços no fim. */
+:root{
+  --bg:#e7ebe9; --plate:#f3f5f2; --panel:#fbfcfb; --ink:#16252b; --muted:#55676d; --line:#cdd6d3;
+  --accent:#0f5c63; --on-accent:#ffffff;
+  --short:#a3202f; --long:#2b7ba6; --muscle:#c4572f; --bone:#ebe2c9; --bone-edge:#8f8060; --skin:#e3c3b0;
+  --display:"Bricolage Grotesque","Trebuchet MS",sans-serif;
+  --body:"Instrument Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#0f1619; --plate:#141d21; --panel:#1a252a; --ink:#e7eeec; --muted:#9db0b3; --line:#2d3c42;
+  --accent:#72c7cc; --on-accent:#0b1b1e;
+  --short:#e45b6c; --long:#6bb6dc; --muscle:#cf6a3c; --bone:#d9cfb5; --bone-edge:#5f553f; --skin:#3a2c27; color-scheme:dark } }
+:root[data-theme="dark"]{
+  --bg:#0f1619; --plate:#141d21; --panel:#1a252a; --ink:#e7eeec; --muted:#9db0b3; --line:#2d3c42;
+  --accent:#72c7cc; --on-accent:#0b1b1e;
+  --short:#e45b6c; --long:#6bb6dc; --muscle:#cf6a3c; --bone:#d9cfb5; --bone-edge:#5f553f; --skin:#3a2c27; color-scheme:dark }
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.5;
+  padding-block:22px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:1080px;margin:0 auto;display:flex;flex-direction:column;gap:22px}
+header h1{font-family:var(--display);font-weight:700;font-size:clamp(28px,5vw,38px);line-height:1.05;margin:0}
+header p{margin:6px 0 0;color:var(--muted);max-width:60ch}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;align-items:start}
+@media (max-width:760px){.grid{grid-template-columns:minmax(0,1fr)}}
+.idea{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:16px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.idea h2{font-family:var(--display);font-weight:700;font-size:21px;line-height:1.15;margin:0}
+.tag{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.idea p{margin:0;max-width:58ch}
+.falta{font-size:13px;color:var(--muted);border-top:1px dashed var(--line);padding-top:10px}
+.falta b{color:var(--ink);font-weight:600}
+svg{display:block;width:100%;height:auto;background:var(--plate);border:1px solid var(--line);border-radius:4px}
+.out{font-weight:600;min-height:3em}
+.out small{display:block;font-weight:400;color:var(--muted);font-size:13px}
+.sl{display:grid;grid-template-columns:minmax(0,9.5em) minmax(0,1fr);gap:4px 10px;align-items:center;font-size:14px}
+input[type=range]{width:100%;accent-color:var(--accent);margin:0}
+button{font:inherit;color:inherit}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1px solid var(--line);background:var(--bg);border-radius:99px;padding:6px 12px;cursor:pointer;font-weight:500;font-size:14px}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.zone{cursor:pointer;stroke:var(--ink);stroke-width:1;stroke-dasharray:3 3}
+.zone:focus-visible{outline:none;stroke-width:2.5;stroke-dasharray:none}
+.checks{display:flex;flex-direction:column;gap:8px}
+.checks label{display:flex;gap:10px;align-items:flex-start;cursor:pointer}
+.checks input{margin-top:4px;accent-color:var(--accent);flex:none}
+.two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.two h3{margin:0 0 4px;font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-weight:500}
+.two ul{margin:0;padding-left:18px}
+.fila h2{font-family:var(--display);font-weight:500;font-size:20px;margin:0 0 8px}
+.fila ol{margin:0;padding:0;list-style:none;border-top:1px solid var(--line)}
+.fila li{display:grid;grid-template-columns:minmax(0,13em) minmax(0,1fr);gap:4px 16px;padding:10px 0;border-bottom:1px solid var(--line)}
+.fila li b{font-weight:600}
+.fila li span{color:var(--muted)}
+@media (max-width:560px){.fila li{grid-template-columns:minmax(0,1fr)}}
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Caderno Escápula Viva</h1>
+    <p>Quatro ideias novas para o aplicativo, cada uma com um pedaço que já funciona para você mexer, e uma fila de esboços que ainda não saíram do papel.</p>
+  </header>
+
+  <div class="grid">
+
+    <!-- 1 -->
+    <article class="idea">
+      <span class="tag">Ideia 1 · funciona</span>
+      <h2>Cabo de guerra da escápula</h2>
+      <p>A escápula não tem encaixe de osso nas costelas: ela fica onde as cordas deixam. Puxe cada músculo e veja para onde ela vai.</p>
+      <svg id="tug" viewBox="0 0 320 250" role="img" aria-label="Escápula puxada por seis músculos desenhados como cordas"></svg>
+      <div class="sl" id="tug-sl"></div>
+      <div class="out" id="tug-out"></div>
+      <div class="falta"><b>Falta:</b> usar o desenho anatômico da Escápula Viva no lugar das cordas e mostrar o efeito no pescoço.</div>
+    </article>
+
+    <!-- 2 -->
+    <article class="idea">
+      <span class="tag">Ideia 2 · funciona</span>
+      <h2>Para onde o ar vai</h2>
+      <p>O tórax visto de cima, como um anel. Escolha uma postura e veja que parte do anel abre a cada inspiração.</p>
+      <div class="chips" id="air-chips"></div>
+      <svg id="air" viewBox="0 0 320 240" role="img" aria-label="Tórax visto de cima, com o contorno abrindo mais ou menos em cada direção conforme a postura"></svg>
+      <div class="out" id="air-out"></div>
+      <div class="falta"><b>Falta:</b> ritmo guiado (4 tempos para entrar, 6 para sair) e ligar com a posição escolhida na Escápula Viva. As proporções mostram a tendência; não são medida.</div>
+    </article>
+
+    <!-- 3 -->
+    <article class="idea">
+      <span class="tag">Ideia 3 · funciona, guarda neste aparelho</span>
+      <h2>Onde aperta hoje</h2>
+      <p>Toque nas regiões das costas para marcar o quanto estão presas (um toque: leve; dois: médio; três: muito). O aplicativo escolhe por onde começar.</p>
+      <svg id="map" viewBox="0 0 240 250" role="group" aria-label="Costas com sete regiões para marcar tensão"></svg>
+      <div class="out" id="map-out"></div>
+      <div class="chips"><button class="chip" id="map-reset">Limpar marcações</button></div>
+      <div class="falta"><b>Falta:</b> histórico por dia e abrir direto a sessão guiada certa para a região marcada.</div>
+    </article>
+
+    <!-- 4 -->
+    <article class="idea">
+      <span class="tag">Ideia 4 · funciona</span>
+      <h2>Teste do braço na parede</h2>
+      <p>Costas, cabeça e quadril na parede, joelhos um pouco dobrados. Suba os braços esticados devagar e marque o que acontecer.</p>
+      <div class="checks" id="test"></div>
+      <div class="two" id="test-out"></div>
+      <div class="falta"><b>Falta:</b> boneco mostrando cada compensação, anotar o resultado para comparar em 3 a 4 semanas.</div>
+    </article>
+  </div>
+
+  <section class="fila">
+    <h2>Na fila, ainda só no papel</h2>
+    <ol>
+      <li><b>Vista de três quartos</b><span>A prancha girada como na sua primeira imagem, com botão para alternar entre costas e oblíqua.</span></li>
+      <li><b>Mais músculos</b><span>Peitoral menor, escalenos, esternocleidomastoideo e diafragma, para fechar a ligação entre pescoço, ombro e respiração.</span></li>
+      <li><b>O dia em 30 segundos</b><span>Uma linha do tempo com sentada, celular, violão e treino, mostrando a tensão do trapézio subindo e o efeito de pausas curtas.</span></li>
+      <li><b>Antes e depois</b><span>Registrar os números dos testes e ver a evolução a cada 3 ou 4 semanas.</span></li>
+      <li><b>Sessão pela região</b><span>Uma sessão guiada para cada queixa: pescoço, entre as escápulas, lateral das costelas.</span></li>
+    </ol>
+  </section>
+</div>
+
+<script>
+(() => {
+const $ = s => document.querySelector(s);
+const NS = 'http://www.w3.org/2000/svg';
+const el = (tag, at = {}, parent) => { const e = document.createElementNS(NS, tag); for (const k in at) e.setAttribute(k, at[k]); if (parent) parent.append(e); return e; };
+const clamp = (v,a,b) => Math.max(a, Math.min(b, v));
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ===== 1. Cabo de guerra ===== */
+{
+  const svg = $('#tug'), C = [185,118], SHAPE = [[-30,-58],[42,-44],[-18,62]];
+  const M = [
+    {n:'Trapézio superior', A:[118,0],  L:[42,-44]},
+    {n:'Elevador',          A:[84,30],  L:[-30,-58]},
+    {n:'Romboides',         A:[62,72],  L:[-27,0]},
+    {n:'Trapézio médio',    A:[62,96],  L:[6,-50]},
+    {n:'Trapézio inferior', A:[62,226], L:[-26,-36]},
+    {n:'Serrátil anterior', A:[298,196],L:[-18,62]}
+  ];
+  el('line', {x1:62,y1:0,x2:62,y2:250,stroke:'var(--bone-edge)','stroke-width':9,'stroke-linecap':'round',opacity:.5}, svg);
+  for (let i = 0; i < 7; i++) el('path', {d:`M66 ${40+i*28} Q 170 ${22+i*28} 285 ${70+i*30}`, fill:'none', stroke:'var(--bone)', 'stroke-width':7, 'stroke-linecap':'round'}, svg);
+  const ghost = el('polygon', {points:SHAPE.map(p => `${C[0]+p[0]},${C[1]+p[1]}`).join(' '), fill:'none', stroke:'var(--muted)', 'stroke-dasharray':'4 4'}, svg);
+  const ropes = M.map(() => el('line', {'stroke-linecap':'round'}, svg));
+  const scap = el('polygon', {fill:'var(--bone)', stroke:'var(--bone-edge)', 'stroke-width':1.5, 'stroke-linejoin':'round'}, svg);
+  const dots = M.map(() => el('circle', {r:3, fill:'var(--ink)'}, svg));
+  const sl = $('#tug-sl');
+  M.forEach((m,i) => { sl.insertAdjacentHTML('beforeend', `<label for="tg${i}">${m.n}</label><input type="range" id="tg${i}" min="0" max="100" value="30">`); });
+  const inputs = M.map((m,i) => $('#tg'+i));
+  const net = t => { let fx = 0, fy = 0, tq = 0;
+    M.forEach((m,i) => { const dx = m.A[0]-(C[0]+m.L[0]), dy = m.A[1]-(C[1]+m.L[1]), d = Math.hypot(dx,dy), ux = dx/d, uy = dy/d;
+      fx += ux*t[i]; fy += uy*t[i]; tq += (m.L[0]*uy - m.L[1]*ux)*t[i]; });
+    return [fx, fy, tq]; };
+  const base = net(M.map(() => .3));
+  function paint(){
+    const t = inputs.map(i => i.value/100), n = net(t);
+    const dx = clamp((n[0]-base[0])*24, -34, 60), dy = clamp((n[1]-base[1])*30, -45, 40), rot = clamp((n[2]-base[2])*.55, -32, 32), r = rot*Math.PI/180;
+    const W = p => [C[0]+dx + p[0]*Math.cos(r) - p[1]*Math.sin(r), C[1]+dy + p[0]*Math.sin(r) + p[1]*Math.cos(r)];
+    scap.setAttribute('points', SHAPE.map(p => W(p).join(',')).join(' '));
+    M.forEach((m,i) => { const p = W(m.L); ropes[i].setAttribute('x1', m.A[0]); ropes[i].setAttribute('y1', m.A[1]); ropes[i].setAttribute('x2', p[0]); ropes[i].setAttribute('y2', p[1]);
+      ropes[i].setAttribute('stroke', t[i] > .55 ? 'var(--short)' : t[i] < .15 ? 'var(--long)' : 'var(--muscle)'); ropes[i].setAttribute('stroke-width', 2 + t[i]*8);
+      dots[i].setAttribute('cx', p[0]); dots[i].setAttribute('cy', p[1]); });
+    const w = [];
+    if (dy < -8) w.push('sobe em direção à orelha'); if (dy > 8) w.push('desce');
+    if (dx < -8) w.push('cola na coluna'); if (dx > 8) w.push('escorrega para a frente em volta das costelas');
+    if (rot < -6) w.push('gira para cima, como quando o braço sobe'); if (rot > 6) w.push('gira para baixo');
+    const slack = M.filter((m,i) => t[i] < .15).map(m => m.n.toLowerCase());
+    $('#tug-out').innerHTML = (w.length ? 'A escápula ' + w.join(', ') + '.' : 'Cordas equilibradas: a escápula fica no lugar de repouso.') +
+      `<small>${slack.length ? 'Sem puxar: ' + slack.join(', ') + '. Quem sobra faz o trabalho sozinho.' : 'Vermelho puxa forte, laranja é tônus normal, azul está frouxo.'}</small>`;
+  }
+  inputs.forEach(i => i.oninput = paint); paint();
+}
+
+/* ===== 2. Para onde o ar vai ===== */
+let airB = () => {};
+{
+  const svg = $('#air'), cx = 150, cy = 122, RX = 96, RY = 64;
+  const POST = [
+    ['Solta', {f:.7,s:1,k:.85,alto:.15}, 'O anel abre em volta: lados, costas e frente. O alto do peito quase não se mexe.'],
+    ['Ombros na orelha', {f:.75,s:.4,k:.4,alto:1}, 'O ar sobe: o alto do peito e os ombros fazem o trabalho, e os lados e as costas abrem pouco.'],
+    ['Escápulas espremidas', {f:1,s:.6,k:.15,alto:.6}, 'As costas ficam travadas pelas escápulas coladas, e o ar empurra o peito para a frente.'],
+    ['Curvada no celular', {f:.25,s:.6,k:.75,alto:.45}, 'A frente fica dobrada e abre pouco; o ar vai para as costas e para o alto.']
+  ];
+  let cur = POST[0][1], shown = {...cur};
+  el('text', {x:cx, y:16, 'text-anchor':'middle', 'font-size':11, fill:'var(--muted)', 'font-family':'var(--mono)'}, svg).textContent = 'FRENTE';
+  el('text', {x:cx, y:232, 'text-anchor':'middle', 'font-size':11, fill:'var(--muted)', 'font-family':'var(--mono)'}, svg).textContent = 'COSTAS';
+  const ring = el('path', {fill:'var(--skin)', stroke:'var(--accent)', 'stroke-width':2.5}, svg);
+  el('ellipse', {cx, cy, rx:RX, ry:RY, fill:'none', stroke:'var(--muted)', 'stroke-dasharray':'4 4'}, svg);
+  el('ellipse', {cx, cy:cy+RY-12, rx:11, ry:9, fill:'var(--bone)', stroke:'var(--bone-edge)'}, svg);
+  el('rect', {x:cx-9, y:cy-RY+3, width:18, height:7, rx:3, fill:'var(--bone)', stroke:'var(--bone-edge)'}, svg);
+  const sc = [-1,1].map(s => el('rect', {x:cx+s*52-22, y:cy+RY+2, width:44, height:8, rx:4, fill:'var(--bone)', stroke:'var(--bone-edge)'}, svg));
+  el('text', {x:286, y:34, 'text-anchor':'middle', 'font-size':10, fill:'var(--muted)', 'font-family':'var(--mono)'}, svg).textContent = 'ALTO';
+  el('rect', {x:278, y:42, width:16, height:160, rx:4, fill:'var(--line)'}, svg);
+  const alto = el('rect', {x:278, width:16, rx:4, fill:'var(--accent)'}, svg);
+  const chips = $('#air-chips');
+  POST.forEach((p,i) => { const b = document.createElement('button'); b.className = 'chip'; b.textContent = p[0]; b.setAttribute('aria-pressed', i === 0);
+    b.onclick = () => { cur = p[1]; [...chips.children].forEach((c,j) => c.setAttribute('aria-pressed', i === j)); $('#air-out').textContent = p[2]; if (reduced){ shown = {...cur}; airB(1); } }; chips.append(b); });
+  $('#air-out').textContent = POST[0][2];
+  airB = b => {
+    for (const k in shown) shown[k] += (cur[k] - shown[k])*(reduced ? 1 : .08);
+    let d = '';
+    for (let i = 0; i <= 72; i++){ const a = i/72*Math.PI*2, c = Math.cos(a), s = Math.sin(a);
+      const amp = shown.f*Math.max(0,-s)**2 + shown.k*Math.max(0,s)**2 + shown.s*c*c, g = 1 + .2*amp*b;
+      d += (i ? 'L' : 'M') + (cx + RX*c*g).toFixed(1) + ' ' + (cy + RY*s*g).toFixed(1); }
+    ring.setAttribute('d', d + 'Z');
+    const h = 160*shown.alto*(.35 + .65*b); alto.setAttribute('y', 202 - h); alto.setAttribute('height', h);
+    sc.forEach((r,i) => r.setAttribute('transform', `translate(${(i ? 1 : -1)*(cur === POST[2][1] ? -14 : 0)},${-4*shown.k*b})`));
+  };
+  airB(reduced ? 1 : 0);
+}
+
+/* ===== 3. Onde aperta hoje ===== */
+{
+  const svg = $('#map');
+  el('path', {d:'M100 8 h40 v34 q4 16 52 30 q22 8 22 40 v130 h-188 v-130 q0-32 22-40 q48-14 52-30 z', fill:'var(--skin)', stroke:'var(--bone-edge)'}, svg);
+  el('line', {x1:120,y1:44,x2:120,y2:240,stroke:'var(--bone-edge)','stroke-dasharray':'2 5'}, svg);
+  for (const s of [-1,1]) el('path', {d:`M${120+s*26} 92 l${s*46} 10 l${-s*34} 62 z`, fill:'var(--bone)', stroke:'var(--bone-edge)', opacity:.8}, svg);
+  const Z = [
+    {n:'Pescoço', sh:['ellipse',{cx:120,cy:42,rx:20,ry:24}], m:'elevador da escápula e trapézio superior', do:'bolinha suave no canto do pescoço e inclinação lateral por 30 s de cada lado'},
+    {n:'Topo do ombro esquerdo', sh:['ellipse',{cx:70,cy:78,rx:30,ry:13}], m:'trapézio superior', do:'expiração longa deixando o ombro pesar, depois Y deitada para o trapézio inferior'},
+    {n:'Topo do ombro direito', sh:['ellipse',{cx:170,cy:78,rx:30,ry:13}], m:'trapézio superior', do:'expiração longa deixando o ombro pesar, depois Y deitada para o trapézio inferior'},
+    {n:'Entre as escápulas', sh:['rect',{x:102,y:92,width:36,height:72,rx:14}], m:'romboides e trapézio médio', do:'gato-camelo e respirar nas costas; se vive esticado e dolorido, remada com pausa'},
+    {n:'Lateral das costelas, esquerda', sh:['ellipse',{cx:48,cy:170,rx:16,ry:34}], m:'serrátil anterior e latíssimo', do:'rolo na lateral das costas e flexão "plus" na parede'},
+    {n:'Lateral das costelas, direita', sh:['ellipse',{cx:192,cy:170,rx:16,ry:34}], m:'serrátil anterior e latíssimo', do:'rolo na lateral das costas e flexão "plus" na parede'},
+    {n:'Lombar alta', sh:['rect',{x:98,y:186,width:44,height:48,rx:14}], m:'eretores da coluna', do:'soltar quadril e torácica em vez de alongar a lombar; dead bug com respiração'}
+  ];
+  let lv = Z.map(() => 0);
+  try { const s = JSON.parse(localStorage.getItem('ev-mapa') || 'null'); if (Array.isArray(s) && s.length === Z.length) lv = s.map(v => clamp(v|0,0,3)); } catch (e) {}
+  const W = ['', 'leve', 'médio', 'muito'];
+  const nodes = Z.map((z,i) => { const n = el(z.sh[0], {...z.sh[1], class:'zone', tabindex:0, role:'button'}, svg);
+    const tap = () => { lv[i] = (lv[i]+1) % 4; paint(); try { localStorage.setItem('ev-mapa', JSON.stringify(lv)); } catch (e) {} };
+    n.addEventListener('click', tap); n.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); tap(); } }); return n; });
+  function paint(){
+    nodes.forEach((n,i) => { n.setAttribute('fill', lv[i] ? 'var(--short)' : 'transparent'); n.setAttribute('fill-opacity', lv[i]*.28);
+      n.setAttribute('aria-label', Z[i].n + (lv[i] ? ': ' + W[lv[i]] : ': sem marcação')); });
+    const max = Math.max(...lv), i = lv.indexOf(max), n = lv.filter(Boolean).length;
+    $('#map-out').innerHTML = !max ? 'Nada marcado ainda.<small>Toque numa região do desenho.</small>'
+      : `Comece por: ${Z[i].n.toLowerCase()} (${W[max]}).<small>Músculos prováveis: ${Z[i].m}. Experimente ${Z[i].do}.${n > 1 ? ' Depois siga para as outras ' + (n-1) + ' marcadas.' : ''}</small>`;
+  }
+  $('#map-reset').onclick = () => { lv = Z.map(() => 0); paint(); try { localStorage.removeItem('ev-mapa'); } catch (e) {} };
+  paint();
+}
+
+/* ===== 4. Teste do braço na parede ===== */
+{
+  const Q = [
+    ['O ombro encolhe para a orelha antes de o braço passar do rosto', ['trapézio superior','elevador da escápula'], ['serrátil anterior','trapézio inferior']],
+    ['A lombar descola da parede ou as costelas abrem para a frente', ['latíssimo','peitoral'], ['abdominais profundos (dead bug)']],
+    ['Os polegares não chegam na parede', ['peitoral','latíssimo','meio das costas (rolo e livro abrindo)'], ['trapézio médio e inferior (Y e T deitada)']],
+    ['Os cotovelos dobram para conseguir subir', ['latíssimo','parte de trás do ombro'], ['rotadores externos (elástico)']],
+    ['Um braço sobe menos que o outro', ['o lado que sobe menos, primeiro'], ['o mesmo lado, com uma série a mais']]
+  ];
+  const box = $('#test');
+  Q.forEach((q,i) => box.insertAdjacentHTML('beforeend', `<label><input type="checkbox" id="tq${i}"><span>${q[0]}</span></label>`));
+  const paint = () => {
+    const on = Q.filter((q,i) => $('#tq'+i).checked), u = k => [...new Set(on.flatMap(q => q[k]))];
+    $('#test-out').innerHTML = on.length
+      ? `<div><h3 style="color:var(--short)">Soltar e alongar</h3><ul>${u(1).map(x => `<li>${x}</li>`).join('')}</ul></div><div><h3 style="color:var(--long)">Ativar</h3><ul>${u(2).map(x => `<li>${x}</li>`).join('')}</ul></div>`
+      : '<p style="grid-column:1/-1;color:var(--muted)">Nada marcado: se os polegares tocaram a parede sem nada disso acontecer, o teste passou. Marque o que aparecer para ver o plano.</p>';
+  };
+  box.addEventListener('change', paint); paint();
+}
+
+/* laço de respiração da ideia 2 */
+if (!reduced){ const t0 = performance.now(); const loop = t => { airB(.5 - .5*Math.cos((t - t0)/5200*Math.PI*2)); requestAnimationFrame(loop); }; requestAnimationFrame(loop); }
+})();
+</script>
