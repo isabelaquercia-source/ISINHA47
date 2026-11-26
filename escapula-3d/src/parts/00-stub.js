@@ -1,0 +1,1 @@
+EV.register('stub', ({THREE}) => { const g=new THREE.Group(); g.add(new THREE.Mesh(new THREE.TorusKnotGeometry(8,2.5,120,16), new THREE.MeshStandardMaterial({color:0xd4763a,roughness:.4}))); return {group:g, update(){}}; });
