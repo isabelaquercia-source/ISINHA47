@@ -40,6 +40,14 @@
   main { max-width: 920px; margin: 0 auto; padding: 8px 16px 48px; }
   h1 { font-size: clamp(1.8rem, 6vw, 2.6rem); margin: 4px 0 8px; letter-spacing: -.03em; }
   .lead { color: var(--muted); line-height: 1.5; margin: 0 0 18px; max-width: 38rem; }
+  .hero-link {
+    display: block; margin: 0 0 16px; padding: 14px 16px; border-radius: 18px;
+    text-decoration: none; color: inherit;
+    border: 1px solid rgba(126, 231, 176, 0.35);
+    background: linear-gradient(135deg, rgba(94,196,160,.18), rgba(91,99,239,.14));
+  }
+  .hero-link b { display:block; color:#9dffc8; font-size:1.05rem; margin-bottom:4px; }
+  .hero-link span { color: var(--muted); font-size:.88rem; line-height:1.4; }
 
   .tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
   .tabs button {
@@ -126,6 +134,10 @@
   <main>
     <h1>Suas músicas. Tablatura correndo.</h1>
     <p class="lead">Cola a tab de violão/guitarra, sobe o áudio (opcional), define o BPM e aperta play. A linha anda no tempo — estilo prática tipo Yousician, versão 1.</p>
+    <a class="hero-link" href="./rhiannon/">
+      <b>Rhiannon · pista mobile</b>
+      <span>Música completa com melodia, acordes, dedilhado e figuração. Em pé no celular — deita se quiser.</span>
+    </a>
 
     <div class="tabs" id="nav">
       <button class="on" data-view="library">Biblioteca</button>

@@ -1,0 +1,707 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#1B2430">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Rhiannon · Pista</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@500;600;700;800&family=IBM+Plex+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden;overscroll-behavior:none}
+body{
+  font-family:"Figtree",system-ui,sans-serif;color:#F4F7FB;
+  background:#15202B;
+  background:
+    radial-gradient(120% 70% at 50% -10%, rgba(94,196,160,.28), transparent 55%),
+    radial-gradient(90% 55% at 100% 100%, rgba(62,110,190,.22), transparent 50%),
+    linear-gradient(180deg,#24485A 0%,#1B3A52 38%,#18253A 72%,#141C2A 100%);
+  touch-action:manipulation;-webkit-user-select:none;user-select:none;
+  -webkit-font-smoothing:antialiased;
+}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+.app{position:fixed;inset:0;display:flex;flex-direction:column;padding:env(safe-area-inset-top) env(safe-area-inset-right) 0 env(safe-area-inset-left)}
+.top{
+  flex:none;display:flex;align-items:flex-start;justify-content:space-between;gap:10px;
+  padding:10px 14px 6px;z-index:3;
+}
+.brand{min-width:0}
+.brand .kicker{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.62)}
+.brand h1{font-size:clamp(1.35rem,5.2vw,1.85rem);font-weight:800;letter-spacing:-.03em;line-height:1.05;margin-top:2px}
+.brand .sub{margin-top:3px;font-size:12px;color:rgba(230,240,255,.7);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.speed{
+  display:flex;align-items:center;gap:4px;height:36px;padding:0 6px 0 10px;border-radius:18px;
+  background:linear-gradient(90deg,#7EE7B0,#B6F08A);color:#0C3324;font-weight:800;font-variant-numeric:tabular-nums;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.35);
+}
+.speed button{width:28px;height:28px;border-radius:50%;font-weight:800;font-size:16px;line-height:1}
+.speed span{min-width:3.2em;text-align:center;font-family:"IBM Plex Mono",monospace;font-size:13px}
+.sections{
+  flex:none;display:flex;gap:8px;overflow-x:auto;padding:4px 14px 8px;
+  scrollbar-width:none;-webkit-overflow-scrolling:touch;
+}
+.sections::-webkit-scrollbar{display:none}
+.sec{
+  flex:none;padding:8px 12px;border-radius:999px;border:1px solid rgba(255,255,255,.16);
+  background:rgba(0,0,0,.18);font-size:12px;font-weight:700;color:rgba(255,255,255,.78);
+}
+.sec.on{background:#fff;color:#15202B;border-color:#fff}
+.sec .tag{opacity:.65;font-weight:600;margin-left:4px;font-size:10px;text-transform:uppercase}
+.stage{flex:1;min-height:0;position:relative;overflow:hidden}
+.stage canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.badge{
+  position:absolute;left:14px;top:10px;z-index:2;padding:6px 10px;border-radius:10px;
+  background:rgba(12,18,28,.55);backdrop-filter:blur(8px);font-weight:800;font-size:13px;
+  opacity:0;transform:translateY(4px);transition:opacity .18s,transform .18s;pointer-events:none;
+}
+.badge.show{opacity:1;transform:none}
+.badge.ok{color:#8CFFC0}.badge.early{color:#FFD36A}.badge.late{color:#9AD0FF}.badge.miss{color:#FF8E82}
+.bar{
+  flex:none;display:grid;grid-template-columns:46px 1fr auto;align-items:center;gap:12px;
+  padding:10px 14px calc(12px + env(safe-area-inset-bottom));
+  background:linear-gradient(180deg,transparent,rgba(0,0,0,.28));
+}
+.play{
+  width:46px;height:46px;border-radius:50%;background:#5B63EF;
+  display:grid;place-items:center;box-shadow:0 0 0 5px rgba(150,155,255,.28);
+}
+.play svg{width:18px;height:18px;grid-area:1/1}
+.play svg[hidden]{display:none !important}
+.mmw{height:34px;border-radius:10px;overflow:hidden;background:rgba(0,0,0,.28);position:relative}
+.mmw canvas{width:100%;height:100%;display:block}
+.meta{font-size:11px;font-weight:700;color:rgba(255,255,255,.7);text-align:right;min-width:4.5rem;font-family:"IBM Plex Mono",monospace}
+.hint{position:absolute;right:12px;bottom:8px;z-index:2;font-size:11px;font-weight:600;color:rgba(255,255,255,.45)}
+@media (orientation:landscape) and (max-height:500px){
+  .top{padding:6px 12px 2px}
+  .brand h1{font-size:1.15rem}
+  .brand .sub,.brand .kicker{display:none}
+  .sections{padding:2px 12px 4px}
+  .sec{padding:6px 10px;font-size:11px}
+  .bar{padding:6px 12px calc(8px + env(safe-area-inset-bottom))}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <div class="brand">
+      <div class="kicker">Queen · Pista</div>
+      <h1>Rhiannon</h1>
+      <div class="sub" id="modeLabel">Intro · melodia</div>
+    </div>
+    <div class="speed" aria-label="Velocidade">
+      <button type="button" id="spdDown" aria-label="Mais lento">−</button>
+      <span id="spdVal">100%</span>
+      <button type="button" id="spdUp" aria-label="Mais rápido">+</button>
+    </div>
+  </header>
+
+  <nav class="sections" id="sections" aria-label="Seções"></nav>
+
+  <div class="stage" id="stage">
+    <canvas id="cv"></canvas>
+    <div class="badge" id="badge">Perfeito!</div>
+    <div class="hint" id="orientHint">gira o celular se quiser deitar</div>
+  </div>
+
+  <footer class="bar">
+    <button class="play" id="playBtn" aria-label="Play">
+      <svg id="iconPlay" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+      <svg id="iconPause" viewBox="0 0 24 24" fill="currentColor" hidden><path d="M6 5h4v14H6zm8 0h4v14h-4z"/></svg>
+    </button>
+    <div class="mmw" id="mmw"><canvas id="mm"></canvas></div>
+    <div class="meta" id="clock">0:00</div>
+  </footer>
+</div>
+<script>
+(() => {
+  /* ---------- song data (8th-note grid) ---------- */
+  // note: [barSlotAbs, string0=highE..5=lowE wait — we use Yousician-like lowE at bottom = index 5 visually]
+  // string index: 0 = high e (top), 5 = low E (bottom) — matches visual SY order
+  const FC = {0:'#8E8E93',1:'#F2A93B',2:'#B23CF0',3:'#4A9DE9',4:'#2ECC7F'};
+  const CHC = {Am:'#A02CEA',F:'#E3A21F',C:'#3B9BE8',G:'#2ECC7F',Dm:'#E35B7A',Em:'#F2A93B'};
+  const OPEN = [329.63,246.94,196,146.83,110,82.41]; // high e → low E
+
+  // Patterns per bar slot (8)
+  const PAT = {
+    quiet:   [0,0,0,0,0,0,0,0],
+    padrao:  ['D',0,'D',0,'D','U','D','U'],
+    colcheias:['D','U','D','U','D','U','D','U'],
+    leve:    ['D',0,'U',0,'D',0,'U',0],
+  };
+
+  /**
+   * Sections describe bars. Each bar: {chord, pat, notes:[[slot,string,fret,durSlots],...], mode}
+   * Absolute position = barIndex * 8 + slot
+   */
+  const SECTIONS = [
+    {
+      id:'intro', name:'Intro', mode:'melodia', tag:'melodia',
+      bars: [
+        {chord:'Am', pat:'quiet', notes:[[0,2,2,2],[2,1,0,2],[4,0,0,2],[6,1,1,2]]},
+        {chord:'Am', pat:'quiet', notes:[[0,2,2,2],[2,1,0,2],[4,0,0,1],[5,1,1,1],[6,2,2,2]]},
+        {chord:'F',  pat:'quiet', notes:[[0,2,2,2],[2,1,1,2],[4,0,1,2],[6,1,1,2]]},
+        {chord:'F',  pat:'quiet', notes:[[0,2,3,2],[2,1,1,2],[4,0,1,1],[5,1,1,1],[6,2,2,2]]},
+      ]
+    },
+    {
+      id:'verso', name:'Verso', mode:'acordes', tag:'acordes',
+      bars: [
+        {chord:'Am', pat:'padrao', notes:[]},
+        {chord:'Am', pat:'padrao', notes:[]},
+        {chord:'F',  pat:'padrao', notes:[]},
+        {chord:'F',  pat:'padrao', notes:[]},
+        {chord:'Am', pat:'colcheias', notes:[]},
+        {chord:'Am', pat:'colcheias', notes:[]},
+        {chord:'F',  pat:'leve', notes:[]},
+        {chord:'F',  pat:'leve', notes:[]},
+      ]
+    },
+    {
+      id:'dedilhado', name:'Dedilhado', mode:'dedilhado', tag:'p i m a',
+      bars: [
+        // Am arpeggio feel
+        {chord:'Am', pat:'quiet', notes:[[0,5,0,1],[1,4,0,1],[2,3,2,1],[3,2,2,1],[4,1,1,1],[5,2,2,1],[6,3,2,1],[7,4,0,1]]},
+        {chord:'Am', pat:'quiet', notes:[[0,5,0,1],[1,4,0,1],[2,3,2,1],[3,2,2,1],[4,1,1,1],[5,0,0,1],[6,1,1,1],[7,2,2,1]]},
+        {chord:'F',  pat:'quiet', notes:[[0,4,3,1],[1,3,2,1],[2,2,1,1],[3,1,1,1],[4,0,1,1],[5,1,1,1],[6,2,1,1],[7,3,2,1]]},
+        {chord:'F',  pat:'quiet', notes:[[0,4,3,1],[1,3,2,1],[2,2,1,1],[3,1,1,1],[4,2,1,1],[5,3,2,1],[6,4,3,1],[7,3,2,1]]},
+      ]
+    },
+    {
+      id:'figuracao', name:'Figuração', mode:'figuracao', tag:'batida',
+      bars: [
+        {chord:'Am', pat:'colcheias', notes:[]},
+        {chord:'F',  pat:'colcheias', notes:[]},
+        {chord:'C',  pat:'padrao', notes:[]},
+        {chord:'G',  pat:'padrao', notes:[]},
+        {chord:'Am', pat:'leve', notes:[]},
+        {chord:'F',  pat:'leve', notes:[]},
+        {chord:'Dm', pat:'padrao', notes:[]},
+        {chord:'E',  pat:'padrao', notes:[]},
+      ]
+    },
+    {
+      id:'ponte', name:'Ponte', mode:'melodia', tag:'riff',
+      bars: [
+        {chord:'Am', pat:'quiet', notes:[[0,3,2,1],[1,2,2,1],[2,1,0,2],[4,0,0,2],[6,1,1,2]]},
+        {chord:'F',  pat:'quiet', notes:[[0,3,2,1],[1,2,1,1],[2,1,1,2],[4,0,1,2],[6,1,1,2]]},
+        {chord:'C',  pat:'quiet', notes:[[0,2,0,2],[2,1,1,2],[4,0,0,2],[6,1,1,2]]},
+        {chord:'G',  pat:'quiet', notes:[[0,3,0,2],[2,2,0,2],[4,1,0,2],[6,0,3,2]]},
+      ]
+    },
+    {
+      id:'outro', name:'Outro', mode:'melodia', tag:'melodia',
+      bars: [
+        {chord:'Am', pat:'quiet', notes:[[0,2,2,2],[2,1,0,2],[4,0,0,4]]},
+        {chord:'F',  pat:'quiet', notes:[[0,2,2,2],[2,1,1,2],[4,0,1,4]]},
+        {chord:'Am', pat:'quiet', notes:[[0,3,2,2],[2,2,2,2],[4,1,1,2],[6,2,2,2]]},
+        {chord:'Am', pat:'quiet', notes:[[0,1,0,4],[4,2,2,4]]},
+      ]
+    },
+  ];
+  // fix E chord color
+  CHC.E = '#FF7A6E';
+
+  /* flatten */
+  const BARS = [];
+  const SEC_META = [];
+  SECTIONS.forEach((sec) => {
+    const start = BARS.length;
+    sec.bars.forEach((b) => BARS.push({...b, sectionId:sec.id, mode:sec.mode}));
+    SEC_META.push({...sec, start, len:sec.bars.length, end:start + sec.bars.length});
+  });
+  const TOTAL_SLOTS = BARS.length * 8;
+  const BPM0 = 92;
+
+  /* ---------- DOM ---------- */
+  const $ = (id) => document.getElementById(id);
+  const cv = $('cv'), mm = $('mm'), stage = $('stage'), mmw = $('mmw');
+  const badge = $('badge'), modeLabel = $('modeLabel'), clock = $('clock');
+  const spdVal = $('spdVal'), sectionsEl = $('sections');
+  const playBtn = $('playBtn'), iconPlay = $('iconPlay'), iconPause = $('iconPause');
+
+  SEC_META.forEach((s, i) => {
+    const b = document.createElement('button');
+    b.className = 'sec' + (i===0?' on':'');
+    b.type = 'button';
+    b.dataset.i = i;
+    b.innerHTML = `${s.name}<span class="tag">${s.tag}</span>`;
+    b.addEventListener('click', () => jumpSection(i, true));
+    sectionsEl.appendChild(b);
+  });
+
+  /* ---------- state ---------- */
+  let speed = 1;
+  let playing = false;
+  let pos = 0; // in slots (float)
+  let raf = 0;
+  let lastTs = 0;
+  let loopSec = 0; // section index to loop; -1 = whole song once then stop? we'll loop current section if double-tapped — keep simple: loop active section when finished
+  let loopOn = true;
+  let activeSec = 0;
+  let audioCtx = null;
+  let lastHitSlot = -1;
+  let feedbackTimer = 0;
+
+  /* ---------- layout / draw ---------- */
+  let W=390, H=640, dpr=1, cx, mx, G={};
+
+  function prep(canvas, w, h) {
+    dpr = Math.min(window.devicePixelRatio || 1, 2.5);
+    canvas.width = Math.max(1, Math.round(w * dpr));
+    canvas.height = Math.max(1, Math.round(h * dpr));
+    canvas.style.width = w + 'px';
+    canvas.style.height = h + 'px';
+    const c = canvas.getContext('2d');
+    c.setTransform(dpr, 0, 0, dpr, 0, 0);
+    return c;
+  }
+
+  function size() {
+    W = stage.clientWidth; H = stage.clientHeight;
+    cx = prep(cv, W, H);
+    mx = prep(mm, mmw.clientWidth, mmw.clientHeight);
+    const land = window.matchMedia('(orientation: landscape)').matches && H < 500;
+    const SS = Math.max(14, Math.min(land ? 18 : 22, Math.min(H * 0.028, W * 0.045)));
+    const boardH = SS * 6.9;
+    const edge = SS * 0.42;
+    const lh = land ? 42 : 52;
+    const topPad = land ? 36 : 56;
+    const botPad = lh + (land ? 18 : 28);
+    let by = Math.round(Math.max(topPad, Math.min(H - boardH - edge - botPad, land ? H * 0.28 : H * 0.42)));
+    const SY = [0,1,2,3,4,5].map((s) => by + SS * 0.45 + SS * (s + 0.5));
+    const PX = Math.max(14, Math.min(land ? 28 : 32, W / (land ? 18 : 14)));
+    const PHX = Math.round(W * (land ? 0.32 : 0.38));
+    G = {land, SS, boardH, edge, by, SY, NH:SS, R:SS/2, BR:Math.max(4.2, SS*.32), PX, PHX, ly: by + boardH + edge + 10, lh};
+    $('orientHint').style.display = land ? 'none' : 'block';
+  }
+
+  const Xof = (p, pos) => G.PHX + (p - pos) * G.PX;
+
+  function rr(c, x, y, w, h, r) {
+    r = Math.max(0, Math.min(r, w/2, h/2));
+    c.beginPath();
+    c.moveTo(x+r,y); c.arcTo(x+w,y,x+w,y+h,r); c.arcTo(x+w,y+h,x,y+h,r);
+    c.arcTo(x,y+h,x,y,r); c.arcTo(x,y,x+w,y,r); c.closePath();
+  }
+
+  function sectionAtSlot(slot) {
+    const bar = Math.max(0, Math.min(BARS.length - 1, Math.floor(slot / 8)));
+    return SEC_META.findIndex((s) => bar >= s.start && bar < s.end);
+  }
+
+  function gatherHits(pmin, pmax) {
+    // hit points for ball: note starts + strum hits
+    const pts = [];
+    const a0 = Math.max(0, Math.floor(pmin / 8) - 1);
+    const a1 = Math.min(BARS.length - 1, Math.floor(pmax / 8) + 1);
+    for (let a = a0; a <= a1; a++) {
+      const bar = BARS[a];
+      const base = a * 8;
+      const pat = PAT[bar.pat] || PAT.quiet;
+      if (bar.notes && bar.notes.length) {
+        bar.notes.forEach(([slot, s, fr, d]) => {
+          const y = G.SY[s] - G.R - G.BR;
+          pts.push({p: base + slot, y, kind:'note', s, fr, d, chord: bar.chord});
+        });
+      } else {
+        for (let i = 0; i < 8; i++) {
+          if (!pat[i]) continue;
+          const y = G.ly - 6;
+          pts.push({p: base + i, y, kind:'strum', dir: pat[i], chord: bar.chord});
+        }
+      }
+    }
+    pts.sort((u,v) => u.p - v.p || u.y - v.y);
+    // unique by p (keep highest priority note)
+    const uniq = [];
+    let lastP = -999;
+    pts.forEach((pt) => {
+      if (pt.p === lastP) return;
+      uniq.push(pt); lastP = pt.p;
+    });
+    return uniq;
+  }
+
+  function drawBoard(pos) {
+    const c = cx;
+    const {SS, boardH, edge, by, SY, NH, R, BR, PX, PHX, ly, lh} = G;
+    const pmin = pos - PHX / PX - 3;
+    const pmax = pos + (W - PHX) / PX + 3;
+
+    // soft backdrop bands
+    c.clearRect(0,0,W,H);
+    c.fillStyle = 'rgba(255,255,255,.04)';
+    for (let i = 0; i < 4; i++) {
+      const y = H * (0.12 + i * 0.2);
+      c.beginPath();
+      c.ellipse(W*0.5, y, W*0.7, 28, 0, 0, Math.PI*2);
+      c.fill();
+    }
+
+    // measure lines above board
+    for (let b = Math.ceil(pmin/8)*8; b <= pmax; b += 8) {
+      if (b < 0) continue;
+      const x = Xof(b, pos);
+      c.fillStyle = 'rgba(255,255,255,.12)';
+      c.fillRect(x - 0.6, 0, 1.2, by);
+    }
+
+    // fretboard
+    c.fillStyle = '#2A2A30';
+    c.fillRect(0, by, W, boardH);
+    c.fillStyle = '#1C1C22';
+    c.fillRect(0, by + boardH, W, edge);
+    c.fillStyle = 'rgba(255,255,255,.06)';
+    c.fillRect(0, by, W, 1);
+
+    // frets with slight perspective
+    const mid = W/2, k = 0.1, T = boardH + edge;
+    for (let b = Math.floor(pmin/2)*2; b <= pmax; b += 2) {
+      const x = Xof(b, pos);
+      const xb = x + (x - mid) * k;
+      const bar = ((b % 8) + 8) % 8 === 0;
+      c.strokeStyle = '#15151A';
+      c.lineWidth = bar ? 2.6 : 1.6;
+      c.beginPath(); c.moveTo(x, by); c.lineTo(xb, by + T); c.stroke();
+    }
+
+    // strings
+    const SW = [1.2,1.5,1.9,2.3,2.7,3.1];
+    SY.forEach((y, s) => {
+      const lw = SW[s] * (SS / 16);
+      c.lineWidth = lw;
+      c.strokeStyle = 'rgba(0,0,0,.35)';
+      c.beginPath(); c.moveTo(0, y + lw*.8); c.lineTo(W, y + lw*.8); c.stroke();
+      c.strokeStyle = s < 3 ? '#E8E8EE' : '#B39A66';
+      c.beginPath(); c.moveTo(0, y); c.lineTo(W, y); c.stroke();
+      if (s >= 3) {
+        c.setLineDash([1, 1.4]);
+        c.strokeStyle = '#76603D';
+        c.beginPath(); c.moveTo(0, y); c.lineTo(W, y); c.stroke();
+        c.setLineDash([]);
+      }
+    });
+
+    // playhead rail
+    c.fillStyle = 'rgba(255,255,255,.14)';
+    c.fillRect(PHX - 1, by - 8, 2, boardH + edge + lh + 22);
+
+    // notes + chord lane
+    const a0 = Math.max(0, Math.floor(pmin / 8));
+    const a1 = Math.min(BARS.length - 1, Math.floor(pmax / 8));
+    for (let a = a0; a <= a1; a++) {
+      const bar = BARS[a];
+      const base = a * 8;
+      // chord block under board
+      const x0 = Xof(base, pos) - PX/2 + 1;
+      const x1 = Xof(base + 8, pos) - PX/2 - 2;
+      const done = base + 8 <= pos;
+      const act = base <= pos && pos < base + 8;
+      c.save();
+      c.globalAlpha = done ? 0.4 : 1;
+      rr(c, x0, ly, x1 - x0, lh, 10);
+      c.fillStyle = CHC[bar.chord] || '#888';
+      c.fill();
+      if (act) { c.lineWidth = 1.8; c.strokeStyle = 'rgba(255,255,255,.9)'; c.stroke(); }
+      c.fillStyle = '#fff';
+      c.font = '800 12px Figtree,sans-serif';
+      c.textAlign = 'left'; c.textBaseline = 'alphabetic';
+      c.fillText(bar.chord, Math.min(Math.max(x0 + 8, 8), x1 - 28), ly + 14);
+
+      const pat = PAT[bar.pat] || PAT.quiet;
+      for (let i = 0; i < 8; i++) {
+        const ax = Xof(base + i, pos);
+        if (ax < -8 || ax > W + 8) continue;
+        const t = pat[i];
+        const on = Math.floor(pos) === base + i && playing;
+        if (!t) {
+          c.beginPath(); c.arc(ax, ly + 28, 1.5, 0, Math.PI*2);
+          c.fillStyle = 'rgba(255,255,255,.4)'; c.fill();
+        } else {
+          c.strokeStyle = on ? '#FFF1A6' : 'rgba(255,255,255,.95)';
+          c.lineWidth = (t === 'D' ? 2.2 : 1.7) + (on ? 0.8 : 0);
+          c.lineCap = 'round'; c.lineJoin = 'round';
+          c.beginPath();
+          if (t === 'D') {
+            c.moveTo(ax, ly+18); c.lineTo(ax, ly+36);
+            c.moveTo(ax-3.4, ly+32); c.lineTo(ax, ly+36); c.lineTo(ax+3.4, ly+32);
+          } else {
+            c.moveTo(ax, ly+36); c.lineTo(ax, ly+18);
+            c.moveTo(ax-3.1, ly+22); c.lineTo(ax, ly+18); c.lineTo(ax+3.1, ly+22);
+          }
+          c.stroke();
+        }
+      }
+      c.restore();
+
+      // note pills
+      (bar.notes || []).forEach(([slot, s, fr, d]) => {
+        const p = base + slot;
+        const x = Xof(p, pos);
+        if (x + d * PX < -12 || x - R > W + 12) return;
+        const y = SY[s];
+        const w = Math.max(NH, d * PX - 2);
+        const ndone = p + d <= pos;
+        const nact = p <= pos && pos < p + d;
+        rr(c, x - R, y - R, w, NH, R);
+        c.fillStyle = ndone ? '#2ECC7F' : (FC[fr] || FC[1]);
+        c.fill();
+        if (nact) { c.lineWidth = 2; c.strokeStyle = '#fff'; c.stroke(); }
+        c.fillStyle = '#fff';
+        c.font = `800 ${Math.round(NH*0.68)}px IBM Plex Mono,monospace`;
+        c.textAlign = 'center'; c.textBaseline = 'middle';
+        c.fillText(String(fr), x, y + 0.5);
+      });
+    }
+
+    // ball + dotted arc
+    const hits = gatherHits(pmin, pmax);
+    let ball = null;
+    for (let i = 0; i < hits.length - 1; i++) {
+      const A = hits[i], B = hits[i+1];
+      const xa = Xof(A.p, pos), xb = Xof(B.p, pos);
+      const dp = Math.max(0.001, B.p - A.p);
+      const cy = Math.min(A.y, B.y) - SS * (1.15 + 0.7 * Math.min(dp, 4));
+      if (A.p <= pos && pos < B.p) {
+        const u = (pos - A.p) / dp;
+        const y = (1-u)*(1-u)*A.y + 2*u*(1-u)*cy + u*u*B.y;
+        ball = {x: PHX, y};
+      }
+      if (xb < -8 || xa > W + 8) continue;
+      const n = Math.max(4, Math.round((xb - xa) / 4.5));
+      for (let j = 1; j < n; j++) {
+        const u = j / n;
+        const xx = xa + (xb - xa) * u;
+        if (xx < -4 || xx > W + 4) continue;
+        const yy = (1-u)*(1-u)*A.y + 2*u*(1-u)*cy + u*u*B.y;
+        c.beginPath(); c.arc(xx, yy, 1.5, 0, Math.PI*2);
+        c.fillStyle = xx < PHX ? 'rgba(225,230,240,.45)' : '#6EC3F2';
+        c.fill();
+      }
+    }
+    // lead-in / after last
+    if (!ball && hits.length) {
+      if (pos < hits[0].p) ball = {x: PHX, y: hits[0].y};
+      else if (pos >= hits[hits.length-1].p) ball = {x: PHX, y: hits[hits.length-1].y};
+    }
+    if (ball) {
+      c.beginPath(); c.arc(ball.x, ball.y, BR, 0, Math.PI*2);
+      c.fillStyle = '#fff'; c.fill();
+      c.beginPath(); c.arc(ball.x, ball.y, BR + 3, 0, Math.PI*2);
+      c.strokeStyle = 'rgba(255,255,255,.35)'; c.lineWidth = 2; c.stroke();
+    }
+  }
+
+  function drawMinimap(pos) {
+    const c = mx;
+    const w = mmw.clientWidth, h = mmw.clientHeight;
+    c.clearRect(0,0,w,h);
+    const slotW = w / TOTAL_SLOTS;
+    BARS.forEach((bar, a) => {
+      c.fillStyle = CHC[bar.chord] || '#666';
+      c.globalAlpha = 0.85;
+      c.fillRect(a * 8 * slotW, 8, 8 * slotW - 0.6, h - 16);
+    });
+    c.globalAlpha = 1;
+    // section markers
+    SEC_META.forEach((s) => {
+      const x = s.start * 8 * slotW;
+      c.fillStyle = 'rgba(255,255,255,.55)';
+      c.fillRect(x, 0, 1, h);
+    });
+    const px = Math.min(w - 3, Math.max(0, pos * slotW));
+    c.fillStyle = '#fff';
+    c.fillRect(px - 1.5, 2, 3, h - 4);
+  }
+
+  function fmtTime(slots) {
+    const sec = (slots / 8) * (60 / (BPM0 * speed)) * 4; // 4 beats/bar — wait: 8 slots = 1 bar = 4 beats at BPM
+    // slots are eighths: 2 slots = 1 beat. time = slots * (60/BPM)/2
+    const t = slots * (60 / (BPM0 * speed)) / 2;
+    const m = Math.floor(t / 60);
+    const s = Math.floor(t % 60);
+    return m + ':' + String(s).padStart(2,'0');
+  }
+
+  function syncChrome() {
+    const si = sectionAtSlot(pos);
+    if (si !== activeSec && si >= 0) {
+      activeSec = si;
+      [...sectionsEl.children].forEach((el, i) => el.classList.toggle('on', i === si));
+    }
+    if (si >= 0) {
+      const s = SEC_META[si];
+      modeLabel.textContent = `${s.name} · ${s.tag}`;
+    }
+    clock.textContent = fmtTime(pos);
+    spdVal.textContent = Math.round(speed * 100) + '%';
+  }
+
+  function frame() {
+    drawBoard(pos);
+    drawMinimap(pos);
+    syncChrome();
+  }
+
+  /* ---------- audio ---------- */
+  function ensureAudio() {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+  }
+
+  function pluck(freq, when, gain) {
+    if (!audioCtx) return;
+    const t0 = when || audioCtx.currentTime;
+    const o = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    o.type = 'triangle';
+    o.frequency.value = freq;
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.exponentialRampToValueAtTime(gain || 0.18, t0 + 0.01);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.45);
+    o.connect(g); g.connect(audioCtx.destination);
+    o.start(t0); o.stop(t0 + 0.5);
+  }
+
+  function chordFreqs(name) {
+    // rough open-position voicings high→low mapped to OPEN indices
+    const map = {
+      Am:[[0,0],[1,1],[2,2],[3,2],[4,0],[5,0]],
+      F: [[0,1],[1,1],[2,2],[3,3],[4,3],[5,-1]],
+      C: [[0,0],[1,1],[2,0],[3,2],[4,3],[5,-1]],
+      G: [[0,3],[1,0],[2,0],[3,0],[4,2],[5,3]],
+      Dm:[[0,1],[1,3],[2,2],[3,0],[4,-1],[5,-1]],
+      Em:[[0,0],[1,0],[2,0],[3,2],[4,2],[5,0]],
+      E: [[0,0],[1,0],[2,1],[3,2],[4,2],[5,0]],
+    };
+    const frets = map[name] || map.Am;
+    const out = [];
+    frets.forEach(([s, fr]) => {
+      if (fr < 0) return;
+      out.push(OPEN[s] * Math.pow(2, fr / 12));
+    });
+    return out;
+  }
+
+  function triggerAtSlot(slot) {
+    const bar = BARS[Math.floor(slot / 8)];
+    if (!bar) return;
+    const i = ((slot % 8) + 8) % 8;
+    const notes = (bar.notes || []).filter((n) => n[0] === i);
+    if (notes.length) {
+      notes.forEach((n) => {
+        const s = n[1], fr = n[2];
+        const f = OPEN[s] * Math.pow(2, fr / 12);
+        pluck(f, audioCtx.currentTime, 0.16);
+      });
+      flash('Perfeito!', 'ok');
+      return;
+    }
+    const pat = PAT[bar.pat] || PAT.quiet;
+    if (pat[i]) {
+      const freqs = chordFreqs(bar.chord);
+      const step = pat[i] === 'D' ? 1 : -1;
+      const ordered = step === 1 ? freqs.slice().reverse() : freqs.slice();
+      ordered.forEach((f, idx) => pluck(f, audioCtx.currentTime + idx * 0.012, 0.11));
+      flash(Math.random() > 0.15 ? 'Perfeito!' : 'Um pouco atrasado', Math.random() > 0.15 ? 'ok' : 'late');
+    }
+  }
+
+  function flash(text, kind) {
+    badge.textContent = text;
+    badge.className = 'badge show ' + kind;
+    clearTimeout(feedbackTimer);
+    feedbackTimer = setTimeout(() => badge.classList.remove('show'), 480);
+  }
+
+  /* ---------- transport ---------- */
+  function jumpSection(i, restartLoop) {
+    activeSec = i;
+    pos = SEC_META[i].start * 8;
+    lastHitSlot = Math.floor(pos) - 1;
+    [...sectionsEl.children].forEach((el, j) => el.classList.toggle('on', j === i));
+    if (restartLoop) loopOn = true;
+    frame();
+  }
+
+  function tick(ts) {
+    if (!playing) return;
+    if (!lastTs) lastTs = ts;
+    const dt = Math.min(0.05, (ts - lastTs) / 1000);
+    lastTs = ts;
+    // slots per second: 2 eighths per beat * (BPM/60) * speed
+    const sps = 2 * (BPM0 / 60) * speed;
+    pos += dt * sps;
+
+    const slot = Math.floor(pos);
+    if (slot !== lastHitSlot && slot >= 0 && slot < TOTAL_SLOTS) {
+      // trigger any crossed integers
+      for (let s = lastHitSlot + 1; s <= slot; s++) triggerAtSlot(s);
+      lastHitSlot = slot;
+    }
+
+    const sec = SEC_META[activeSec];
+    const endSlot = (loopOn ? sec.end : BARS.length) * 8;
+    if (pos >= endSlot) {
+      if (loopOn) {
+        pos = sec.start * 8;
+        lastHitSlot = Math.floor(pos) - 1;
+      } else if (activeSec < SEC_META.length - 1) {
+        jumpSection(activeSec + 1, false);
+      } else {
+        pos = 0; lastHitSlot = -1; stop();
+      }
+    }
+    frame();
+    raf = requestAnimationFrame(tick);
+  }
+
+  function play() {
+    ensureAudio();
+    playing = true;
+    lastTs = 0;
+    iconPlay.hidden = true; iconPause.hidden = false;
+    raf = requestAnimationFrame(tick);
+  }
+  function stop() {
+    playing = false;
+    cancelAnimationFrame(raf);
+    iconPlay.hidden = false; iconPause.hidden = true;
+    frame();
+  }
+  function toggle() { playing ? stop() : play(); }
+
+  playBtn.addEventListener('click', toggle);
+  $('spdDown').addEventListener('click', () => { speed = Math.max(0.5, Math.round((speed - 0.05)*100)/100); syncChrome(); });
+  $('spdUp').addEventListener('click', () => { speed = Math.min(1.25, Math.round((speed + 0.05)*100)/100); syncChrome(); });
+
+  // scrub minimap
+  function scrub(clientX) {
+    const rect = mmw.getBoundingClientRect();
+    const u = Math.min(1, Math.max(0, (clientX - rect.left) / rect.width));
+    pos = u * TOTAL_SLOTS;
+    lastHitSlot = Math.floor(pos) - 1;
+    const si = sectionAtSlot(pos);
+    if (si >= 0) activeSec = si;
+    frame();
+  }
+  mmw.addEventListener('pointerdown', (e) => { mmw.setPointerCapture(e.pointerId); scrub(e.clientX); });
+  mmw.addEventListener('pointermove', (e) => { if (e.buttons) scrub(e.clientX); });
+
+  window.addEventListener('resize', () => { size(); frame(); });
+  window.addEventListener('orientationchange', () => setTimeout(() => { size(); frame(); }, 180));
+
+  // boot
+  size();
+  jumpSection(0, true);
+  frame();
+})();
+</script>
+</body>
+</html>
