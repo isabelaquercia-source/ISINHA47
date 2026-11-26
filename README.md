@@ -44,7 +44,7 @@ Depois acesse `http://127.0.0.1:8768`.
 
 ## Caderno Escápula Viva
 
-Página de ideias meio prototipadas para o aplicativo (cabo de guerra da escápula, para onde o ar vai, onde aperta hoje, teste do braço na parede) e fila de esboços.
+Quatro demonstrações no desenho anatômico (levantar o braço, peito aberto à força, ombro alto, empurrar): como dá errado, como fica bom, onde se sente e o que fazer.
 
 ```bash
 python3 -m http.server 8769 --bind 127.0.0.1 --directory escapula-ideias
