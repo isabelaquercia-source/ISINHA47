@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8"/>
+<meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
 <title>Body Lab · Movimento</title>
 <style>
@@ -164,17 +164,20 @@
   </main>
   <script>
 /**
- * Corpo Engine — representação de movimento corporal para consulta.
- * Foco: silhueta muda de verdade, músculo ativo, ação legível.
+ * CorpoEngine — movimento corporal para consulta.
+ * IK de 2 ossos com pé plantado, músculo ativo, ações legíveis, yaw.
  */
 window.CorpoEngine = (() => {
+  const FLOOR_Y = 500;
+  const L1 = 94;
+  const L2 = 88;
+
   const ACTIONS = [
     {
       id: "segura",
       label: "Segura a pelve",
       cue: "SEGURA",
       tip: "Glúteo médio do lado de apoio trava a pelve. Sem cair pro lado.",
-      muscle: "medioApoio",
       view: "back",
       kind: "singleLeg",
     },
@@ -183,7 +186,6 @@ window.CorpoEngine = (() => {
       label: "Abre a perna",
       cue: "ABRE",
       tip: "Abdutor leva a perna livre pra fora. Pelve quieta.",
-      muscle: "medioLivre",
       view: "back",
       kind: "abduct",
     },
@@ -192,7 +194,6 @@ window.CorpoEngine = (() => {
       label: "Freia o joelho",
       cue: "FREIA",
       tip: "No pouso, o músculo freia o joelho pra dentro.",
-      muscle: "medioApoio",
       view: "back",
       kind: "valgus",
     },
@@ -201,7 +202,6 @@ window.CorpoEngine = (() => {
       label: "Gira a coxa",
       cue: "GIRA",
       tip: "Rotação externa da coxa de apoio — pé firme, joelho rastreia.",
-      muscle: "medioApoio",
       view: "back",
       kind: "rotate",
     },
@@ -210,7 +210,6 @@ window.CorpoEngine = (() => {
       label: "Agacha",
       cue: "DESCE",
       tip: "Quadril pra trás e baixo. Joelho e peito do pé alinhados.",
-      muscle: "quadGlute",
       view: "side",
       kind: "squat",
     },
@@ -219,7 +218,6 @@ window.CorpoEngine = (() => {
       label: "Afunda",
       cue: "AVANÇA",
       tip: "Passo longo. Joelho da frente estável, tronco alto.",
-      muscle: "gluteQuad",
       view: "side",
       kind: "lunge",
     },
@@ -234,7 +232,6 @@ window.CorpoEngine = (() => {
   function easeInOut(t) {
     return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
   }
-  /** ping-pong 0→1→0 */
   function wave(t) {
     const x = t % 1;
     if (x < 0.45) return easeInOut(x / 0.45);
@@ -243,14 +240,38 @@ window.CorpoEngine = (() => {
     return 0;
   }
 
+  /** 2-bone IK: hip → knee → foot. Returns joint angles in degrees. */
+  function ik(hipX, hipY, footX, footY, len1 = L1, len2 = L2) {
+    let dx = footX - hipX;
+    let dy = footY - hipY;
+    let d = Math.hypot(dx, dy);
+    d = clamp(d, Math.abs(len1 - len2) + 1, len1 + len2 - 1);
+    const base = (Math.atan2(dx, dy) * 180) / Math.PI;
+    const cosA = (len1 * len1 + d * d - len2 * len2) / (2 * len1 * d);
+    const a = (Math.acos(clamp(cosA, -1, 1)) * 180) / Math.PI;
+    const thighDeg = base - a;
+    const kneeX = hipX + len1 * Math.sin((thighDeg * Math.PI) / 180);
+    const kneeY = hipY + len1 * Math.cos((thighDeg * Math.PI) / 180);
+    const shinDeg =
+      (Math.atan2(footX - kneeX, footY - kneeY) * 180) / Math.PI - thighDeg;
+    return {
+      thighDeg,
+      shinDeg,
+      footDeg: -(thighDeg + shinDeg),
+      kneeX,
+      kneeY,
+    };
+  }
+
   function create(root, opts = {}) {
     const state = {
       actionId: opts.actionId || "segura",
       t: 0,
       speed: 1,
       playing: true,
-      yaw: 0, // -1 left ... 1 right (fake rotate)
+      yaw: 0,
       reduced: window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+      viewBuilt: null,
     };
 
     root.innerHTML = shell();
@@ -279,6 +300,7 @@ window.CorpoEngine = (() => {
       if (!btn) return;
       state.actionId = btn.dataset.act;
       state.t = 0;
+      state.viewBuilt = null;
       refs.actions.querySelectorAll("button").forEach((b) => b.classList.toggle("on", b === btn));
       draw(true);
     });
@@ -289,7 +311,6 @@ window.CorpoEngine = (() => {
     });
 
     refs.slow.addEventListener("input", () => {
-      // 0.25x .. 1.5x
       state.speed = 0.25 + Number(refs.slow.value) * 1.25;
     });
 
@@ -321,6 +342,66 @@ window.CorpoEngine = (() => {
       return ACTIONS.find((a) => a.id === state.actionId) || ACTIONS[0];
     }
 
+    function ensureSideSvg(kind) {
+      const dual = kind === "lunge";
+      const key = "side-" + (dual ? "lunge" : "squat");
+      if (state.viewBuilt === key) return nodesSide();
+      refs.svg.innerHTML = sideMarkup(dual);
+      state.viewBuilt = key;
+      return nodesSide();
+    }
+
+    function ensureBackSvg() {
+      if (state.viewBuilt === "back") return nodesBack();
+      refs.svg.innerHTML = backMarkup();
+      state.viewBuilt = "back";
+      return nodesBack();
+    }
+
+    function nodesSide() {
+      const s = refs.svg;
+      return {
+        hip: s.querySelector(".c-hip"),
+        torso: s.querySelector(".c-torso"),
+        head: s.querySelector(".c-head"),
+        arm: s.querySelector(".c-arm"),
+        fore: s.querySelector(".c-fore"),
+        thighF: s.querySelector(".c-thighF"),
+        shinF: s.querySelector(".c-shinF"),
+        footF: s.querySelector(".c-footF"),
+        thighB: s.querySelector(".c-thighB"),
+        shinB: s.querySelector(".c-shinB"),
+        footB: s.querySelector(".c-footB"),
+        muscle: s.querySelector(".c-muscle"),
+        floor: s.querySelector(".c-floor"),
+        cue: s.querySelector(".c-cue"),
+        body: s.querySelector(".c-body"),
+        legB: s.querySelector(".c-legB"),
+      };
+    }
+
+    function nodesBack() {
+      const s = refs.svg;
+      return {
+        root: s.querySelector(".c-root"),
+        pelvis: s.querySelector(".c-pelvis"),
+        guide: s.querySelector(".c-guide"),
+        medL: s.querySelector(".c-medL"),
+        medR: s.querySelector(".c-medR"),
+        arrow: s.querySelector(".c-arrow"),
+        thighL: s.querySelector(".c-thighL"),
+        shinL: s.querySelector(".c-shinL"),
+        footL: s.querySelector(".c-footL"),
+        thighR: s.querySelector(".c-thighR"),
+        shinR: s.querySelector(".c-shinR"),
+        footR: s.querySelector(".c-footR"),
+        kneeMark: s.querySelector(".c-kneeMark"),
+        floor: s.querySelector(".c-floor"),
+        cue: s.querySelector(".c-cue"),
+        torso: s.querySelector(".c-torso"),
+      };
+    }
+
     function draw() {
       const a = action();
       const w = wave(state.t);
@@ -331,245 +412,341 @@ window.CorpoEngine = (() => {
 
       let pelveDeg = 0;
       let muscleLabel = "—";
-      let svg = "";
 
       if (a.view === "side") {
-        const pose = sidePose(a.kind, w);
+        const n = ensureSideSvg(a.kind);
+        const pose = applySide(n, a.kind, w, yaw);
         pelveDeg = pose.pelve;
         muscleLabel = pose.muscleLabel;
-        svg = renderSide(pose, a, yaw);
+        if (n.cue) n.cue.textContent = a.cue;
       } else {
-        const pose = backPose(a.kind, w, yaw);
+        const n = ensureBackSvg();
+        const pose = applyBack(n, a.kind, w, yaw);
         pelveDeg = pose.pelve;
         muscleLabel = pose.muscleLabel;
-        svg = renderBack(pose, a, yaw);
+        if (n.cue) n.cue.textContent = a.cue;
       }
 
       refs.pelve.textContent = (pelveDeg >= 0 ? "+" : "") + pelveDeg.toFixed(0) + "°";
       refs.muscleName.textContent = muscleLabel;
-      refs.svg.innerHTML = svg;
     }
 
-    /** Side view poses — big silhouette change */
-    function sidePose(kind, w) {
-      if (kind === "lunge") {
-        return {
-          hipY: lerp(0, 42, w),
-          thigh: lerp(-8, 48, w),
-          shin: lerp(6, -52, w),
-          thighB: lerp(12, -28, w),
-          torso: lerp(4, 12, w),
-          arm: lerp(10, 40, w),
-          pelve: lerp(0, 6, w),
-          muscleLabel: "glúteo + quad",
-          effort: w,
-        };
+    function applySide(n, kind, w, yaw) {
+      const isLunge = kind === "lunge";
+      // Yaw: lean + reveal rear leg + slight foreshorten via scaleX
+      const lean = yaw * 28;
+      const reveal = clamp(Math.abs(yaw) * 1.4, 0, 1);
+
+      let hx, hy, front, back, torsoDeg, armDeg, pelve, label;
+
+      if (isLunge) {
+        hx = lerp(200, 186, w);
+        hy = lerp(318, 358, w);
+        front = { x: lerp(200, 138, w), y: FLOOR_Y };
+        back = { x: lerp(210, 305, w), y: FLOOR_Y };
+        torsoDeg = lerp(4, 12, w) + lean * 0.15;
+        armDeg = lerp(10, 36, w);
+        pelve = lerp(0, 6, w);
+        label = "glúteo + quad";
+      } else {
+        // stand hy ≈ FLOOR - (L1+L2) so foot plants; squat drops hip hard
+        hx = lerp(200, 184, w) + yaw * 8;
+        hy = lerp(318, 385, w);
+        front = { x: 218 + yaw * 6, y: FLOOR_Y };
+        back = { x: 200 - yaw * 42, y: FLOOR_Y };
+        torsoDeg = lerp(4, 22, w) + lean * 0.2;
+        armDeg = lerp(8, 44, w);
+        pelve = lerp(0, 8, w);
+        label = "quad + glúteo";
       }
-      // squat
-      return {
-        hipY: lerp(0, 58, w),
-        thigh: lerp(-6, 78, w),
-        shin: lerp(8, -82, w),
-        thighB: 0,
-        torso: lerp(4, 22, w),
-        arm: lerp(8, 50, w),
-        pelve: lerp(0, 8, w),
-        muscleLabel: "quad + glúteo",
-        effort: w,
-      };
+
+      const f = ik(hx, hy, front.x, front.y);
+      n.hip.setAttribute("transform", `translate(${hx} ${hy})`);
+      n.torso.setAttribute("transform", `rotate(${torsoDeg})`);
+      n.head.setAttribute("transform", `translate(4 -4) rotate(${lerp(-2, -8, w)})`);
+      n.arm.setAttribute("transform", `translate(18 24) rotate(${armDeg})`);
+      if (n.fore) n.fore.setAttribute("transform", `translate(8 52) rotate(${lerp(6, 18, w)})`);
+      n.thighF.setAttribute("transform", `rotate(${f.thighDeg})`);
+      n.shinF.setAttribute("transform", `translate(2 94) rotate(${f.shinDeg})`);
+      n.footF.setAttribute(
+        "transform",
+        `translate(0 88) rotate(${clamp(f.footDeg, -14, 8)})`,
+      );
+
+      if (n.legB) {
+        const showBack = isLunge ? 1 : reveal;
+        n.legB.setAttribute("opacity", String(showBack > 0.05 ? lerp(0.35, 0.95, showBack) : 0));
+        if (showBack > 0.02 || isLunge) {
+          const b = ik(hx, hy, back.x, back.y);
+          n.thighB.setAttribute("transform", `rotate(${b.thighDeg})`);
+          n.shinB.setAttribute("transform", `translate(4 90) rotate(${b.shinDeg})`);
+          n.footB.setAttribute(
+            "transform",
+            `translate(0 86) rotate(${clamp(b.footDeg, -14, 10)})`,
+          );
+        }
+      }
+
+      if (n.body) {
+        // Fake 3/4: scale X compresses as yaw increases
+        const sx = lerp(1, 0.72, Math.abs(yaw));
+        n.body.setAttribute("transform", `translate(210 0) scale(${sx} 1) translate(-210 0)`);
+      }
+
+      if (n.muscle) n.muscle.setAttribute("opacity", String(0.35 + w * 0.65));
+      if (n.floor) {
+        n.floor.setAttribute("rx", String(lerp(100, 118, w)));
+        n.floor.setAttribute("opacity", String(lerp(0.14, 0.26, w)));
+        n.floor.setAttribute("cx", String(210 + yaw * 18));
+      }
+
+      return { pelve, muscleLabel: label };
     }
 
-    /** Back view — single leg / abduct / etc */
-    function backPose(kind, w, yaw) {
-      const lean = yaw * 22;
+    function applyBack(n, kind, w, yaw) {
+      const lean = yaw * 26;
+      let freeLift, freeOut, tilt, kneeIn, spin, label, activeL, fail, supportKnee;
+
       if (kind === "abduct") {
-        return {
-          stand: "L",
-          freeLegLift: lerp(20, 70, w),
-          freeLegOut: lerp(8, 55, w),
-          pelvisTilt: lerp(0, -4, w) + lean * 0.2,
-          kneeIn: 0,
-          thighSpin: 0,
-          torsoSway: lean,
-          pelve: lerp(0, -4, w),
-          muscleLabel: "médio (perna livre)",
-          active: "R",
-          effort: w,
-        };
+        freeLift = lerp(18, 78, w);
+        freeOut = lerp(6, 62, w);
+        tilt = lerp(0, -5, w) + lean * 0.15;
+        kneeIn = 0;
+        spin = 0;
+        supportKnee = 0;
+        label = "médio (perna livre)";
+        activeL = false;
+        fail = false;
+      } else if (kind === "valgus") {
+        freeLift = 38;
+        freeOut = 12;
+        tilt = lerp(0, 16, w) + lean * 0.15;
+        kneeIn = lerp(0, 32, w);
+        spin = lerp(0, -14, w);
+        supportKnee = kneeIn;
+        label = "médio esquerdo (falha)";
+        activeL = true;
+        fail = true;
+      } else if (kind === "rotate") {
+        freeLift = 42;
+        freeOut = 20;
+        tilt = lean * 0.12;
+        kneeIn = lerp(10, -12, w);
+        spin = lerp(-18, 24, w);
+        supportKnee = kneeIn;
+        label = "médio + rotadores";
+        activeL = true;
+        fail = false;
+      } else {
+        // segura pelve
+        freeLift = lerp(22, 62, w);
+        freeOut = 14;
+        tilt = lerp(10, 0, w) + lean * 0.1;
+        kneeIn = 0;
+        spin = 0;
+        supportKnee = 0;
+        label = "médio esquerdo";
+        activeL = true;
+        fail = false;
       }
-      if (kind === "valgus") {
-        return {
-          stand: "L",
-          freeLegLift: 35,
-          freeLegOut: 10,
-          pelvisTilt: lerp(0, 14, w) + lean * 0.2, // collapse demo
-          kneeIn: lerp(0, 28, w),
-          thighSpin: lerp(0, -12, w),
-          torsoSway: lean,
-          pelve: lerp(0, 14, w),
-          muscleLabel: "médio esquerdo (falha)",
-          active: "L",
-          effort: w,
-          fail: true,
-        };
+
+      // Support foot planted via IK; free leg uses explicit angles so silhueta abre de verdade
+      const hipX = 210 + lean * 1.2;
+      const hipY = 320;
+      const supportFoot = { x: 168 + supportKnee * 0.4, y: FLOOR_Y };
+      const support = ik(hipX - 28, hipY + 40, supportFoot.x, supportFoot.y, 100, 95);
+
+      n.root.setAttribute("transform", `translate(${hipX} ${hipY - 70}) rotate(${lean * 0.35})`);
+      n.pelvis.setAttribute("transform", `rotate(${tilt})`);
+      n.guide.setAttribute("stroke", fail ? "#ef4444" : "#22c55e");
+      n.guide.querySelectorAll("circle").forEach((c) => c.setAttribute("fill", fail ? "#ef4444" : "#22c55e"));
+
+      const redL = activeL ? 0.28 + w * 0.72 : 0.07;
+      const redR = !activeL ? 0.28 + w * 0.72 : 0.07;
+      n.medL.setAttribute("opacity", String(redL));
+      n.medR.setAttribute("opacity", String(redR));
+      const swell = 1 + w * 0.22;
+      if (activeL) {
+        n.medL.setAttribute(
+          "transform",
+          `translate(-52 62) scale(${swell}) translate(52 -62)`,
+        );
+        n.medR.removeAttribute("transform");
+      } else {
+        n.medR.setAttribute(
+          "transform",
+          `translate(52 62) scale(${swell}) translate(-52 -62)`,
+        );
+        n.medL.removeAttribute("transform");
       }
-      if (kind === "rotate") {
-        return {
-          stand: "L",
-          freeLegLift: 40,
-          freeLegOut: 18,
-          pelvisTilt: lean * 0.15,
-          kneeIn: lerp(8, -10, w),
-          thighSpin: lerp(-15, 20, w),
-          torsoSway: lean,
-          pelve: lerp(0, 3, w),
-          muscleLabel: "médio + rotadores",
-          active: "L",
-          effort: w,
-        };
+
+      n.arrow.setAttribute("opacity", String(0.5 + w * 0.5));
+      n.arrow.setAttribute("transform", activeL ? "translate(0 0)" : "scale(-1 1)");
+
+      n.thighL.setAttribute(
+        "transform",
+        `translate(-28 48) rotate(${support.thighDeg + supportKnee * 0.25 + spin * 0.2})`,
+      );
+      n.shinL.setAttribute(
+        "transform",
+        `translate(0 100) rotate(${support.shinDeg + supportKnee * 0.15})`,
+      );
+      n.footL.setAttribute(
+        "transform",
+        `translate(0 95) rotate(${clamp(support.footDeg, -12, 8)})`,
+      );
+
+      // Free leg: thigh swings out (-freeOut), shin folds up (-freeLift) — leitura imediata
+      n.thighR.setAttribute(
+        "transform",
+        `translate(30 46) rotate(${-freeOut - 8})`,
+      );
+      n.shinR.setAttribute(
+        "transform",
+        `translate(0 96) rotate(${-freeLift})`,
+      );
+      n.footR.setAttribute("transform", `translate(0 90) rotate(${freeLift * 0.15})`);
+
+      if (n.kneeMark) {
+        n.kneeMark.setAttribute("opacity", fail ? String(0.4 + w * 0.6) : "0");
+        n.kneeMark.setAttribute("transform", `translate(${-28 + kneeIn * 0.4} ${48 + 100})`);
       }
-      // segura pelve — classic single-leg
-      return {
-        stand: "L",
-        freeLegLift: lerp(25, 55, w),
-        freeLegOut: 12,
-        pelvisTilt: lerp(8, 0, w) + lean * 0.1, // corrects to level
-        kneeIn: 0,
-        thighSpin: 0,
-        torsoSway: lean,
-        pelve: lerp(8, 0, w),
-        muscleLabel: "médio esquerdo",
-        active: "L",
-        effort: w,
-      };
+
+      if (n.floor) {
+        n.floor.setAttribute("cx", String(210 + lean * 0.6));
+        n.floor.setAttribute("rx", String(110 + Math.abs(freeOut) * 0.4));
+      }
+
+      if (n.torso) {
+        n.torso.setAttribute("transform", `rotate(${lean * 0.2})`);
+      }
+
+      return { pelve: tilt, muscleLabel: label };
     }
 
-    function renderSide(pose, action, yaw = 0) {
-      const accent = "#c8f542";
-      const effort = pose.effort;
-      const muscleOp = 0.25 + effort * 0.75;
-      const skew = yaw * 18;
+    function sideMarkup(dual) {
       return `
       <svg viewBox="0 0 420 560" class="corpo-svg" aria-hidden="true">
         <defs>
           <linearGradient id="skinS" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stop-color="#f2e2cc"/><stop offset="55%" stop-color="#c9a57c"/><stop offset="100%" stop-color="#7a5a3c"/>
+            <stop offset="0%" stop-color="#f2e2cc"/>
+            <stop offset="55%" stop-color="#c9a57c"/>
+            <stop offset="100%" stop-color="#7a5a3c"/>
           </linearGradient>
         </defs>
-        <ellipse cx="210" cy="525" rx="${110 + effort * 16}" ry="12" fill="${accent}" opacity="${0.12 + effort * 0.12}"/>
-        <g transform="translate(210 ${285 + pose.hipY}) rotate(${skew})">
-          <g transform="rotate(${pose.torso})">
-            <path d="M-12 0 C-26 22,-32 58,-28 95 C-24 118,-10 130,4 130 L26 120 C34 96,34 66,28 40 C22 16,8 4,-2 0 Z" fill="url(#skinS)"/>
-            <path d="M-2 36 C4 55,8 78,10 100" fill="none" stroke="#e11d48" stroke-width="5" stroke-linecap="round" opacity="${muscleOp}"/>
-            <ellipse cx="6" cy="26" rx="16" ry="13" fill="url(#skinS)"/>
-            <ellipse cx="4" cy="-36" rx="19" ry="22" fill="url(#skinS)"/>
-            <circle cx="12" cy="-38" r="2.4" fill="${accent}"/>
-            <g transform="translate(18 24) rotate(${pose.arm})">
-              <path d="M0 0 C10 18,12 40,8 60" fill="none" stroke="url(#skinS)" stroke-width="14" stroke-linecap="round"/>
+        <ellipse class="c-floor" cx="210" cy="522" rx="110" ry="12" fill="#c8f542" opacity=".16"/>
+        <g class="c-body">
+          <g class="c-hip" transform="translate(200 308)">
+            <g class="c-torso">
+              <path d="M-10 0 C-24 20,-30 55,-26 90 C-22 112,-10 124,4 126 L24 118 C30 96,30 68,26 42 C22 18,10 4,0 0 Z" fill="url(#skinS)"/>
+              <path class="c-muscle" d="M-2 40 C4 58,8 78,10 98" fill="none" stroke="#e11d48" stroke-width="5" stroke-linecap="round" opacity=".6"/>
+              <ellipse cx="6" cy="26" rx="15" ry="12" fill="url(#skinS)"/>
+              <g class="c-head" transform="translate(4 -4)">
+                <ellipse cx="2" cy="-32" rx="18" ry="21" fill="url(#skinS)"/>
+                <circle cx="10" cy="-34" r="2.2" fill="#c8f542"/>
+              </g>
+              <g class="c-arm" transform="translate(18 24)">
+                <path d="M0 0 C8 16,12 34,8 52" fill="none" stroke="url(#skinS)" stroke-width="13" stroke-linecap="round"/>
+                <g class="c-fore" transform="translate(8 52)">
+                  <path d="M0 0 C6 14,6 30,2 46" fill="none" stroke="url(#skinS)" stroke-width="11" stroke-linecap="round"/>
+                  <circle cx="2" cy="52" r="6.5" fill="url(#skinS)"/>
+                </g>
+              </g>
+            </g>
+            <g class="c-legB" opacity="${dual ? 0.9 : 0}">
+              <g class="c-thighB">
+                <path d="M4 6 C12 32,22 58,34 82" fill="none" stroke="url(#skinS)" stroke-width="22" stroke-linecap="round" opacity=".92"/>
+                <g class="c-shinB" transform="translate(4 90)">
+                  <circle cx="0" cy="0" r="8" fill="url(#skinS)"/>
+                  <path d="M0 0 C6 24,14 48,22 74" fill="none" stroke="url(#skinS)" stroke-width="16" stroke-linecap="round"/>
+                  <g class="c-footB" transform="translate(0 86)">
+                    <path d="M-6 0 C10 2,28 2,38 -2 C42 -4,40 -8,32 -9 C16 -10,2 -6,-4 -3 Z" fill="url(#skinS)"/>
+                  </g>
+                </g>
+              </g>
+            </g>
+            <g class="c-thighF">
+              <path d="M0 4 C-4 34,-2 64,2 94" fill="none" stroke="url(#skinS)" stroke-width="24" stroke-linecap="round"/>
+              <path d="M-6 28 C0 50,4 72,6 88" fill="none" stroke="#e11d48" stroke-width="5" stroke-linecap="round" opacity=".55" class="c-muscle"/>
+              <g class="c-shinF" transform="translate(2 94)">
+                <circle cx="0" cy="0" r="9" fill="url(#skinS)"/>
+                <path d="M0 0 C2 28,2 56,0 88" fill="none" stroke="url(#skinS)" stroke-width="18" stroke-linecap="round"/>
+                <g class="c-footF" transform="translate(0 88)">
+                  <path d="M-8 0 C8 4,36 4,50 0 C54 -2,52 -6,44 -8 C24 -10,4 -6,-6 -3 Z" fill="url(#skinS)"/>
+                </g>
+              </g>
             </g>
           </g>
-          <g transform="rotate(${pose.thigh})">
-            <path d="M0 2 C-4 36,-2 70,4 100" fill="none" stroke="url(#skinS)" stroke-width="26" stroke-linecap="round"/>
-            <path d="M-6 30 C0 50,4 72,6 90" fill="none" stroke="#e11d48" stroke-width="6" stroke-linecap="round" opacity="${muscleOp}"/>
-            <g transform="translate(4 100) rotate(${pose.shin})">
-              <circle cx="0" cy="0" r="10" fill="url(#skinS)"/>
-              <path d="M0 0 C2 30,2 60,0 95" fill="none" stroke="url(#skinS)" stroke-width="20" stroke-linecap="round"/>
-              <path d="M-10 95 C8 100,40 100,56 96" fill="none" stroke="url(#skinS)" stroke-width="12" stroke-linecap="round"/>
-            </g>
-          </g>
-          ${
-            action.kind === "lunge"
-              ? `<g transform="rotate(${pose.thighB})">
-            <path d="M6 4 C16 36,28 66,40 92" fill="none" stroke="url(#skinS)" stroke-width="22" stroke-linecap="round" opacity=".9"/>
-            <path d="M40 92 C48 120,58 145,70 165" fill="none" stroke="url(#skinS)" stroke-width="16" stroke-linecap="round"/>
-          </g>`
-              : ""
-          }
         </g>
-        <text x="300" y="70" fill="#ea580c" font-size="28" font-weight="800" font-family="system-ui">${action.cue}</text>
+        <text class="c-cue" x="300" y="70" fill="#ea580c" font-size="28" font-weight="800" font-family="system-ui">DESCE</text>
       </svg>`;
     }
 
-    function renderBack(pose, action) {
-      // Rear view simplified athletic body — silhouette MUST change with freeLegLift/Out/pelvisTilt
-      const tilt = pose.pelvisTilt;
-      const lift = pose.freeLegLift;
-      const out = pose.freeLegOut;
-      const kneeIn = pose.kneeIn;
-      const spin = pose.thighSpin;
-      const sway = pose.torsoSway;
-      const effort = pose.effort;
-      const fail = !!pose.fail;
-      const activeL = pose.active === "L";
-      const redL = activeL ? 0.3 + effort * 0.7 : 0.08;
-      const redR = !activeL ? 0.3 + effort * 0.7 : 0.08;
-      const lineColor = fail ? "#ef4444" : "#22c55e";
-
-      // standing foot left (viewer left = person's left when back view... back view: person's left is viewer's right)
-      // We draw person from behind: left side of SVG = person's right shoulder.
-      // Keep it simple: support leg on SVG-left, free leg SVG-right for "stand L" meaning support on left of screen.
-
+    function backMarkup() {
       return `
       <svg viewBox="0 0 420 560" class="corpo-svg" aria-hidden="true">
         <defs>
           <linearGradient id="skinB" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stop-color="#e8cbb0"/><stop offset="100%" stop-color="#a67c52"/>
+            <stop offset="0%" stop-color="#e8cbb0"/>
+            <stop offset="100%" stop-color="#a67c52"/>
+          </linearGradient>
+          <linearGradient id="shirtB" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#60a5fa"/>
+            <stop offset="100%" stop-color="#1d4ed8"/>
           </linearGradient>
         </defs>
-        <ellipse cx="210" cy="528" rx="120" ry="11" fill="#94a3b8" opacity=".2"/>
-
-        <g transform="translate(210 250) rotate(${sway})">
-          <!-- head -->
+        <ellipse class="c-floor" cx="210" cy="528" rx="120" ry="11" fill="#94a3b8" opacity=".22"/>
+        <g class="c-root" transform="translate(210 250)">
           <ellipse cx="0" cy="-118" rx="28" ry="32" fill="url(#skinB)"/>
-          <!-- torso / shirt -->
-          <path d="M-48 -85 C-58 -40,-60 10,-52 55 L52 55 C60 10,58 -40,48 -85 Z" fill="#3b82f6"/>
-          <path d="M-40 -70 C-20 -55,20 -55,40 -70" fill="none" stroke="#1e3a8a" stroke-width="3" opacity=".35"/>
-
-          <!-- pelvis block -->
-          <g transform="rotate(${tilt})">
+          <g class="c-torso">
+            <path d="M-48 -85 C-58 -40,-60 10,-52 55 L52 55 C60 10,58 -40,48 -85 Z" fill="url(#shirtB)"/>
+            <path d="M-40 -70 C-20 -55,20 -55,40 -70" fill="none" stroke="#1e3a8a" stroke-width="3" opacity=".35"/>
+            <path d="M-52 -40 L-78 30" fill="none" stroke="url(#skinB)" stroke-width="14" stroke-linecap="round"/>
+            <path d="M52 -40 L78 30" fill="none" stroke="url(#skinB)" stroke-width="14" stroke-linecap="round"/>
+          </g>
+          <g class="c-pelvis">
             <ellipse cx="0" cy="62" rx="54" ry="18" fill="#1f2937"/>
-            <!-- pelvis guide -->
-            <line x1="-70" y1="62" x2="70" y2="62" stroke="${lineColor}" stroke-width="3" stroke-dasharray="8 6"/>
-            <circle cx="-54" cy="62" r="4" fill="${lineColor}"/>
-            <circle cx="54" cy="62" r="4" fill="${lineColor}"/>
-
-            <!-- glute med L (svg left) -->
-            <path d="M-58 40 C-72 55,-70 78,-52 85 C-40 78,-42 55,-48 42 Z" fill="#ef4444" opacity="${redL}"/>
-            <!-- glute med R -->
-            <path d="M58 40 C72 55,70 78,52 85 C40 78,42 55,48 42 Z" fill="#ef4444" opacity="${redR}"/>
-
-            ${
-              activeL
-                ? `<path d="M-62 88 C-62 70,-58 55,-54 48" fill="none" stroke="#fff" stroke-width="3" opacity=".9"/>
-                   <path d="M-54 48 L-60 58 M-54 48 L-48 58" fill="none" stroke="#ef4444" stroke-width="3" stroke-linecap="round"/>`
-                : `<path d="M62 88 C62 70,58 55,54 48" fill="none" stroke="#fff" stroke-width="3" opacity=".9"/>
-                   <path d="M54 48 L48 58 M54 48 L60 58" fill="none" stroke="#ef4444" stroke-width="3" stroke-linecap="round"/>`
-            }
-
-            <!-- support leg (left) -->
-            <g transform="translate(-28 78) rotate(${kneeIn * 0.3 + spin * 0.2})">
-              <path d="M0 0 L${-6 + kneeIn * 0.15} 95" fill="none" stroke="#111827" stroke-width="28" stroke-linecap="round"/>
-              <path d="M${-6 + kneeIn * 0.15} 95 L${-4 + kneeIn * 0.4} 190" fill="none" stroke="#111827" stroke-width="22" stroke-linecap="round"/>
-              <path d="M${-20 + kneeIn * 0.4} 190 H${18 + kneeIn * 0.4}" fill="none" stroke="#111827" stroke-width="12" stroke-linecap="round"/>
-              ${fail ? `<path d="M0 100 L${kneeIn} 100" fill="none" stroke="#ef4444" stroke-width="3" marker-end="url(#arrow)"/>` : ""}
+            <g class="c-guide">
+              <line x1="-70" y1="62" x2="70" y2="62" stroke="#22c55e" stroke-width="3" stroke-dasharray="8 6"/>
+              <circle cx="-54" cy="62" r="4" fill="#22c55e"/>
+              <circle cx="54" cy="62" r="4" fill="#22c55e"/>
+            </g>
+            <path class="c-medL" d="M-58 40 C-72 55,-70 78,-52 85 C-40 78,-42 55,-48 42 Z" fill="#ef4444" opacity=".3"/>
+            <path class="c-medR" d="M58 40 C72 55,70 78,52 85 C40 78,42 55,48 42 Z" fill="#ef4444" opacity=".08"/>
+            <g class="c-arrow" opacity=".8">
+              <path d="M-62 88 C-62 70,-58 55,-54 48" fill="none" stroke="#fff" stroke-width="3"/>
+              <path d="M-54 48 L-60 58 M-54 48 L-48 58" fill="none" stroke="#ef4444" stroke-width="3" stroke-linecap="round"/>
             </g>
 
-            <!-- free leg (right) — BIG motion -->
-            <g transform="translate(30 72) rotate(${-out})">
-              <path d="M0 0 L${12} ${40 + lift * 0.2}" fill="none" stroke="#111827" stroke-width="24" stroke-linecap="round"/>
-              <g transform="translate(12 ${40 + lift * 0.2}) rotate(${-lift})">
-                <path d="M0 0 L8 70" fill="none" stroke="#111827" stroke-width="20" stroke-linecap="round"/>
-                <path d="M-6 70 H22" fill="none" stroke="#111827" stroke-width="10" stroke-linecap="round"/>
+            <g class="c-thighL" transform="translate(-28 48)">
+              <path d="M0 0 L0 100" fill="none" stroke="#111827" stroke-width="28" stroke-linecap="round"/>
+              <g class="c-shinL" transform="translate(0 100)">
+                <circle cx="0" cy="0" r="10" fill="#111827"/>
+                <path d="M0 0 L0 95" fill="none" stroke="#111827" stroke-width="22" stroke-linecap="round"/>
+                <g class="c-footL" transform="translate(0 95)">
+                  <path d="M-18 0 H18" fill="none" stroke="#111827" stroke-width="12" stroke-linecap="round"/>
+                </g>
               </g>
             </g>
+
+            <g class="c-thighR" transform="translate(28 46)">
+              <path d="M0 0 L0 96" fill="none" stroke="#111827" stroke-width="24" stroke-linecap="round"/>
+              <g class="c-shinR" transform="translate(0 96)">
+                <circle cx="0" cy="0" r="9" fill="#111827"/>
+                <path d="M0 0 L0 90" fill="none" stroke="#111827" stroke-width="20" stroke-linecap="round"/>
+                <g class="c-footR" transform="translate(0 90)">
+                  <path d="M-14 0 H16" fill="none" stroke="#111827" stroke-width="11" stroke-linecap="round"/>
+                </g>
+              </g>
+            </g>
+
+            <g class="c-kneeMark" opacity="0">
+              <path d="M0 0 L28 0" fill="none" stroke="#ef4444" stroke-width="3" stroke-linecap="round"/>
+              <circle cx="28" cy="0" r="5" fill="#ef4444"/>
+            </g>
           </g>
-
-          <!-- arms -->
-          <path d="M-52 -40 L-78 30" fill="none" stroke="url(#skinB)" stroke-width="14" stroke-linecap="round"/>
-          <path d="M52 -40 L78 30" fill="none" stroke="url(#skinB)" stroke-width="14" stroke-linecap="round"/>
         </g>
-
-        <text x="290" y="72" fill="#ea580c" font-size="30" font-weight="800" font-family="system-ui">${action.cue}</text>
+        <text class="c-cue" x="290" y="72" fill="#ea580c" font-size="30" font-weight="800" font-family="system-ui">SEGURA</text>
       </svg>`;
     }
 
@@ -604,13 +781,14 @@ window.CorpoEngine = (() => {
     return {
       setAction(id) {
         state.actionId = id;
+        state.viewBuilt = null;
         draw(true);
       },
       getState: () => ({ ...state }),
     };
   }
 
-  return { ACTIONS, create };
+  return { ACTIONS, create, ik };
 })();
 
 CorpoEngine.create(document.getElementById("mount"));
