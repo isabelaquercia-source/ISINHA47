@@ -32,10 +32,12 @@ EV.register('body', ({THREE, EV, quality}) => {
     [  9, 12.2, 6.0, -12.2, -3.2, 1.58, 2.2],
     [ 12, 12.7, 6.1, -12.5, -3.2, 1.70, 2.2],
     [ 14, 13.35, 6.2, -12.7, -3.2, 1.75, 2.4],
-    [ 16, 13.95, 6.4, -12.9, -3.2, 1.81, 2.5],
-    [ 17, 14.25, 6.55, -13.05, -3.2, 1.84, 2.6],
-    [ 18, 14.45, 6.7, -13.2, -3.2, 1.94, 2.7],
-    [ 20, 14.75, 6.95, -13.6, -3.2, 2.25, 2.8],
+    [ 15, 13.7, 6.3, -12.8, -3.2, 1.82, 2.45],
+    [ 16, 14.2, 6.4, -12.9, -3.2, 1.97, 2.5],
+    [ 17, 14.45, 6.55, -13.05, -3.2, 2.14, 2.6],
+    [ 17.6, 14.6, 6.65, -13.15, -3.2, 2.28, 2.65],                    // daqui para cima o flanco fica atrás do braço na vista 'ref': largura para o serrátil
+    [ 18.5, 14.7, 6.75, -13.3, -3.2, 2.42, 2.7],
+    [ 20, 14.85, 6.95, -13.6, -3.2, 2.5, 2.8],
     [ 24, 15.2, 7.7, -14.3, -3.2, 2.65, 2.8],
     [ 30, 15.9, 8.85, -14.8, -3.0, 2.60, 2.6],
     [ 35, 16.4, 9.2, -14.6, -2.4, 2.40, 2.5],
@@ -178,20 +180,21 @@ EV.register('body', ({THREE, EV, quality}) => {
 
   /* cabeça (referencial do crânio: +x direita, +y para cima, +z posterior, origem no centro da calota) */
   const hs = sk.scale / 1.05, H = (x, y, z) => { const v = sk.local(x, y, z); return [v.x, v.y, v.z]; };
-  elip(H(0, 0.3, 0.9), [8.0 * hs, 7.45 * hs, 9.9 * hs], 1.5);                                // calota (parietal / occipital)
+  elip(H(0, 0.15, 0.9), [8.0 * hs, 7.6 * hs, 9.9 * hs], 1.5);                                // calota (parietal / occipital)
   elip(H(0, 0.2, -3.4), [6.6 * hs, 6.9 * hs, 6.3 * hs], 1.5);                                // testa (mais estreita)
   elip(H(0, -4.8, -4.4), [5.6 * hs, 5.6 * hs, 5.5 * hs], 1.6);                               // face
-  elip(H(4.6, -4.3, -1.8), [2.3 * hs, 2.0 * hs, 4.2 * hs], 1.0);                             // têmpora / arco zigomático
-  elip(H(5.0, -5.0, 2.2), [1.75 * hs, 2.6 * hs, 2.2 * hs], 1.0);                             // atrás da orelha (mastoide)
-  cone(H(4.75, -2.6, -6.1), H(5.3, -4.9, -4.8), 0.9 * hs, 0.9 * hs, 0.8);                    // maçã do rosto (zigomático)
+  elip(H(4.6, -4.3, -1.6), [2.62 * hs, 2.05 * hs, 4.3 * hs], 1.0);                           // têmpora / arco zigomático
+  elip(H(4.75, -4.5, 3.2), [1.95 * hs, 2.35 * hs, 2.9 * hs], 0.8);                           // atrás da orelha (mastoide)
+  cone(H(4.75, -2.6, -6.1), H(5.3, -4.9, -4.8), 1.1 * hs, 1.1 * hs, 0.8);                    // maçã do rosto (zigomático)
+  cone(H(4.7, -3.0, -6.3), H(4.9, -5.3, -6.1), 0.85 * hs, 0.8 * hs, 0.6);
   cone(H(0, -2.2, -9.3), H(0, -5.6, -11.0), 0.85 * hs, 1.0 * hs, 0.9);                       // nariz
   elip(H(0, -6.1, -10.0), [1.4 * hs, 1.0 * hs, 1.2 * hs], 0.8);
   elip(H(0, -8.6, -7.2), [3.1 * hs, 1.9 * hs, 2.4 * hs], 0.8);                               // arcadas dentárias
   elip(H(0, -8.2, -9.0), [2.0 * hs, 1.3 * hs, 1.1 * hs], 0.8);                               // lábios
   elip(H(5.0, -8.1, -2.2), [1.25 * hs, 4.0 * hs, 2.7 * hs], 0.9);                             // masseter sobre o ramo da mandíbula
-  cone(H(4.65, -11.5, -1.9), H(2.75, -11.5, -5.0), 1.12 * hs, 1.0 * hs, 0.45);                 // corpo da mandíbula: borda de baixo …
-  cone(H(2.75, -11.5, -5.0), H(1.45, -11.45, -7.15), 1.0 * hs, 1.0 * hs, 0.45);
-  cone(H(1.45, -11.45, -7.15), H(0, -11.4, -7.65), 1.0 * hs, 1.0 * hs, 0.45);
+  cone(H(4.65, -11.5, -1.9), H(2.9, -11.55, -5.4), 1.12 * hs, 1.05 * hs, 0.45);                 // corpo da mandíbula: borda de baixo …
+  cone(H(2.9, -11.55, -5.4), H(1.45, -11.5, -7.15), 1.05 * hs, 1.05 * hs, 0.45);
+  cone(H(1.45, -11.5, -7.15), H(0, -11.45, -7.65), 1.05 * hs, 1.05 * hs, 0.45);
   cone(H(4.55, -10.3, -2.1), H(2.6, -10.3, -4.8), 1.0 * hs, 1.0 * hs, 0.45);                  // … e arcada
   cone(H(2.6, -10.3, -4.8), H(1.6, -10.3, -7.1), 1.0 * hs, 1.0 * hs, 0.45);
   cone(H(1.6, -10.3, -7.1), H(0, -10.3, -7.9), 1.0 * hs, 1.0 * hs, 0.45);
@@ -205,21 +208,23 @@ EV.register('body', ({THREE, EV, quality}) => {
   cone([15.4, 43.1, -1.6], [17.95, 42.9, -1.65], 1.0, 0.95, 1.4);                            // pele rente à articulação acromioclavicular
   cone([17.95, 42.9, -1.65], [17.2, 41.3, 2.8], 0.95, 1.3, 1.4);                             // … e ao acrômio
   cone([17.7, 36, 2.4], [18.9, 16.5, 3.0], 3.2, 2.5, 1.6);                                   // tríceps: cabeça longa
-  cone([20.2, 30, 1.8], [20.3, 17.5, 2.6], 2.6, 2.2, 0.8);                                   // tríceps: cabeça lateral
-  cone([18.4, 35, -2.6], [19.3, 13, -1.6], 3.2, 2.8, 1.6);                                   // bíceps
-  cone([19.3, 15, 0.8], [19.9, 7.5, 1.0], 3.2, 2.7, 1.2);                                    // cotovelo
-  cone([18.7, 11.5, -0.4], [18.9, 8, -0.2], 2.0, 2.0, 1.2);                                  // epicôndilo medial
+  cone([19.9, 30, 1.8], [20.6, 17.5, 2.4], 2.4, 2.3, 0.8);                                   // tríceps: cabeça lateral
+  cone([18.4, 35, -2.3], [19.45, 19, -1.9], 2.8, 2.7, 1.6);                                 // bíceps
+  cone([19.45, 19, -1.9], [19.7, 12.5, -1.6], 2.7, 2.3, 1.0);                                // … e braquial, afinando para o cotovelo
+  cone([19.6, 15, 0.8], [19.9, 7.5, 1.0], 2.9, 2.7, 1.2);                                    // cotovelo
+  cone([18.5, 10.5, -0.6], [18.3, 4.2, -1.1], 2.2, 2.45, 1.2);                                // epicôndilo medial e origem dos flexores
+  cone([18.3, 14, 2.0], [18.7, 7.5, 1.6], 2.3, 2.3, 1.2);                                    // tríceps: cabeça medial
   elip([21.5, 7.3, 2.5], [1.3, 1.6, 1.3], 0.8);                                              // olécrano
   elip([18.0, 34.6, -0.5], [5.3, 8.0, 5.6], 0.7);                                            // deltoide (por cima do braço, com vinco na borda)
   cone([19.4, 33, 0], [19.7, 25.5, 0.6], 3.4, 2.1, 0.7);                                     // inserção do deltoide
   /* antebraço em pronação (largo de lado a lado, fino de frente para trás): massa radial (de fora) e ulnar (de dentro) */
-  cone([21.2, 13, 0.3], [21.7, 5.5, -1.0], 1.6, 2.2, 1.5);
+  cone([21.2, 13.5, 0.3], [21.7, 5.5, -1.0], 1.85, 2.2, 1.5);
   cone([21.7, 5.5, -1.0], [22.5, -1, -4.2], 2.2, 2.2, 1.0);
   cone([22.5, -1, -4.2], [22.2, -9, -8.2], 2.2, 1.7, 1.0);
   cone([22.2, -9, -8.2], [21.4, -16, -12.4], 1.7, 1.5, 1.0);
-  cone([19.6, 7.5, 0.4], [19.7, 2, -1.8], 2.2, 2.2, 1.2);
-  cone([19.7, 2, -1.8], [19.4, -5, -6.0], 2.2, 2.0, 1.0);
-  cone([19.4, -5, -6.0], [19.3, -16, -12.6], 2.0, 1.5, 1.0);
+  cone([19.6, 7.5, 0.4], [19.7, 2, -1.2], 2.2, 2.1, 1.2);
+  cone([19.7, 2, -1.2], [19.5, -5, -5.0], 2.1, 1.9, 1.0);
+  cone([19.5, -5, -5.0], [19.3, -16, -12.6], 1.9, 1.5, 1.0);
 
   /* ------------------------------------------------------------------- caixas
      Grade grossa (4 cm) com a lista de primitivas que alcançam cada célula: a SDF só avalia as vizinhas. */
@@ -310,7 +315,7 @@ EV.register('body', ({THREE, EV, quality}) => {
     if (pn > 0 && Math.abs(pX[pn - 1] + x) < 1e-7) return pD[--pn];
     return dist(x, y, z);
   };
-  const cell = 1.0 / quality, XM = Math.ceil(25.6 / cell) * cell;
+  const cell = 1.03 / quality, XM = Math.ceil(25.6 / cell) * cell;
   const geom = EV.mesh.fromSDF(distGrade, {min: [-XM, -28, -16.6], max: [XM, 76, 11.8], cell, exact: true});
 
   /* ------------------------------------------------------------------ pintura

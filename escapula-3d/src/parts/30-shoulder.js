@@ -90,12 +90,19 @@ EV.register('shoulder', ({THREE, EV, quality}) => {
     if (fora > 0){ const e = Math.sqrt(fora) / F.ip; o[0] = Math.sqrt(o[0] * o[0] + e * e); }
     return o;
   }
-  /* Tabela de parâmetros em função de x: linhas [x, p1, p2…] interpoladas por Hermite e amostradas a cada `passo`. */
+  /* Tabela de parâmetros em função de x: linhas [x, p1, p2…] interpoladas por Hermite monótono e amostradas a cada `passo`. */
   function tabela(rows, passo){
     const n = rows.length, m = rows[0].length - 1, xs = rows.map(r => r[0]), x0 = xs[0], N = Math.round((xs[n - 1] - x0) / passo), cols = [];
     for (let c = 1; c <= m; c++){
       const ys = rows.map(r => r[c]), tg = new Array(n), col = new Float32Array(N + 2);
-      for (let i = 0; i < n; i++){ const a = Math.max(0, i - 1), b = Math.min(n - 1, i + 1); tg[i] = (ys[b] - ys[a]) / (xs[b] - xs[a]); }
+      for (let i = 0; i < n; i++){
+        const a = Math.max(0, i - 1), b = Math.min(n - 1, i + 1); tg[i] = (ys[b] - ys[a]) / (xs[b] - xs[a]);
+        /* sem ultrapassagem (monótona): onde o valor salta depressa de um nó para o outro, a curva não passa do nó */
+        if (i > 0 && i < n - 1){
+          const s0 = (ys[i] - ys[i - 1]) / (xs[i] - xs[i - 1]), s1 = (ys[i + 1] - ys[i]) / (xs[i + 1] - xs[i]);
+          if (s0 * s1 <= 0) tg[i] = 0; else { const lim = 3 * Math.min(Math.abs(s0), Math.abs(s1)); if (Math.abs(tg[i]) > lim) tg[i] = Math.sign(tg[i]) * lim; }
+        }
+      }
       for (let k = 0; k <= N + 1; k++){
         const x = Math.min(xs[n - 1], x0 + k * passo); let i = 0; while (i < n - 2 && x > xs[i + 1]) i++;
         const h = xs[i + 1] - xs[i], u = (x - xs[i]) / h, u2 = u * u, u3 = u2 * u;
@@ -118,13 +125,13 @@ EV.register('shoulder', ({THREE, EV, quality}) => {
      (os marcos do ângulo superior) e forte perto do colo, onde a charneira também desce.
      z0g devolve z e guarda em `incl` o fator de inclinação √(1 + |∇z|²) (para a espessura ser medida na
      perpendicular da lâmina e não ao longo de z). */
-  let incl = 1;
+  let incl = 1, tEsp = 0;                                             // tEsp: altura acima da linha da espinha (charneira)
   const z0g = (x, y) => {
     const xr = Math.sqrt((x - 6) * (x - 6) + 0.25), xl = 0.5 * (x - 6 + xr), dxl = 0.5 * (1 + (x - 6) / xr);
     const t = y - (0.15 + 0.06 * x - 0.25 * xl), tr = Math.sqrt(t * t + 0.09), tp = 0.5 * (t + tr), dtp = 0.5 * (1 + t / tr);
     const u = x < 1.5 ? 0 : x > 8 ? 1 : (x - 1.5) / 6.5, c1 = 0.13 + 0.6 * u * u * (3 - 2 * u), dc1 = 0.6 * 6 * u * (1 - u) / 6.5;
     const k = (c1 + 0.066 * tp) * dtp, gy = PB - k, gx = PA - dc1 * tp - k * (-0.06 + 0.25 * dxl);
-    incl = Math.sqrt(1 + gx * gx + gy * gy);
+    incl = Math.sqrt(1 + gx * gx + gy * gy); tEsp = t;
     return PA * x + PB * y - c1 * tp - 0.033 * tp * tp;
   };
   const z0 = z0g;
@@ -137,9 +144,9 @@ EV.register('shoulder', ({THREE, EV, quality}) => {
     [5.60, 1.75, 0.32, 0.5, 0], [6.45, 1.42, 0.32, 0.5, 0],                                   // incisura da escápula
     [7.00, 1.55, 0.34, 0.6, -0.05], [7.75, 1.95, 0.42, 0.8, -0.15], [8.70, 1.62, 0.55, 1.0, -0.28], [9.22, 0.30, 0.66, 1.2, -0.30],
     [9.45, -0.90, 0.75, 1.3, 0], [9.45, -2.40, 0.75, 1.3, 0], [9.30, -3.50, 0.68, 1.3, 0.05],   // atrás da glenoide
-    [8.67, -4.30, 0.60, 1.6, 0.12], [7.85, -4.66, 0.58, 1.9, 0.15], [7.20, -5.20, 0.56, 2.1, 0.17], [6.60, -6.20, 0.55, 2.1, 0.18],
-    [5.94, -7.20, 0.55, 2.1, 0.18], [5.39, -7.97, 0.55, 2.1, 0.18], [4.85, -8.70, 0.55, 2.0, 0.18], [4.30, -9.47, 0.55, 2.0, 0.18],
-    [3.92, -10.20, 0.55, 1.9, 0.18], [3.59, -10.98, 0.55, 1.7, 0.17], [3.30, -11.75, 0.54, 1.5, 0.16], [2.93, -12.50, 0.53, 1.4, 0.13],
+    [8.67, -4.30, 0.60, 1.6, 0.12], [7.85, -4.66, 0.58, 1.8, 0.15], [7.20, -5.20, 0.55, 1.8, 0.15], [6.60, -6.20, 0.50, 1.6, 0.12],
+    [5.94, -7.20, 0.46, 1.4, 0.09], [5.39, -7.97, 0.45, 1.4, 0.08], [4.85, -8.70, 0.45, 1.4, 0.08], [4.30, -9.47, 0.45, 1.4, 0.08],
+    [3.92, -10.20, 0.46, 1.4, 0.08], [3.59, -10.98, 0.47, 1.4, 0.08], [3.30, -11.75, 0.49, 1.4, 0.09], [2.93, -12.50, 0.51, 1.4, 0.10],
     [2.39, -13.10, 0.52, 1.3, 0.10], [1.84, -13.60, 0.54, 1.3, 0.10], [1.30, -13.82, 0.54, 1.3, 0.10], [0.80, -13.72, 0.52, 1.2, 0.09],
     [0.42, -13.30, 0.48, 1.1, 0.08]
   ];
@@ -160,16 +167,18 @@ EV.register('shoulder', ({THREE, EV, quality}) => {
     }
   }
   const FL = campo2D(contorno(borda, 0.3), -1.9, -14.9, 10.9, 4.8, 0.17);
-  const HFD = 0.20, HFV = 0.21;                                       // meia-espessura da lâmina nas fossas (dorsal / costal)
-  const relevo = (x, y) => {                                          // ondulação suave da face dorsal (fossa infraespinal)
-    const a = (x - 3.3) / 2.7, b = (y + 5.8) / 4.2, c = (x - 5.6) / 1.3, d = (y + 3.2) / 2.2;
-    return 0.10 * Math.exp(-a * a - b * b) - 0.05 * Math.exp(-c * c - d * d);
-  };
+  /* meia-espessura da lâmina nas fossas (dorsal / costal). A lâmina não pode ser mais fina que ~1,4 célula da malha
+     (no celular a célula é maior): abaixo disso a "surface nets" abre furinhos, sobretudo onde a lâmina é inclinada */
+  const HFD = 0.15, HFV = 0.25;
+  /* face dorsal da fossa infraespinal levemente convexa: engrossa depressa junto da borda medial e quase nada dali
+     para fora (sem degraus nem vales: vista de raspão, como a escápula esquerda na prancha, fica um degradê limpo) */
+  const relevo = x => 0.42 * (1 - Math.exp(-Math.max(0, x + 0.6) / 2.2)) * (1 - EV.smoothstep(-3.4, -0.6, tEsp))    // some junto da espinha: ali a fossa é côncava
+    + 0.10 * EV.smoothstep(-0.2, 0.8, tEsp);                           // fossa supraespinal (lâmina inclinada): um pouco mais espessa
   const lamina = (x, y, z) => {
     const o = ler(FL, x, y), d = o[0], hB = o[1], wB = o[2], vies = o[3], zm = z0g(x, y), sf = incl;
     if (d > -hB){ const u = d + hB, w = (z - zm) / sf - vies; return Math.sqrt(u * u + w * w) - hB; }      // borda arredondada
     const s = -d - hB, g = s < wB ? 0.5 + 0.5 * Math.cos(PI * s / wB) : 0;
-    const hd = HFD + (hB + vies - HFD) * g + (1 - g) * relevo(x, y), hv = HFV + (hB - vies - HFV) * g;
+    const hd = HFD + (hB + vies - HFD) * g + (1 - g) * relevo(x), hv = HFV + (hB - vies - HFV) * g;
     const w = (z - zm) / sf, a = w - hd, b = -hv - w;
     return a > b ? a : b;
   };
@@ -183,13 +192,13 @@ EV.register('shoulder', ({THREE, EV, quality}) => {
     [1.2,   0.10, 0, 0.12,  0.14, -0.06,  0.10,  0.00, 0, 0.26],         // perto da raiz a crista é um lábio que pende
     [2.4,   0.00, 0, 0.20,  0.45, -0.12,  0.36,  0.00, 0, 0.28],         // sobre um sulco (base de baixo recuada)
     [3.5,  -0.08, 0, 0.28,  0.72, -0.14,  0.56, -0.04, 0, 0.30],
-    [4.6,  -0.12, 0, 0.42,  0.94, -0.16,  0.66, -0.22, 0, 0.33],
-    [5.2,  -0.15, 0, 0.50,  1.04, -0.12,  0.62, -0.40, 0, 0.36],
-    [5.8,  -0.18, 0, 0.62,  1.10, -0.06,  0.56, -0.58, 0, 0.38],         // daqui para fora a face de baixo vira rampa larga
-    [6.5,  -0.22, 0, 0.74,  1.15, -0.02,  0.50, -0.86, 0, 0.40],
-    [7.3,  -0.26, 0, 0.80,  1.19, -0.10,  0.44, -1.12, 0, 0.40],
-    [7.9,  -0.30, 0, 0.82,  1.21, -0.12,  0.44, -1.20, 0, 0.40],
-    [8.6,  -0.30, 0, 0.82,  1.21, -0.10,  0.46, -1.18, 0, 0.40],
+    [4.6,  -0.12, 0, 0.42,  0.94, -0.16,  0.66, -0.26, 0, 0.33],
+    [5.2,  -0.15, 0, 0.50,  1.04, -0.12,  0.62, -0.46, 0, 0.36],
+    [5.8,  -0.18, 0, 0.62,  1.10, -0.06,  0.56, -0.66, 0, 0.38],         // daqui para fora a face de baixo vira rampa larga
+    [6.5,  -0.22, 0, 0.74,  1.15, -0.02,  0.50, -0.94, 0, 0.40],
+    [7.3,  -0.26, 0, 0.80,  1.19, -0.10,  0.44, -1.20, 0, 0.40],
+    [7.9,  -0.30, 0, 0.82,  1.21, -0.12,  0.44, -1.28, 0, 0.40],
+    [8.6,  -0.30, 0, 0.82,  1.21, -0.10,  0.46, -1.26, 0, 0.40],
     [9.2,  -0.20, 0, 0.83,  1.22,  0.30,  0.86, -0.85, 0, 0.34]
   ].map(r => { r[2] = z0(r[0], r[1]) + r[9] - 0.15; r[8] = z0(r[0], r[7]) + r[9] - 0.15; return r; }).concat([    // bases dentro da espessura da lâmina
     /* raiz do acrômio: só a faixa da crista, que termina dentro da placa do acrômio */
@@ -272,14 +281,14 @@ EV.register('shoulder', ({THREE, EV, quality}) => {
   const fNom = (x, y, z) => {
     let d = lamina(x, y, z), b;
     b = caixa(BE, x, y, z); if (b < MARG) d = smin(d, espinha(x, y, z), 0.22); else if (b < d) d = b;
-    b = caixa(BA, x, y, z); if (b < MARG) d = smin(d, acromio(x, y, z), 0.14); else if (b < d) d = b;
+    b = caixa(BA, x, y, z); if (b < MARG) d = smin(d, acromio(x, y, z), 0.05); else if (b < d) d = b;
     b = caixa(BG, x, y, z); if (b < MARG) d = smin(d, glenoide(x, y, z), 0.40); else if (b < d) d = b;
     b = caixa(BC, x, y, z); if (b < MARG) d = smin(d, coracoide(x, y, z), 0.45); else if (b < d) d = b;
     return d;
   };
   const fEsc = (x, y, z) => K * fNom(x * IK, y * IK, z * IK);
   const geom = EV.mesh.fromSDF(fEsc, {
-    min: [-1.5 * K, -14.6 * K, -5.4 * K], max: [14.3 * K, 4.6 * K, 2.4 * K], cell: 0.215 / Math.sqrt(q),
+    min: [-1.5 * K, -14.6 * K, -5.4 * K], max: [14.3 * K, 4.6 * K, 2.4 * K], cell: 0.215 / Math.pow(q, 0.35),                                  // a célula cresce pouco no celular (lâmina fina)
     ao: true, aoColor: [0.55, 0.53, 0.68], aoRadius: 1.6, aoStrength: 1.15
   });
   {
@@ -287,7 +296,7 @@ EV.register('shoulder', ({THREE, EV, quality}) => {
        superior, borda medial) saem serrilhados. Duas passadas de alisamento tangencial (média dos vizinhos), cada uma
        seguida de projeção de volta para f = 0 ao longo da normal; na última as normais são refeitas pelo gradiente. */
     const P = geom.attributes.position.array, Nn = geom.attributes.normal.array, I = geom.index.array, nV = P.length / 3;
-    const acc = new Float32Array(P.length), cnt = new Float32Array(nV), h = 0.09;
+    const acc = new Float32Array(P.length), cnt = new Float32Array(nV), h = 0.16;   // passo largo: a normal não acompanha o grão das grades 2D
     const grad = (x, y, z, o) => {
       let gx = fEsc(x + h, y, z) - fEsc(x - h, y, z), gy = fEsc(x, y + h, z) - fEsc(x, y - h, z), gz = fEsc(x, y, z + h) - fEsc(x, y, z - h);
       const il = 1 / (Math.sqrt(gx * gx + gy * gy + gz * gz) || 1);
@@ -315,13 +324,13 @@ EV.register('shoulder', ({THREE, EV, quality}) => {
     }
     /* normais: nas superfícies largas e quase planas (lâmina, acrômio) o gradiente tem um ruído pequeno (os campos 2D
        são lidos com interpolação bilinear) que, visto de raspão, vira risquinhos no contorno do material. Média com
-       os vizinhos de normal parecida (≤ ~20°): alisa o plano e não toca nas bordas arredondadas nem nas quinas. */
-    for (let it = 0; it < 3; it++){
+       os vizinhos de normal quase igual (≤ ~10°, peso crescente): tira só o ruído do plano, sem tocar nas curvas. */
+    for (let it = 0; it < 4; it++){
       acc.fill(0);
       for (let t = 0; t < I.length; t += 3){
         for (let k = 0; k < 3; k++){
           const a = I[t + k] * 3, b = I[t + (k + 1) % 3] * 3;
-          const w = (Nn[a] * Nn[b] + Nn[a + 1] * Nn[b + 1] + Nn[a + 2] * Nn[b + 2] - 0.94) / 0.06;
+          const w = (Nn[a] * Nn[b] + Nn[a + 1] * Nn[b + 1] + Nn[a + 2] * Nn[b + 2] - 0.985) / 0.015;
           if (w > 0){ acc[a] += Nn[b] * w; acc[a + 1] += Nn[b + 1] * w; acc[a + 2] += Nn[b + 2] * w; acc[b] += Nn[a] * w; acc[b + 1] += Nn[a + 1] * w; acc[b + 2] += Nn[a + 2] * w; }
         }
       }
@@ -339,11 +348,21 @@ EV.register('shoulder', ({THREE, EV, quality}) => {
       if (nx * (Nn[a] + Nn[b] + Nn[c]) + ny * (Nn[a + 1] + Nn[b + 1] + Nn[c + 1]) + nz * (Nn[a + 2] + Nn[b + 2] + Nn[c + 2]) < 0){ const k = I[t + 1]; I[t + 1] = I[t + 2]; I[t + 2] = k; }
     }
     /* sombreado de atlas gravado na cor de vértice: o que olha para baixo (debaixo da espinha, do acrômio, das bordas)
-       puxa para um cinza-lavanda, por cima da oclusão de ambiente que o fromSDF já gravou */
+       puxa para um cinza-lavanda, por cima da oclusão de ambiente que o fromSDF já gravou. Depois a cor é alisada
+       pela malha (média com os vizinhos), para as transições não acompanharem o desenho dos triângulos nas bordas. */
     const C = geom.attributes.color.array;
     for (let i = 0; i < C.length; i += 3){
       const k = 0.62 * EV.smoothstep(0.05, 0.95, -Nn[i + 1]);
       C[i] *= 1 - 0.30 * k; C[i + 1] *= 1 - 0.32 * k; C[i + 2] *= 1 - 0.16 * k;
+    }
+    for (let it = 0; it < 3; it++){
+      acc.fill(0); cnt.fill(0);
+      for (let t = 0; t < I.length; t += 3){
+        const a = I[t] * 3, b = I[t + 1] * 3, c = I[t + 2] * 3;
+        for (let k = 0; k < 3; k++){ const ca = C[a + k], cb = C[b + k], cc = C[c + k]; acc[a + k] += cb + cc; acc[b + k] += ca + cc; acc[c + k] += ca + cb; }
+        cnt[I[t]] += 2; cnt[I[t + 1]] += 2; cnt[I[t + 2]] += 2;
+      }
+      for (let v = 0; v < nV; v++){ const o = v * 3, ic = 0.6 / (cnt[v] || 1); for (let k = 0; k < 3; k++) C[o + k] = 0.4 * C[o + k] + acc[o + k] * ic; }
     }
     geom.computeBoundingSphere();
   }
@@ -369,7 +388,7 @@ EV.register('shoulder', ({THREE, EV, quality}) => {
     /* a clavícula da referência é mais escura e amarelada por baixo e por trás: sombreado gravado na cor de vértice */
     const Nc = geomClav.attributes.normal.array, Cc = geomClav.attributes.color.array;
     for (let i = 0; i < Nc.length; i += 3){
-      const k = EV.smoothstep(-0.35, 0.8, -0.75 * Nc[i + 1] + 0.5 * Nc[i + 2]) * 0.95;
+      const k = EV.smoothstep(-0.7, 0.9, -0.75 * Nc[i + 1] + 0.5 * Nc[i + 2]) * 0.95;
       Cc[i] = 1 - 0.30 * k; Cc[i + 1] = 1 - 0.36 * k; Cc[i + 2] = 1 - 0.52 * k;
     }
   }
