@@ -31,3 +31,13 @@ python3 -m http.server 8767 --bind 127.0.0.1 --directory camera-distante
 ```
 
 Depois acesse `http://127.0.0.1:8767`.
+
+## Escápula Viva
+
+Prancha anatômica interativa das costas (trapézio, elevador da escápula, romboides e serrátil anterior): mexe a escápula, mostra quem encurta e quem estica e o efeito na respiração.
+
+```bash
+python3 -m http.server 8768 --bind 127.0.0.1 --directory escapula-viva
+```
+
+Depois acesse `http://127.0.0.1:8768`.

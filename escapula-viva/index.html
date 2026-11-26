@@ -1,0 +1,537 @@
+<title>Escápula Viva</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Instrument+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: prancha de atlas à esquerda (fixa enquanto rola), painel de leitura e controles à direita; empilha no celular. */
+:root{
+  --bg:#e7ebe9; --plate:#f5f6f3; --panel:#fbfcfb; --ink:#16252b; --muted:#55676d; --line:#cdd6d3;
+  --accent:#0f5c63; --on-accent:#ffffff;
+  --short:#a3202f; --long:#2b7ba6; --muscle:#c9623a;
+  --bone:#efe7d2; --bone-hi:#fbf7ea; --bone-edge:#a39473; --ghost:#d9a98c;
+  --display:"Bricolage Grotesque","Trebuchet MS",sans-serif;
+  --body:"Instrument Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#0f1619; --plate:#172126; --panel:#1a252a; --ink:#e7eeec; --muted:#9db0b3; --line:#2d3c42;
+  --accent:#72c7cc; --on-accent:#0b1b1e;
+  --short:#e45b6c; --long:#6bb6dc; --muscle:#d2703f;
+  --bone:#ddd4bc; --bone-hi:#efe8d6; --bone-edge:#6f6450; --ghost:#8a6a5a; color-scheme:dark } }
+:root[data-theme="dark"]{
+  --bg:#0f1619; --plate:#172126; --panel:#1a252a; --ink:#e7eeec; --muted:#9db0b3; --line:#2d3c42;
+  --accent:#72c7cc; --on-accent:#0b1b1e;
+  --short:#e45b6c; --long:#6bb6dc; --muscle:#d2703f;
+  --bone:#ddd4bc; --bone-hi:#efe8d6; --bone-edge:#6f6450; --ghost:#8a6a5a; color-scheme:dark }
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.5;
+  padding-block:20px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:1120px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+header h1{font-family:var(--display);font-weight:700;font-size:clamp(28px,5vw,40px);line-height:1.05;margin:0;letter-spacing:-.01em}
+header p{margin:6px 0 0;color:var(--muted);max-width:62ch}
+.grid{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:22px;align-items:start}
+@media (max-width:820px){.grid{grid-template-columns:minmax(0,1fr)}}
+
+.stage{position:sticky;top:calc(env(safe-area-inset-top,0px) + 12px);display:flex;flex-direction:column;gap:10px}
+@media (max-width:820px){.stage{position:static}}
+.plate{position:relative;background:var(--plate);border:1px solid var(--line);border-radius:6px;overflow:hidden}
+canvas{display:block;width:100%;height:auto;touch-action:pan-y;cursor:grab}
+canvas.drag{cursor:grabbing}
+.breath{position:absolute;left:10px;top:10px;display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12px;color:var(--muted);
+  background:var(--panel);border:1px solid var(--line);border-radius:99px;padding:4px 10px}
+.breath i{display:block;width:44px;height:4px;border-radius:2px;background:var(--line);overflow:hidden}
+.breath i b{display:block;height:100%;width:0;background:var(--accent)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:18px;height:8px;border-radius:2px;display:inline-block}
+.hint{font-size:13px;color:var(--muted);margin:0}
+
+.panel{display:flex;flex-direction:column;gap:20px;min-width:0}
+section{display:flex;flex-direction:column;gap:10px;min-width:0}
+h2{font-family:var(--display);font-weight:500;font-size:19px;margin:0;line-height:1.2}
+.lab{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+button{font:inherit;color:inherit}
+.chip{border:1px solid var(--line);background:var(--panel);border-radius:99px;padding:7px 13px;cursor:pointer;font-weight:500;font-size:14px}
+.chip:hover{border-color:var(--accent)}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.sl{display:grid;grid-template-columns:1fr;gap:2px}
+.sl label{font-weight:600;font-size:14px}
+.sl .ends{display:flex;justify-content:space-between;font-size:12px;color:var(--muted)}
+input[type=range]{width:100%;accent-color:var(--accent);margin:2px 0}
+.opts{display:flex;flex-wrap:wrap;gap:14px 22px}
+.opt{display:flex;flex-direction:column;gap:6px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--panel)}
+.seg button{border:0;background:none;padding:6px 11px;font-size:13px;cursor:pointer;border-right:1px solid var(--line)}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--on-accent)}
+
+.rows{display:flex;flex-direction:column;border-top:1px solid var(--line)}
+.row{display:grid;grid-template-columns:22px minmax(0,1.25fr) minmax(60px,1fr) 52px;gap:8px;align-items:center;
+  padding:8px 4px;border:0;border-bottom:1px solid var(--line);background:none;text-align:left;cursor:pointer;width:100%}
+.row:hover,.row[aria-pressed="true"]{background:var(--panel)}
+.row[aria-pressed="true"] .nm{font-weight:600}
+.num{width:20px;height:20px;border-radius:50%;background:var(--ink);color:var(--bg);font-family:var(--mono);font-size:11px;display:grid;place-items:center}
+.nm{font-size:14px;min-width:0}
+.track{position:relative;height:8px;background:var(--line);border-radius:4px}
+.track::after{content:"";position:absolute;left:50%;top:-3px;bottom:-3px;width:1px;background:var(--muted)}
+.fill{position:absolute;top:0;bottom:0;border-radius:4px}
+.pct{font-family:var(--mono);font-size:12px;text-align:right;font-variant-numeric:tabular-nums}
+.axis{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);padding:0 60px 0 30px}
+
+.air{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(60px,1fr) auto;gap:6px 10px;align-items:center;font-size:14px}
+.air .bar{height:8px;background:var(--line);border-radius:4px;overflow:hidden}
+.air .bar b{display:block;height:100%;background:var(--accent);border-radius:4px}
+.air em{font-style:normal;font-family:var(--mono);font-size:12px;color:var(--muted);text-align:right}
+
+.read{display:flex;flex-direction:column;gap:12px}
+.read div{border-left:3px solid var(--accent);padding-left:12px}
+.read h3{margin:0 0 2px;font-size:15px;font-weight:600}
+.read p{margin:0;max-width:62ch}
+.read p + p{margin-top:6px;color:var(--muted)}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:14px 16px;display:flex;flex-direction:column;gap:8px}
+.card h3{margin:0;font-family:var(--display);font-weight:700;font-size:18px;display:flex;align-items:center;gap:8px}
+.card dl{margin:0;display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 12px;font-size:14px}
+.card dt{color:var(--muted)}
+.card dd{margin:0}
+.note{font-size:13px;color:var(--muted);max-width:66ch;margin:0}
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Escápula Viva</h1>
+    <p>Trapézio, elevador, romboides e serrátil vistos de costas. Mexa a escápula e veja quem encurta, quem estica e o que muda na respiração.</p>
+  </header>
+
+  <div class="grid">
+    <div class="stage">
+      <div class="plate">
+        <canvas id="cv" role="img" aria-label="Desenho anatômico das costas com coluna, costelas, escápulas e os músculos trapézio, elevador da escápula, romboides e serrátil anterior, animado com a respiração."></canvas>
+        <div class="breath" aria-hidden="true"><span id="bphase">inspira</span><i><b id="bbar"></b></i></div>
+      </div>
+      <div class="legend">
+        <span><i style="background:var(--short)"></i>encurtado</span>
+        <span><i style="background:var(--muscle)"></i>comprimento de repouso</span>
+        <span><i style="background:var(--long)"></i>esticado</span>
+      </div>
+      <p class="hint">Arraste a escápula no desenho para juntar ou afastar. Toque num músculo para ver a ficha dele.</p>
+    </div>
+
+    <div class="panel">
+      <section>
+        <span class="lab">Posições</span>
+        <div class="chips" id="presets"></div>
+      </section>
+
+      <section>
+        <div class="sl"><label for="s-elev">Subir e descer o ombro</label>
+          <input type="range" id="s-elev" min="-100" max="100" value="0">
+          <div class="ends"><span>desce</span><span>sobe até a orelha</span></div></div>
+        <div class="sl"><label for="s-retr">Juntar e afastar as escápulas</label>
+          <input type="range" id="s-retr" min="-100" max="100" value="0">
+          <div class="ends"><span>afasta (empurra)</span><span>junta (espreme)</span></div></div>
+        <div class="sl"><label for="s-rot">Levantar o braço</label>
+          <input type="range" id="s-rot" min="0" max="100" value="0">
+          <div class="ends"><span>braço ao lado</span><span>braço acima</span></div></div>
+      </section>
+
+      <section>
+        <div class="opts">
+          <div class="opt"><span class="lab">Respiração</span>
+            <div class="seg" id="seg-breath"><button data-v="1">Respirando</button><button data-v="0">Parada</button></div></div>
+          <div class="opt"><span class="lab">Camadas</span>
+            <div class="seg" id="seg-layer"><button data-v="half">Meio a meio</button><button data-v="sup">Trapézio</button><button data-v="deep">Profunda</button></div></div>
+          <div class="opt"><span class="lab">Cores</span>
+            <div class="seg" id="seg-color"><button data-v="state">Estado</button><button data-v="anat">Atlas</button></div></div>
+        </div>
+      </section>
+
+      <section>
+        <h2>Quem encurta e quem estica agora</h2>
+        <div class="rows" id="rows"></div>
+        <div class="axis"><span>encurta</span><span>estica</span></div>
+      </section>
+
+      <section>
+        <h2>O ar nessa posição</h2>
+        <div class="air" id="air"></div>
+      </section>
+
+      <section>
+        <h2>O que está acontecendo</h2>
+        <div class="read" id="read"></div>
+      </section>
+
+      <section>
+        <div class="card" id="card"></div>
+      </section>
+
+      <p class="note">Modelo simplificado para enxergar o mecanismo: as porcentagens saem da geometria do desenho, e as barras de respiração mostram a tendência, sem medir um corpo real. Dor em pontada, formigamento ou perda de força pedem avaliação de fisioterapeuta ou médico.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+const $ = s => document.querySelector(s);
+const cv = $('#cv'), ctx = cv.getContext('2d');
+const VW = 520, VH = 640, VX = -260, VY = -350;
+const clamp = (v,a,b) => Math.max(a, Math.min(b, v));
+const lerp = (a,b,t) => a + (b-a)*t;
+const rad = d => d*Math.PI/180;
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ---------- esqueleto ---------- */
+const yC = i => -228 + i*15;            // C1..C7
+const yT = i => -120 + i*29;            // T1..T12
+const W0 = [52,78,98,113,124,131,136,137,133,124,100,66];
+const D0 = [14,22,28,33,37,41,44,46,47,46,40,30];
+const C0 = [98,-30];                    // centro da escápula direita em repouso
+
+/* ---------- músculos ---------- */
+const MUS = [
+  {k:'lev', n:1, nome:'Elevador da escápula', O:[[15,yC(0)],[18,yC(3)]], I:[[-30,-68],[-34,-44]], nf:8,
+   org:'Processos transversos de C1 a C4', ins:'Ângulo superior da escápula',
+   acao:'Sobe a escápula e gira a ponta dela para baixo; também inclina o pescoço.',
+   tenso:'Trabalha colado ao trapézio superior. É o ponto duro no canto entre o pescoço e o ombro.',
+   cuidar:'Soltar com bolinha suave, inclinação lateral do pescoço por 30 s, depois ativar o trapézio inferior.'},
+  {k:'rmin', n:2, nome:'Romboide menor', O:[[3,-142],[3,-117]], I:[[-34,-47],[-33,-29]], nf:6,
+   org:'Processos espinhosos de C7 e T1', ins:'Borda medial da escápula, na raiz da espinha',
+   acao:'Puxa a escápula para a coluna e ajuda a girá-la para baixo.',
+   tenso:'Fica encurtado quando as escápulas vivem espremidas para trás.',
+   cuidar:'Gato-camelo e abraço em si mesma para abrir; flexão "plus" para o serrátil dividir o trabalho.'},
+  {k:'rmaj', n:3, nome:'Romboide maior', O:[[3,-97],[3,-28]], I:[[-33,-27],[-23,77]], nf:16,
+   org:'Processos espinhosos de T2 a T5', ins:'Borda medial da escápula, até o ângulo inferior',
+   acao:'Junta as escápulas e segura a borda delas contra as costelas.',
+   tenso:'Encurta junto com o trapézio médio na retração forte; estica quando o braço sobe ou empurra.',
+   cuidar:'Remada com pausa para fortalecer; posição da criança respirando nas costas para soltar.'},
+  {k:'ser', n:4, nome:'Serrátil anterior',
+   org:'Costelas 1 a 9, na lateral do tórax', ins:'Face da frente da borda medial da escápula',
+   acao:'Leva a escápula para frente contornando as costelas, gira para cima quando o braço sobe e mantém a escápula colada ao tórax.',
+   tenso:'Como nasce nas costelas, sente cada respiração. Com a escápula presa para trás ou para cima ele fica esticado e fraco, e o trapézio superior assume.',
+   cuidar:'Flexão "plus" (no fim da flexão, empurrar o chão afastando as escápulas) e deslizar os braços na parede.'},
+  {k:'tsup', n:5, nome:'Trapézio superior', O:[[9,-236],[3,-165]], I:[[58,-88],[72,-78]], nf:16, bow:[-10,16],
+   org:'Osso occipital e ligamento nucal', ins:'Terço lateral da clavícula e acrômio',
+   acao:'Sobe o ombro e ajuda a girar a escápula para cima.',
+   tenso:'Encurtado, segura o ombro perto da orelha e puxa a respiração para o alto do peito.',
+   cuidar:'Expiração longa deixando o ombro pesar, bolinha suave, e fortalecer serrátil e trapézio inferior, que são os parceiros que faltam.'},
+  {k:'tmed', n:6, nome:'Trapézio médio', O:[[3,-165],[3,-62]], I:[[72,-78],[6,-55]], nf:14,
+   org:'Ligamento nucal baixo e processos espinhosos de C7 a T3', ins:'Acrômio e espinha da escápula',
+   acao:'Junta as escápulas em direção à coluna.',
+   tenso:'É o motor da retração. Muito tempo espremido, prende a escápula e aperta a parte de trás das costelas.',
+   cuidar:'T deitada para fortalecer com controle; abrir as costas na respiração para soltar.'},
+  {k:'tinf', n:7, nome:'Trapézio inferior', O:[[3,-62],[3,199]], I:[[6,-55],[-31,-37]], nf:22, bow:[6,0],
+   org:'Processos espinhosos de T4 a T12', ins:'Raiz da espinha da escápula',
+   acao:'Desce a escápula e gira para cima; é o contrapeso do trapézio superior.',
+   tenso:'Fica esticado e desligado quando o ombro mora lá em cima.',
+   cuidar:'Y deitada de bruços, 6 a 10 repetições lentas com 2 s de pausa no alto.'}
+];
+const byK = Object.fromEntries(MUS.map(m => [m.k, m]));
+const TRAP = ['tsup','tmed','tinf'];
+
+/* ---------- estado ---------- */
+const P = {elev:0, retr:0, rot:0}, T = {elev:0, retr:0, rot:0};
+let breathOn = !reduced, ph = 0, layer = 'half', colorMode = 'state', sel = 'tsup';
+let G = null, REST = {}, col = {}, hit = {}, scapHit = null;
+
+function scapPt(p, pose){
+  const a = -pose.theta, c = Math.cos(a), s = Math.sin(a), x = p[0]*pose.sx, y = p[1];
+  return [C0[0]+pose.tx + x*c - y*s, C0[1]+pose.ty + x*s + y*c];
+}
+const along = (L,t) => [lerp(L[0][0],L[1][0],t), lerp(L[0][1],L[1][1],t)];
+const dist = (a,b) => Math.hypot(a[0]-b[0], a[1]-b[1]);
+
+function geom(p, b){
+  const er = Math.max(p.elev,0), rr = Math.max(p.retr,0), pr = Math.max(-p.retr,0);
+  const back = clamp(1 - .55*rr + .15*pr, .3, 1.15), low = clamp(1 - .5*er, .4, 1), high = er;
+  const pose = {
+    tx: (rr ? -22*rr : 30*pr) + 20*p.rot - 8*er + 3*b*back,
+    ty: (p.elev > 0 ? -36*p.elev : -14*p.elev) - (1.5 + 6*high)*b,
+    theta: rad(36*p.rot - 7*rr), sx: 1 - .2*pr
+  };
+  const ribs = W0.map((w,i) => {
+    const a = back*(i >= 5 ? low : 1);
+    return {W: w*(1 + .06*b*a*(.6 + .5*i/11)), D: D0[i]*(1 - .22*b*a), y: yT(i) - 4 - 2*b*a};
+  });
+  const mus = {};
+  for (const m of MUS){
+    let fibers = [];
+    if (m.k === 'ser'){
+      for (let i = 0; i < 9; i++){
+        const r = ribs[i], R = [r.W, r.y + r.D*.95];
+        const loc = i < 2 ? [-29,-62+i*8] : i < 4 ? [-33,-30+(i-2)*34] : [-24+(i-4)*1.5, 66+(i-4)*3];
+        const S = scapPt(loc, pose);
+        for (let k = 0; k < 4; k++){ const t = k/3 - .5; fibers.push([[S[0], S[1]+t*5], [R[0]-Math.abs(t)*3, R[1]+t*14]]); }
+      }
+    } else {
+      const I = m.I.map(q => scapPt(q, pose));
+      for (let k = 0; k < m.nf; k++){ const t = k/(m.nf-1); fibers.push([along(m.O,t), along(I,t)]); }
+    }
+    const len = fibers.reduce((s,f) => s + dist(f[0],f[1]), 0)/fibers.length;
+    mus[m.k] = {fibers, len};
+  }
+  return {pose, ribs, mus, back, low, high};
+}
+
+/* ---------- cores ---------- */
+const probe = document.createElement('canvas').getContext('2d');
+function rgb(v){ probe.fillStyle = '#000'; probe.fillStyle = v; const h = probe.fillStyle;
+  return h[0] === '#' ? [1,3,5].map(i => parseInt(h.slice(i,i+2),16)) : (h.match(/[\d.]+/g)||[0,0,0]).slice(0,3).map(Number); }
+const css = c => `rgb(${c.map(Math.round).join(',')})`;
+const mix = (a,b,t) => a.map((v,i) => lerp(v,b[i],t));
+function readTheme(){
+  const s = getComputedStyle(document.documentElement), g = n => s.getPropertyValue(n).trim();
+  col = {ink:g('--ink'), plate:g('--plate'), bone:g('--bone'), boneHi:g('--bone-hi'), boneEdge:g('--bone-edge'), ghost:g('--ghost'),
+    base:rgb(g('--muscle')), short:rgb(g('--short')), long:rgb(g('--long')), tendon:rgb(g('--bone-hi'))};
+}
+const delta = k => G.mus[k].len/REST[k] - 1;
+function musColor(k){
+  if (colorMode === 'anat') return col.base;
+  const s = clamp(delta(k)/.2, -1, 1), a = Math.pow(Math.abs(s), .8);
+  return mix(col.base, s < 0 ? col.short : col.long, a);
+}
+
+/* ---------- desenho ---------- */
+function bone(path, w){
+  ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  ctx.strokeStyle = col.boneEdge; ctx.lineWidth = w + 2.2; ctx.stroke(path);
+  ctx.strokeStyle = col.bone; ctx.lineWidth = w; ctx.stroke(path);
+  ctx.strokeStyle = col.boneHi; ctx.lineWidth = w*.3; ctx.globalAlpha = .7; ctx.stroke(path); ctx.globalAlpha = 1;
+}
+function boneFill(path){ ctx.fillStyle = col.bone; ctx.fill(path); ctx.strokeStyle = col.boneEdge; ctx.lineWidth = 1.3; ctx.stroke(path); }
+
+const ctrl = (f, bow) => [(f[0][0]+f[1][0])/2 + (bow?bow[0]:0), (f[0][1]+f[1][1])/2 + (bow?bow[1]:0)];
+function fanPath(fibers, bow){
+  const p = new Path2D(), a = fibers[0], z = fibers[fibers.length-1], ca = ctrl(a,bow), cz = ctrl(z,bow);
+  p.moveTo(...a[0]); p.quadraticCurveTo(...ca, ...a[1]); p.lineTo(...z[1]); p.quadraticCurveTo(...cz, ...z[0]); p.closePath();
+  return p;
+}
+function musclePath(k){
+  const m = byK[k], f = G.mus[k].fibers;
+  if (k !== 'ser') return fanPath(f, m.bow);
+  const p = new Path2D();
+  for (let i = 0; i < 9; i++) p.addPath(fanPath(f.slice(i*4, i*4+4)));
+  return p;
+}
+function drawMuscle(k){
+  const m = byK[k], f = G.mus[k].fibers, c = musColor(k), path = hit[k];
+  const dark = css(mix(c,[0,0,0],.32)), light = css(mix(c,[255,255,255],.3)), s = clamp(delta(k)/.2,-1,1);
+  ctx.save();
+  ctx.shadowColor = 'rgba(0,0,0,.28)'; ctx.shadowBlur = 5; ctx.shadowOffsetY = 1.5;
+  ctx.fillStyle = css(c); ctx.fill(path);
+  ctx.restore();
+  ctx.lineCap = 'butt'; ctx.lineWidth = 1.1 + .5*Math.max(-s,0);
+  f.forEach((fb, i) => {
+    const cp = ctrl(fb, m.bow);
+    ctx.strokeStyle = i % 2 ? dark : light; ctx.globalAlpha = i % 2 ? .55 : .5;
+    ctx.beginPath(); ctx.moveTo(...fb[0]); ctx.quadraticCurveTo(...cp, ...fb[1]); ctx.stroke();
+  });
+  ctx.globalAlpha = .75; ctx.strokeStyle = css(col.tendon); ctx.lineWidth = 1.6;
+  f.forEach(fb => { const cp = ctrl(fb, m.bow), e = k === 'ser' ? 1 : 0, q = [lerp(fb[e][0],cp[0],.14), lerp(fb[e][1],cp[1],.14)];
+    ctx.beginPath(); ctx.moveTo(...fb[e]); ctx.lineTo(...q); ctx.stroke(); });
+  ctx.globalAlpha = 1; ctx.strokeStyle = dark; ctx.lineWidth = .9; ctx.stroke(path);
+  if (sel === k){ ctx.strokeStyle = col.ink; ctx.lineWidth = 2.6; ctx.lineJoin = 'round'; ctx.stroke(path); }
+}
+function scapulaPaths(){
+  const q = p => scapPt(p, G.pose), b = new Path2D(), s = new Path2D();
+  const M = (pa,p) => pa.moveTo(...q(p)), L = (pa,p) => pa.lineTo(...q(p)), Q = (pa,c,p) => pa.quadraticCurveTo(...q(c), ...q(p));
+  M(b,[-30,-68]); Q(b,[0,-66],[22,-58]); L(b,[40,-58]); Q(b,[56,-48],[46,-32]); Q(b,[20,20],[-22,80]); Q(b,[-32,74],[-30,64]); L(b,[-34,-36]); Q(b,[-36,-56],[-30,-68]); b.closePath();
+  M(s,[-34,-41]); L(s,[30,-66]); Q(s,[52,-86],[70,-82]); Q(s,[78,-71],[62,-63]); L(s,[36,-53]); L(s,[-32,-30]); s.closePath();
+  return {b, s};
+}
+function ribPaths(i){
+  const r = G.ribs[i], {W,D,y} = r, back = new Path2D(), front = new Path2D();
+  back.moveTo(9,y); back.bezierCurveTo(W*.3,y-9, W*.8,y-6, W,y+D*.55);
+  if (i < 10){ back.quadraticCurveTo(W*1.04,y+D*.9, W*.93,y+D*1.15);
+    front.moveTo(W*.93,y+D*1.15); front.quadraticCurveTo(W*.6,y+D*1.5+18, W*.2,y+D*1.15+30+i*3); }
+  return {back, front};
+}
+function vertebra(y, h, bw, tw){
+  ctx.fillStyle = col.bone; ctx.strokeStyle = col.boneEdge; ctx.lineWidth = 1.1;
+  ctx.beginPath(); ctx.ellipse(0, y, tw, 4.6, 0, 0, 7); ctx.fill(); ctx.stroke();
+  ctx.beginPath(); ctx.roundRect(-bw/2, y-h/2, bw, h, 4); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = col.boneHi; ctx.beginPath(); ctx.ellipse(0, y+3, 4.2, h*.42, 0, 0, 7); ctx.fill(); ctx.stroke();
+}
+function mirrored(sign, fn){ ctx.save(); ctx.scale(sign,1); fn(); ctx.restore(); }
+const trapOn = sign => layer === 'sup' || (layer === 'half' && sign < 0);
+
+function draw(){
+  const dpr = Math.min(window.devicePixelRatio||1, 2.5), cw = cv.clientWidth; if (!cw) return;
+  const W = Math.round(cw*dpr), H = Math.round(cw*VH/VW*dpr);
+  if (cv.width !== W || cv.height !== H){ cv.width = W; cv.height = H; }
+  const sc = W/VW; ctx.setTransform(sc,0,0,sc,-VX*sc,-VY*sc); ctx.clearRect(VX,VY,VW,VH);
+
+  for (const k in G.mus) hit[k] = musclePath(k);
+  const sp = scapulaPaths(); scapHit = sp.b;
+  const acr = scapPt([66,-78], G.pose), gl = scapPt([56,-42], G.pose);
+  const phi = rad(130*P.rot), arm = [gl[0] + Math.sin(phi)*230, gl[1] + Math.cos(phi)*230];
+
+  // silhueta
+  for (const s of [1,-1]) mirrored(s, () => {
+    ctx.fillStyle = col.ghost; ctx.globalAlpha = .2; ctx.beginPath();
+    ctx.moveTo(0,-250); ctx.lineTo(36,-250); ctx.bezierCurveTo(42,-170, 70,acr[1]-30, acr[0]+6,acr[1]-14);
+    ctx.quadraticCurveTo(acr[0]+44,acr[1]-4, acr[0]+44,acr[1]+60); ctx.lineTo(acr[0]+40,300); ctx.lineTo(0,300); ctx.closePath(); ctx.fill(); ctx.globalAlpha = 1;
+  });
+  // costelas da frente, clavícula
+  for (const s of [1,-1]) mirrored(s, () => {
+    ctx.globalAlpha = .5; for (let i = 0; i < 10; i++) bone(ribPaths(i).front, 6); ctx.globalAlpha = .8;
+    const c = new Path2D(); c.moveTo(14,-112); c.bezierCurveTo(60,-128, 100,acr[1]-22, acr[0]-4,acr[1]-2); bone(c, 7); ctx.globalAlpha = 1;
+  });
+  // crânio
+  ctx.fillStyle = col.bone; ctx.strokeStyle = col.boneEdge; ctx.lineWidth = 1.3;
+  for (const s of [1,-1]){ ctx.beginPath(); ctx.ellipse(s*50,-246,13,15,0,0,7); ctx.fill(); ctx.stroke(); }
+  const sg = ctx.createRadialGradient(-18,-330,10, 0,-306,90); sg.addColorStop(0,col.boneHi); sg.addColorStop(1,col.bone);
+  ctx.fillStyle = sg; ctx.beginPath(); ctx.ellipse(0,-306,70,77,0,0,7); ctx.fill(); ctx.stroke();
+  ctx.globalAlpha = .45; ctx.beginPath(); ctx.moveTo(-52,-256); ctx.quadraticCurveTo(0,-238,52,-256); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(-62,-300); ctx.quadraticCurveTo(-30,-322,0,-350); ctx.quadraticCurveTo(30,-322,62,-300); ctx.stroke(); ctx.globalAlpha = 1;
+  // costelas de trás
+  for (const s of [1,-1]) mirrored(s, () => { for (let i = 11; i >= 0; i--) bone(ribPaths(i).back, i > 9 ? 6.5 : 8); });
+  // coluna
+  for (let i = 0; i < 7; i++) vertebra(yC(i), 11, 15, 17);
+  for (let i = 0; i < 12; i++) vertebra(yT(i), 22, 19 + i*.5, 22);
+  for (let i = 0; i < 3; i++) vertebra(234 + i*33, 26, 27, 30);
+
+  for (const s of [1,-1]) mirrored(s, () => {
+    drawMuscle('ser');
+    const h = new Path2D(); h.moveTo(...gl); h.lineTo(...arm); bone(h, 17);
+    ctx.beginPath(); ctx.arc(gl[0], gl[1], 16, 0, 7); ctx.fillStyle = col.bone; ctx.fill(); ctx.strokeStyle = col.boneEdge; ctx.lineWidth = 1.3; ctx.stroke();
+    ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.25)'; ctx.shadowBlur = 6; ctx.shadowOffsetY = 2; boneFill(sp.b); ctx.restore();
+    ctx.fillStyle = col.boneHi; ctx.fill(sp.s); ctx.strokeStyle = col.boneEdge; ctx.lineWidth = 1.2; ctx.stroke(sp.s);
+    drawMuscle('lev'); drawMuscle('rmaj'); drawMuscle('rmin');
+    if (trapOn(s)){
+      TRAP.forEach(drawMuscle);
+      // aponeurose junto à coluna
+      ctx.fillStyle = css(col.tendon); ctx.globalAlpha = .85; ctx.beginPath();
+      ctx.moveTo(0,-236); ctx.lineTo(5,-236); ctx.lineTo(4,-158); ctx.quadraticCurveTo(16,-132, 4,-104); ctx.lineTo(3,199); ctx.lineTo(0,199); ctx.closePath(); ctx.fill(); ctx.globalAlpha = 1;
+    }
+  });
+  // marcadores numerados
+  const marks = [];
+  for (const m of MUS){
+    const isT = TRAP.includes(m.k);
+    if (isT && layer === 'deep') continue;
+    if (!isT && m.k !== 'ser' && layer === 'sup') continue;
+    const f = G.mus[m.k].fibers, fb = m.k === 'ser' ? f[26] : f[Math.floor(f.length/2)], t = m.k === 'ser' ? .75 : .5;
+    marks.push([m, (isT ? -1 : 1)*lerp(fb[0][0],fb[1][0],t), lerp(fb[0][1],fb[1][1],t) + (m.bow ? m.bow[1]*.5 : 0)]);
+  }
+  ctx.font = '600 11px "IBM Plex Mono", monospace'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  for (const [m,x,y] of marks){
+    ctx.beginPath(); ctx.arc(x,y,9.5,0,7); ctx.fillStyle = col.ink; ctx.globalAlpha = sel === m.k ? 1 : .82; ctx.fill(); ctx.globalAlpha = 1;
+    ctx.fillStyle = col.plate; ctx.fillText(m.n, x, y+.5);
+  }
+}
+
+/* ---------- painel ---------- */
+const PRESETS = [
+  ['Neutro', 0, 0, 0], ['Ombros na orelha', .9, .15, 0], ['Escápulas espremidas', .1, 1, 0],
+  ['Empurrar', 0, -1, .1], ['Braço acima', .15, -.2, 1], ['Descer e encaixar', -.85, .2, 0]
+];
+const pre = $('#presets');
+PRESETS.forEach((p,i) => { const b = document.createElement('button'); b.className = 'chip'; b.textContent = p[0]; b.setAttribute('aria-pressed', i === 0);
+  b.onclick = () => { T.elev = p[1]; T.retr = p[2]; T.rot = p[3]; syncSliders(); markPreset(i); if (reduced) Object.assign(P, T); updateRead(); }; pre.append(b); });
+const markPreset = i => [...pre.children].forEach((b,j) => b.setAttribute('aria-pressed', i === j));
+const SL = {elev:$('#s-elev'), retr:$('#s-retr'), rot:$('#s-rot')};
+const syncSliders = () => { for (const k in SL) SL[k].value = Math.round(T[k]*100); };
+for (const k in SL) SL[k].oninput = () => { T[k] = SL[k].value/100; markPreset(-1); updateRead(); };
+
+function seg(id, get, set){
+  const el = $(id), paint = () => [...el.children].forEach(b => b.setAttribute('aria-pressed', b.dataset.v === String(get())));
+  [...el.children].forEach(b => b.onclick = () => { set(b.dataset.v); paint(); }); paint();
+}
+seg('#seg-breath', () => breathOn ? 1 : 0, v => breathOn = v === '1');
+seg('#seg-layer', () => layer, v => layer = v);
+seg('#seg-color', () => colorMode, v => colorMode = v);
+
+const rows = $('#rows'), rowEl = {};
+MUS.forEach(m => { const b = document.createElement('button'); b.className = 'row';
+  b.innerHTML = `<span class="num">${m.n}</span><span class="nm">${m.nome}</span><span class="track"><span class="fill"></span></span><span class="pct">0%</span>`;
+  b.onclick = () => select(m.k); rows.append(b); rowEl[m.k] = b; });
+function updateRows(){
+  for (const m of MUS){ const d = delta(m.k)*100, r = rowEl[m.k], f = r.querySelector('.fill'), w = clamp(Math.abs(d)/30,0,1)*50;
+    f.style.width = w + '%'; f.style.left = d < 0 ? (50-w) + '%' : '50%'; f.style.background = d < 0 ? 'var(--short)' : 'var(--long)';
+    const v = Math.round(d); r.querySelector('.pct').textContent = (v > 0 ? '+' : v < 0 ? '−' : '') + Math.abs(v) + '%'; }
+}
+const air = $('#air');
+air.innerHTML = ['Costelas de trás','Costelas de baixo e dos lados','Ombro sobe ao inspirar'].map((t,i) => `<span>${t}</span><span class="bar"><b id="a${i}"></b></span><em id="e${i}"></em>`).join('');
+function updateAir(){
+  const g = geom(T, 0), w = v => v > .9 ? 'abrem livres' : v > .65 ? 'abrem menos' : 'bem presas';
+  $('#a0').style.width = clamp(g.back/1.15,0,1)*100 + '%'; $('#e0').textContent = w(g.back);
+  $('#a1').style.width = g.low*100 + '%'; $('#e1').textContent = w(g.low);
+  $('#a2').style.width = g.high*100 + '%'; $('#e2').textContent = g.high < .2 ? 'quase nada' : g.high < .6 ? 'um pouco' : 'muito';
+}
+function updateRead(){
+  const out = [];
+  if (T.elev > .35) out.push(['Ombro morando perto da orelha',
+    'Trapézio superior e elevador da escápula ficam encurtados e seguram o peso do braço o tempo todo. O trapézio inferior, que puxaria a escápula para baixo, fica esticado e perde a vez. A respiração sobe para o alto do peito: o ombro sobe a cada inspiração e as costelas de baixo abrem menos.',
+    'Para equilibrar: expiração longa deixando o ombro pesar, bolinha suave no trapézio, depois Y deitada e deslizar os braços na parede para acordar o trapézio inferior e o serrátil.']);
+  if (T.elev < -.35) out.push(['Ombro descendo e encaixando',
+    'O trapézio inferior encurta e puxa a escápula para baixo; trapézio superior e elevador se alongam. É o movimento que falta em quem vive com o ombro alto.',
+    'Use como ativação curta antes de remada, flexão e desenvolvimento, sem travar o ombro lá embaixo.']);
+  if (T.retr > .35) out.push(['Escápulas espremidas para trás',
+    'Trapézio médio e romboides encurtam e colam a escápula na coluna. O serrátil anterior fica esticado e a escápula deixa de deslizar sobre as costelas. Com essa parede apertada atrás, as costelas de trás tendem a abrir menos e o ar vai mais para a frente e para cima.',
+    'Para equilibrar: posição da criança respirando nas costas, gato-camelo, e flexão "plus" para o serrátil voltar a puxar a escápula para frente.']);
+  if (T.retr < -.35) out.push(['Escápulas afastando, como ao empurrar',
+    'O serrátil anterior encurta e leva a escápula em volta das costelas. Romboides e trapézio médio se alongam e freiam o movimento. A parte de trás do tórax ganha espaço para abrir.',
+    'É o final da flexão "plus". Se a borda da escápula descola das costas nesse movimento, o serrátil está pedindo treino.']);
+  if (T.rot > .35) out.push(['Braço subindo',
+    'A escápula gira para cima puxada por três cordas ao mesmo tempo: trapézio superior no alto, trapézio inferior embaixo e serrátil pela lateral. Romboides e elevador se alongam para deixar girar. Se o serrátil e o trapézio inferior falham, o trapézio superior faz tudo sozinho e o ombro sobe até a orelha.',
+    'Teste: suba os braços encostada na parede e veja se o ombro encolhe antes de o braço passar da altura do rosto.']);
+  if (!out.length) out.push(['Repouso com respiração',
+    'A escápula descansa sobre as costelas 2 a 7 e escorrega um pouco a cada respiração. Quando o ar entra, as costelas abrem para os lados e para trás e o serrátil, preso nelas, é esticado de leve. Nenhum músculo precisa segurar o ombro: ele fica pendurado.',
+    'Escolha uma posição acima ou arraste a escápula para comparar com este repouso.']);
+  $('#read').innerHTML = out.map(o => `<div><h3>${o[0]}</h3><p>${o[1]}</p><p>${o[2]}</p></div>`).join('');
+  updateAir();
+}
+function select(k){
+  sel = k; const m = byK[k];
+  for (const q in rowEl) rowEl[q].setAttribute('aria-pressed', q === k);
+  if (TRAP.includes(k) && layer === 'deep'){ layer = 'half'; $('#seg-layer').children[0].click(); }
+  if (!TRAP.includes(k) && k !== 'ser' && layer === 'sup'){ $('#seg-layer').children[0].click(); }
+  $('#card').innerHTML = `<h3><span class="num">${m.n}</span>${m.nome}</h3><dl>
+    <dt>Origem</dt><dd>${m.org}</dd><dt>Inserção</dt><dd>${m.ins}</dd><dt>Faz</dt><dd>${m.acao}</dd>
+    <dt>Com o trapézio tenso</dt><dd>${m.tenso}</dd><dt>Como cuidar</dt><dd>${m.cuidar}</dd></dl>`;
+}
+
+/* ---------- toque e arraste ---------- */
+const toModel = e => { const r = cv.getBoundingClientRect(); return [(e.clientX-r.left)/r.width*VW + VX, (e.clientY-r.top)/r.height*VH + VY]; };
+function pick(mx, my){
+  const sign = mx < 0 ? -1 : 1, x = Math.abs(mx); let found = null, onScap = false;
+  ctx.save(); ctx.setTransform(1,0,0,1,0,0);
+  for (const k of [...(trapOn(sign) ? TRAP : []), 'lev','rmin','rmaj','ser']) if (ctx.isPointInPath(hit[k], x, my)){ found = k; break; }
+  onScap = ctx.isPointInPath(scapHit, x, my); ctx.restore();
+  return {found, onScap, sign};
+}
+let dragS = null;
+cv.addEventListener('pointerdown', e => { const [mx,my] = toModel(e), p = pick(mx,my);
+  dragS = {mx, my, ...p, retr:T.retr, elev:T.elev, moved:false}; if (p.found || p.onScap) cv.setPointerCapture(e.pointerId); });
+cv.addEventListener('pointermove', e => { if (!dragS || !(dragS.found || dragS.onScap)) return;
+  const [mx,my] = toModel(e), dx = mx - dragS.mx, dy = my - dragS.my;
+  if (!dragS.moved && Math.hypot(dx,dy) < 5) return; dragS.moved = true; cv.classList.add('drag');
+  T.retr = P.retr = clamp(dragS.retr - dragS.sign*dx/26, -1, 1);
+  if (e.pointerType !== 'touch') T.elev = P.elev = clamp(dragS.elev - dy/30, -1, 1);
+  syncSliders(); markPreset(-1); updateRead(); });
+const endDrag = e => { if (dragS && !dragS.moved && dragS.found && e.type === 'pointerup') select(dragS.found); dragS = null; cv.classList.remove('drag'); };
+cv.addEventListener('pointerup', endDrag); cv.addEventListener('pointercancel', endDrag);
+
+/* ---------- laço ---------- */
+readTheme();
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change', readTheme);
+new MutationObserver(readTheme).observe(document.documentElement, {attributes:true, attributeFilter:['data-theme']});
+{ const g = geom({elev:0,retr:0,rot:0}, 0); for (const k in g.mus) REST[k] = g.mus[k].len; }
+let last = 0, tick = 0;
+function frame(ts){
+  const dt = Math.min((ts - last)/1000 || 0, .05); last = ts;
+  if (breathOn) ph += dt;
+  const b = .5 - .5*Math.cos(2*Math.PI*ph/5.2), k = Math.min(1, dt*7);
+  for (const q in P) P[q] += (T[q] - P[q])*k;
+  G = geom(P, b); draw();
+  if (tick++ % 4 === 0){ updateRows(); $('#bbar').style.width = b*100 + '%';
+    $('#bphase').textContent = !breathOn ? 'parada' : (ph % 5.2) < 2.6 ? 'inspira' : 'expira'; }
+  requestAnimationFrame(frame);
+}
+select('tsup'); updateRead();
+(document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve()).then(readTheme);
+requestAnimationFrame(frame);
+})();
+</script>
