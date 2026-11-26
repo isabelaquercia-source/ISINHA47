@@ -1130,6 +1130,13 @@ mesh.ensureColor = geom => {
 };
 
 /* ==================================================================== TEXTURAS */
+/* extra: paleta compartilhada (cores CSS em sRGB, "como se vê na tela"). Texturas e cores feitas dentro das peças
+   devem ler daqui, para o conjunto mudar junto quando a paleta for afinada. */
+EV.pal = {
+  muscle: {base: '#b25421', light: '#d47a40', dark: '#6a280d'},
+  tendon: {base: '#e2c188', light: '#f3dfb4', dark: '#b9945c'},
+  bone: '#f6ecd0', cartilage: '#efe2b8', ghost: '#f4e6df'
+};
 const tex = EV.tex = {};
 function rng(seed){ let a = seed >>> 0; return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
 /* Textura de fibras correndo ao longo de X (uv.x), ladrilhável nas duas direções. As estrias têm várias larguras
@@ -1139,7 +1146,7 @@ function rng(seed){ let a = seed >>> 0; return () => { a |= 0; a = a + 0x6D2B79F
 tex.fibers = opts => {
   const o = opts || {}, S = o.size || 512, cv = document.createElement('canvas'); cv.width = cv.height = S;
   const x = cv.getContext('2d'), rnd = rng(o.seed || 7), gray = !!o.gray, k = o.contrast === undefined ? 1 : o.contrast, dens = o.streaks === undefined ? 1 : o.streaks;
-  const base = gray ? '#808080' : (o.base || '#b25421'), light = gray ? '#ffffff' : (o.light || '#d47a40'), dark = gray ? '#000000' : (o.dark || '#6a280d');
+  const base = gray ? '#808080' : (o.base || EV.pal.muscle.base), light = gray ? '#ffffff' : (o.light || EV.pal.muscle.light), dark = gray ? '#000000' : (o.dark || EV.pal.muscle.dark);
   x.fillStyle = base; x.fillRect(0, 0, S, S);
   x.lineCap = 'round';
   /* [quantidade, espessura mín., máx., opacidade mín., máx., comprimento mín. (fração de S), máx.] */
@@ -1215,7 +1222,7 @@ mats.muscle = opts => {
 mats.tendon = opts => {
   const o = Object.assign({}, opts || {}), rep = o.repeat || [2, 2];
   delete o.repeat;
-  if (!_tenC) _tenC = tex.fibers({seed: 23, base: '#e2c188', light: '#f3dfb4', dark: '#b9945c', streaks: 0.7, contrast: 0.75});
+  if (!_tenC) _tenC = tex.fibers({seed: 23, base: EV.pal.tendon.base, light: EV.pal.tendon.light, dark: EV.pal.tendon.dark, streaks: 0.7, contrast: 0.75});
   return rim(new T.MeshStandardMaterial(Object.assign({color: 0xffffff, map: texClone(_tenC, rep), roughness: 0.5, metalness: 0.0, vertexColors: true}, o)), [0.55, 0.45, 0.30], 0.45, 1.6, 0.5);
 };
 /* Corpo "fantasma": rosa-claro translúcido, desenhado ANTES de tudo e sem escrever profundidade (fica atrás dos

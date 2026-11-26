@@ -5,24 +5,28 @@ const fs = require('fs'), path = require('path'), vm = require('vm');
 const ROOT = __dirname;
 const THREE_URL = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
 
-function sources(){
+/* opts.ui === false deixa src/ui.js de fora (testes das peças). */
+function sources(opts){
   const parts = fs.readdirSync(path.join(ROOT, 'src/parts')).filter(f => f.endsWith('.js')).sort().map(f => 'src/parts/' + f);
-  return ['src/core.js', ...parts, 'src/app.js', 'src/ui.js'].filter(f => fs.existsSync(path.join(ROOT, f)));
+  const list = ['src/core.js', ...parts, 'src/app.js'];
+  if (!opts || opts.ui !== false) list.push('src/ui.js');
+  return list.filter(f => fs.existsSync(path.join(ROOT, f)));
 }
 /* Devolve [{file, error}] com os erros de sintaxe de cada fonte. */
-function check(){
+function check(opts){
   const out = [];
-  for (const f of sources()){
+  for (const f of sources(opts)){
     try { new vm.Script(fs.readFileSync(path.join(ROOT, f), 'utf8'), {filename: f}); }
     catch (e) { out.push({file: f, error: String(e && e.stack || e).split('\n').slice(0, 5).join('\n')}); }
   }
   return out;
 }
-function build(){
-  const shell = fs.readFileSync(path.join(ROOT, 'src/shell.html'), 'utf8');
+/* opts.shell (string) troca o src/shell.html por outro (os testes das peças usam um mínimo, só com o canvas). */
+function build(opts){
+  const shell = (opts && opts.shell) || fs.readFileSync(path.join(ROOT, 'src/shell.html'), 'utf8');
   if (!shell.includes('<!--EV:SCRIPTS-->')) throw new Error('src/shell.html precisa conter <!--EV:SCRIPTS-->');
   const tags = [`<script src="${THREE_URL}"></script>`];
-  for (const f of sources()){
+  for (const f of sources(opts)){
     const src = fs.readFileSync(path.join(ROOT, f), 'utf8').replace(/<\/script/gi, '<\\/script');
     tags.push(`<script>/* ${f} */\n${src}\n</script>`);
   }
