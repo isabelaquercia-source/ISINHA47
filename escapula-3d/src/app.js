@@ -59,7 +59,21 @@ try {
   resolveReady(); return;
 }
 renderer.outputEncoding = T.sRGBEncoding;
-renderer.toneMapping = T.ACESFilmicToneMapping;
+/* Curva de tons própria (THREE.CustomToneMapping): linear até o joelho K e, dali em diante, um ombro exponencial
+   que tende a 1 sem nunca chegar — o marfim iluminado fica quase branco sem estourar no fundo da prancha e o
+   meio-tom sai como o material o definiu (cada EV.mats traz o seu ganho e a sua compressão; o ACES acinzentava
+   o osso). */
+const TONE_STUB = 'vec3 CustomToneMapping( vec3 color ) { return color; }';
+if (T.ShaderChunk.tonemapping_pars_fragment.indexOf(TONE_STUB) >= 0){
+  T.ShaderChunk.tonemapping_pars_fragment = T.ShaderChunk.tonemapping_pars_fragment.replace(TONE_STUB, [
+    'vec3 CustomToneMapping( vec3 color ) {',
+    '  const float K = 0.55;',
+    '  color = max(color * toneMappingExposure, vec3(0.0));',
+    '  vec3 ombro = K + (1.0 - K) * (1.0 - exp(-(color - K) / (1.0 - K)));',
+    '  return mix(color, ombro, step(vec3(K), color));',
+    '}'].join('\n'));
+  renderer.toneMapping = T.CustomToneMapping;
+} else renderer.toneMapping = T.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.0;
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = T.PCFSoftShadowMap;
@@ -70,19 +84,24 @@ const camera = new T.PerspectiveCamera(28, 876 / 1200, 5, 900);
 APP.three = {renderer, scene, camera};
 
 /* ---------------------------------------------------------------------- luzes
-   Estúdio suave, como na referência: luz principal quase frontal, de cima da câmera (com
-   sombra PCF suave), preenchimento frio vindo da esquerda, contraluz fraca e céu/chão (chão bege: a sombra
-   lavanda da base do crânio vem da cor de vértice daquela peça, não da luz). O conjunto gira com o azimute da
-   câmera, para a luz acompanhar quem olha. */
+   Estúdio suave, como na referência: luz principal de cima e um pouco da ESQUERDA da câmera, com sombra de
+   contato macia; céu claro e chão bege amplos; um preenchimento fraco vindo da própria câmera e outro lateral,
+   pela esquerda. As intensidades somam o mesmo que antes sobre uma superfície de frente para a câmera — o corpo
+   fantasma (que não passa pela curva de tons) depende delas. O que dá o aspecto de atlas (o que olha para baixo
+   esfria, o lado de dentro do gradil escurece, o brilho largo de porcelana, o traço de contorno) é feito nos
+   materiais (EV.mats, em core.js). O conjunto gira com o azimute da câmera, para a luz acompanhar quem olha. */
 const rig = new T.Group(); scene.add(rig);
-const hemi = new T.HemisphereLight(0xfff6e2, 0xb3a58f, 0.40); scene.add(hemi);
-const key = new T.DirectionalLight(0xffedd2, 1.0);
-key.position.set(4, 88, 115); key.castShadow = true;
-key.shadow.mapSize.set(APP.quality < 1 ? 1024 : 2048, APP.quality < 1 ? 1024 : 2048);
+const hemi = new T.HemisphereLight(new T.Color(1.0, 0.99, 0.96), new T.Color(0.60, 0.57, 0.52), 0.50); scene.add(hemi);
+const key = new T.DirectionalLight(new T.Color(1.0, 0.96, 0.88), 0.95);
+key.position.set(-30, 96, 110); key.castShadow = true;
+/* mapa de sombra PEQUENO de propósito: com o filtro PCF suave cada texel (~0,15 cm) vira penumbra — a sombra de
+   contato sai macia, de estúdio (nunca dura nem preta), e custa menos que o mapa de 2048² */
+const SM = APP.quality < 1 ? 512 : 640;
+key.shadow.mapSize.set(SM, SM);
 const sc = key.shadow.camera; sc.left = -46; sc.right = 46; sc.top = 52; sc.bottom = -52; sc.near = 20; sc.far = 360;
-key.shadow.bias = -0.0006; key.shadow.normalBias = 0.12; key.shadow.radius = 3;
-const fill = new T.DirectionalLight(0xe6ecff, 0.20); fill.position.set(-110, 20, 60);
-const back = new T.DirectionalLight(0xffffff, 0.10); back.position.set(30, 60, -120);
+key.shadow.bias = -0.0005; key.shadow.normalBias = 0.16;
+const fill = new T.DirectionalLight(new T.Color(1.0, 0.98, 0.96), 0.10); fill.position.set(8, 12, 120);     // da própria câmera
+const back = new T.DirectionalLight(new T.Color(1.0, 0.97, 0.92), 0.14); back.position.set(-112, 26, 38);   // lateral esquerda: abre o lado que a principal não alcança
 for (const l of [key, fill, back]){ l.target.position.set(0, 32, 0); rig.add(l); rig.add(l.target); }
 rig.position.set(0, 0, 0);
 
@@ -119,11 +138,14 @@ APP.getCamera = () => ({az: cam.az, el: cam.el, dist: cam.dist, fov: cam.fov, ro
 
 /* ---------------------------------------------------------- tamanho da tela */
 let pixelRatio = 1;
+/* espessura do traço de contorno dos materiais (EV.mats.look.px), proporcional à altura do canvas em pixels reais:
+   1,3 px na prancha de 1200 px de altura; nunca abaixo de 0,9 px, para não sumir em telas pequenas */
+function setLine(hpx){ if (EV.mats && EV.mats.look && EV.mats.look.px) EV.mats.look.px.value = Math.max(0.9, 1.3 * hpx / 1200); }
 function fit(){
   const w = Math.max(2, canvas.clientWidth || 876), h = Math.max(2, canvas.clientHeight || Math.round(w * 1200 / 876));
   pixelRatio = Math.min(window.devicePixelRatio || 1, APP.quality < 1 ? 1.5 : 2);
   renderer.setPixelRatio(pixelRatio); renderer.setSize(w, h, false);
-  camera.aspect = w / h; camera.updateProjectionMatrix(); invalidate();
+  camera.aspect = w / h; camera.updateProjectionMatrix(); setLine(h * pixelRatio); invalidate();
 }
 
 /* -------------------------------------------------------------------- estado */
@@ -173,16 +195,24 @@ function applyTint(){
 }
 APP.setTint = on => { tintOn = !!on; applyTint(); invalidate(); };
 
-/* ------------------------------------------------------- marcadores numerados */
+/* ------------------------------------------------------- marcadores numerados
+   Como na prancha: disco cinza-azulado escuro (#4a4f57, ~95% opaco) com o número em branco, sem contorno claro.
+   O sprite mede 1,5 cm (o disco ocupa 87,5% dele: ~2,4% da largura da prancha na vista ref; a interface pode
+   aumentá-lo em telas pequenas). A textura tem 256 px com mipmaps, para ficar nítida em telas de alta densidade. */
 const markers = new T.Group(); markers.visible = false; scene.add(markers);
 const markerList = [];
 function markerSprite(n){
-  const S = 96, cv = document.createElement('canvas'); cv.width = cv.height = S; const x = cv.getContext('2d');
-  x.beginPath(); x.arc(S / 2, S / 2, S / 2 - 6, 0, 7); x.fillStyle = 'rgba(68,72,78,.94)'; x.fill();
-  x.lineWidth = 3; x.strokeStyle = 'rgba(255,255,255,.55)'; x.stroke();
-  x.fillStyle = '#fff'; x.font = '600 54px Helvetica, Arial, sans-serif'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText(String(n), S / 2, S / 2 + 4);
-  const sp = new T.Sprite(new T.SpriteMaterial({map: new T.CanvasTexture(cv), depthTest: false, depthWrite: false, transparent: true, toneMapped: false}));
-  sp.map = sp.material.map; sp.material.map.encoding = T.sRGBEncoding;
+  const S = 256, cv = document.createElement('canvas'); cv.width = cv.height = S; const x = cv.getContext('2d');
+  x.beginPath(); x.arc(S / 2, S / 2, S * 0.4375, 0, 7); x.fillStyle = 'rgba(74,79,87,.95)'; x.fill();
+  x.fillStyle = '#fff'; x.font = '500 146px "Helvetica Neue", Helvetica, Arial, sans-serif'; x.textAlign = 'center'; x.textBaseline = 'alphabetic';
+  const tx = String(n), mt = x.measureText(tx);
+  /* centra pelo desenho real do número (não pela caixa da fonte) */
+  const asc = mt.actualBoundingBoxAscent || 105, desc = mt.actualBoundingBoxDescent || 0;
+  const esq = mt.actualBoundingBoxLeft || 0, dir = mt.actualBoundingBoxRight || mt.width;
+  x.fillText(tx, S / 2 + (esq - dir) / 2, S / 2 + (asc - desc) / 2);
+  const map = new T.CanvasTexture(cv); map.encoding = T.sRGBEncoding; map.anisotropy = 4;
+  const sp = new T.Sprite(new T.SpriteMaterial({map, depthTest: false, depthWrite: false, transparent: true, toneMapped: false}));
+  sp.map = map;
   sp.scale.set(1.5, 1.5, 1); sp.renderOrder = 999;
   return sp;
 }
@@ -250,7 +280,7 @@ APP.shot = o => {
   o = o || {};
   const w = o.width || 876, h = o.height || 1200;
   const keep = {cam: APP.getCamera(), state: Object.assign({}, APP.state), vis: order.map(n => APP.parts[n].group.visible), mk: markers.visible, size: renderer.getSize(new T.Vector2()), pr: renderer.getPixelRatio()};
-  renderer.setPixelRatio(1); renderer.setSize(w, h, false); camera.aspect = w / h;
+  renderer.setPixelRatio(1); renderer.setSize(w, h, false); camera.aspect = w / h; setLine(h);
   APP.setCamera(o.cam || 'ref');
   Object.assign(APP.state, {elev: 0, retr: 0, rot: 0, breath: 0}, o.state || {});   // no lugar: EVAPP.state é sempre o mesmo objeto
   APP.setVisible({only: o.only, hide: o.hide});
@@ -258,7 +288,7 @@ APP.shot = o => {
   applyState(); render();
   const url = canvas.toDataURL('image/png');
   /* restaura */
-  renderer.setPixelRatio(keep.pr); renderer.setSize(keep.size.x, keep.size.y, false); camera.aspect = keep.size.x / Math.max(1, keep.size.y);
+  renderer.setPixelRatio(keep.pr); renderer.setSize(keep.size.x, keep.size.y, false); camera.aspect = keep.size.x / Math.max(1, keep.size.y); setLine(keep.size.y * keep.pr);
   APP.setCamera(keep.cam);
   for (const k in APP.state) if (!(k in keep.state)) delete APP.state[k];
   Object.assign(APP.state, keep.state);

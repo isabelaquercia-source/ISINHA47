@@ -1,8 +1,359 @@
 <title>Escápula Viva 3D</title>
+<meta name="claude:viewport-fit-sides" content="cover">
 <style>
-  html, body { margin: 0; background: #fff; }
-  #stage { width: 100%; max-width: 876px; margin: 0 auto; background: #fff; }
-  #ev-canvas { display: block; width: 100%; height: auto; aspect-ratio: 876 / 1200; touch-action: none; }
+/* Layout: uma prancha de atlas viva. No celular, uma coluna: cabeçalho curto e a prancha branca (a estrela, com a
+   legenda numerada no canto como na referência), que fica presa no alto da tela enquanto as chaves, o movimento e a
+   legenda completa correm por baixo: dá para mexer num controle e ver a escápula se mover. No computador, a prancha
+   fica presa à esquerda e o resto corre à direita; no celular deitado, a legenda numerada sai de cima do desenho e
+   fica ao lado dele, no mesmo cartão. Só a prancha é cartão; o resto assenta direto no fundo. */
+:root{
+  /* página (mesma família da Escápula Viva 2D) */
+  --bg:#e7ebe9; --panel:#fbfcfb; --ink:#16252b; --muted:#55676d; --line:#cdd6d3;
+  --accent:#0f5c63; --on-accent:#ffffff;
+  --short:#a3202f; --long:#1f6790;
+  --num-bg:#3d4349; --num-fg:#ffffff;
+  --tint-red:#cf3a2b; --tint-blue:#2f6fdf;
+  --shadow:rgba(22,37,43,.22);
+  /* prancha: é papel branco nos dois temas, então a tinta dela não muda com o tema */
+  --plate:#ffffff; --plate-veil:rgba(255,255,255,.86);
+  --plate-ink:#1b2327; --plate-muted:#566166; --plate-line:#d3d9d7; --plate-dim:#6b7579;
+  --plate-accent:#0f5c63; --plate-on-accent:#ffffff; --plate-short:#a3202f; --plate-long:#1f6790;
+  --plate-num:#3d4349; --plate-num-fg:#ffffff;
+  /* tipo: só fontes do aparelho. Título e nomes em grotesca condensada (como a legenda dos atlas). */
+  --display:"Avenir Next Condensed","Bahnschrift","Roboto Condensed",sans-serif-condensed,"Arial Narrow","Helvetica Neue",system-ui,sans-serif;
+  --body:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --mono:ui-monospace,"SF Mono","Cascadia Mono","Roboto Mono",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#0f1619; --panel:#1a252a; --ink:#e7eeec; --muted:#9db0b3; --line:#2d3c42;
+  --accent:#72c7cc; --on-accent:#0b1b1e;
+  --short:#ee7a88; --long:#74bde2;
+  --num-bg:#dce5e3; --num-fg:#10181b;
+  --shadow:rgba(0,0,0,.55);
+  --plate:#f7f4ed; --plate-veil:rgba(247,244,237,.86);
+  color-scheme:dark } }
+:root[data-theme="dark"]{
+  --bg:#0f1619; --panel:#1a252a; --ink:#e7eeec; --muted:#9db0b3; --line:#2d3c42;
+  --accent:#72c7cc; --on-accent:#0b1b1e;
+  --short:#ee7a88; --long:#74bde2;
+  --num-bg:#dce5e3; --num-fg:#10181b;
+  --shadow:rgba(0,0,0,.55);
+  --plate:#f7f4ed; --plate-veil:rgba(247,244,237,.86);
+  color-scheme:dark }
+
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.45;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+button{font:inherit;color:inherit;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.page{display:grid;grid-template-columns:minmax(0,1fr);gap:14px;
+  --gl:max(16px,env(safe-area-inset-left,0px));--gr:max(16px,env(safe-area-inset-right,0px));
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:14px 36px;
+  --plate-w:max(calc(60vh * 876 / 1200),min(328px,calc(68vh * 876 / 1200)))}
+@supports (height:1svh){ .page{--plate-w:max(calc(60svh * 876 / 1200),min(328px,calc(68svh * 876 / 1200)))} }
+/* a faixa do entalhe do celular, acima da prancha presa, na cor da página */
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+
+/* ------------------------------------------------------------ cabeçalho */
+.top{display:grid;gap:2px;min-width:0}
+.eyebrow{margin:0;font-family:var(--mono);font-size:15px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+h1{margin:0;font-family:var(--display);font-stretch:condensed;font-weight:700;font-size:30px;line-height:1.05;text-wrap:balance}
+.hint{margin:4px 0 0;color:var(--muted);font-size:15px;line-height:1.4;max-width:48ch;text-wrap:pretty}
+.hint .mouse{display:none}
+@media (hover:hover) and (pointer:fine){ .hint .touch{display:none} .hint .mouse{display:inline} }
+
+/* -------------------------------------------------------------- prancha
+   Presa no alto: uma faixa de lado a lado na cor da página (o que corre por baixo some atrás dela). A prancha ocupa
+   de 60% a 68% da altura da tela, no máximo (procura ter 328 px de largura, onde a legenda do canto cabe folgada;
+   --plate-w é essa largura, usada também para o foco do teclado não parar atrás da prancha): sempre sobra onde rolar
+   e onde ficam os controles. */
+.plate-col{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;min-width:0;background:var(--bg);
+  margin:-8px calc(-1 * var(--gr)) -6px calc(-1 * var(--gl));padding:8px var(--gr) 6px var(--gl)}
+.plate-col::after{content:"";position:absolute;left:0;right:0;top:100%;height:8px;background:linear-gradient(var(--bg),transparent);pointer-events:none}
+.no3d .plate-col{position:static}
+.no3d .plate-col::after{display:none}
+.plate{position:relative;margin:0 auto;overflow:hidden;background:var(--plate);color:var(--plate-ink);
+  border:1px solid var(--plate-line);border-radius:14px;box-shadow:0 1px 2px var(--shadow),0 14px 30px -18px var(--shadow);
+  width:min(100%,var(--plate-w));max-width:100%;container:plate / inline-size;
+  -webkit-user-select:none;user-select:none;-webkit-touch-callout:none}                 /* arrastar o modelo não seleciona texto */
+#ev-canvas{display:block;width:100%;height:auto;aspect-ratio:876 / 1200;touch-action:none;outline:none;-webkit-tap-highlight-color:transparent}
+#ev-canvas:focus-visible{outline:2px solid var(--plate-accent);outline-offset:-5px;border-radius:11px}
+.plate :focus-visible{outline-color:var(--plate-accent)}
+
+/* a legenda numerada no canto de cima, à direita, onde ela fica na prancha de atlas */
+.key{position:absolute;top:4px;right:6px;width:min(50%,196px);margin:0;padding:0;list-style:none;display:grid}
+.key button{display:grid;grid-template-columns:24px minmax(0,1fr);column-gap:7px;align-items:center;align-content:center;width:100%;min-height:44px;
+  padding:4px 6px;border:0;border-radius:10px;background:none;color:var(--plate-ink);text-align:left;cursor:pointer}
+.plate.is-away .key button{background:var(--plate-veil)}   /* fora da vista original o desenho pode passar por baixo */
+.num{display:grid;place-items:center;flex:none;width:26px;height:26px;border-radius:50%;background:var(--num-bg);color:var(--num-fg);
+  font-family:var(--body);font-size:15px;font-weight:600;line-height:1;font-variant-numeric:tabular-nums}
+.key .num{width:24px;height:24px;font-size:15px;background:var(--plate-num);color:var(--plate-num-fg)}
+.key-name{font-family:var(--display);font-stretch:condensed;font-weight:700;font-size:clamp(15px,2.5cqi,18px);line-height:1.14}   /* acompanha a prancha grande */
+.key-now{grid-column:2;font-size:15px;line-height:1.15;color:var(--plate-muted)}
+.key-now.is-short{color:var(--plate-short)} .key-now.is-long{color:var(--plate-long)}
+.key button[aria-pressed="true"] .num{background:var(--plate-accent);color:var(--plate-on-accent)}
+.key.has-sel button[aria-pressed="false"]{color:var(--plate-muted)}
+.key.has-sel button[aria-pressed="false"] .num{background:var(--plate-dim)}
+/* prancha estreita: linhas de 40 px para a legenda não encostar no ombro (a área de toque continua com 44 px) */
+@container plate (max-width:345px){
+  .key{right:4px}
+  .key button{position:relative;grid-template-columns:22px minmax(0,1fr);column-gap:6px;min-height:40px;padding:2px 3px}
+  .key button::after{content:"";position:absolute;inset:-2px 0}
+  .key .num{width:22px;height:22px}
+}
+@media (hover:hover){ .key button:hover .key-name{text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:3px} }
+
+/* botões de vista, discretos, embaixo */
+.pill{position:relative;min-height:38px;padding:7px 13px;border:1px solid var(--plate-line);border-radius:99px;background:var(--plate-veil);color:var(--plate-ink);
+  font-size:15px;font-weight:500;line-height:1.2;cursor:pointer;white-space:nowrap}
+.pill::after{content:"";position:absolute;inset:-4px -3px}                              /* pílula discreta de 38 px, toque de 46 px */
+.pill[aria-pressed="true"]{border-color:var(--plate-accent);color:var(--plate-accent);box-shadow:inset 0 0 0 1px var(--plate-accent)}
+@media (hover:hover){ .pill:hover{border-color:var(--plate-accent)} }
+.views{position:absolute;right:8px;bottom:8px;display:flex;gap:6px}
+.back-ref{position:absolute;left:8px;bottom:8px;color:var(--plate-accent);border-color:var(--plate-accent)}
+
+/* prancha grande (computador): números da legenda um pouco maiores, junto com os nomes */
+@container plate (min-width:600px){
+  .key button{grid-template-columns:27px minmax(0,1fr);column-gap:9px}
+  .key .num{width:27px;height:27px;font-size:16px}
+}
+/* prancha pequena (celular de 320 px): os nomes quebram em duas linhas e a última linha pode encostar no ombro, então
+   cada nome ganha um véu branco. A legenda continua lá: sem ela os números do desenho não dizem nada. */
+@container plate (max-width:299px){
+  .key{top:2px;right:2px;width:min(52%,150px)}
+  .key button{background:var(--plate-veil)}
+}
+@container plate (max-width:329px){                                                           /* as três pílulas não cabem numa linha */
+  .pill{padding-inline:11px}
+  .back-ref{left:auto;right:8px;bottom:54px}
+}
+
+/* montagem */
+.loading{position:absolute;left:0;right:0;bottom:0;display:flex;align-items:center;min-height:50px;padding:10px 14px 14px;
+  background:var(--plate-veil);color:var(--plate-ink);font-size:15px;font-weight:500;transition:opacity .35s}
+.loading.is-done{opacity:0}
+.loading-bar{position:absolute;left:0;right:0;bottom:0;height:4px;background:var(--plate-line)}
+.loading-bar i{display:block;height:100%;background:var(--plate-accent);transform-origin:0 50%;transform:scaleX(0);transition:transform .25s}
+
+/* sem 3D */
+.fail{padding:44px 22px;text-align:center}
+.fail p{margin:0 auto;max-width:30ch;font-size:16px;color:var(--plate-ink)}
+.fail strong{display:block;margin-bottom:6px;font-family:var(--display);font-stretch:condensed;font-size:21px;line-height:1.15}
+.plate.is-fail #ev-canvas,.plate.is-fail .key,.plate.is-fail .views,.plate.is-fail .back-ref,.plate.is-fail .loading{display:none}
+
+/* --------------------------------------------------------------- coluna */
+.side{display:grid;grid-template-columns:minmax(0,1fr);gap:26px;min-width:0;container:side / inline-size}
+.sec{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;min-width:0}
+h2{margin:0;font-family:var(--display);font-stretch:condensed;font-weight:700;font-size:22px;line-height:1.15}
+
+/* chaves e atalhos */
+.chip{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:8px 14px;border:1px solid var(--line);border-radius:99px;
+  background:var(--panel);color:var(--ink);font-size:15px;font-weight:500;line-height:1.2;text-align:left;cursor:pointer}
+@media (hover:hover){ .chip:hover{border-color:var(--accent)} }
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.tog{gap:9px;padding-left:11px}
+/* o interruptor: trilho de 32 × 18 com o botão (um degradê radial) que corre da esquerda (desligado) para a direita */
+.tog::before{content:"";flex:none;width:32px;height:18px;border-radius:9px;
+  background:radial-gradient(circle closest-side,var(--panel) 68%,transparent 76%) 0 50% / 18px 18px no-repeat var(--muted);transition:background-position .16s,background-color .16s}
+.tog[aria-pressed="true"]{background:var(--panel);border-color:var(--accent);color:var(--ink);box-shadow:inset 0 0 0 1px var(--accent)}
+.tog[aria-pressed="true"]::before{background-color:var(--accent);background-position:100% 50%}
+.keys{display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);gap:8px}
+.tint-key{display:flex;flex-wrap:wrap;gap:4px 16px;margin:0;font-size:15px;color:var(--muted)}
+.tint-key span{display:inline-flex;align-items:center;gap:7px}
+.tint-key i{width:16px;height:9px;border-radius:2px}
+.tint-key .r{background:var(--tint-red)} .tint-key .b{background:var(--tint-blue)}
+.presets{display:flex;flex-wrap:wrap;gap:8px}
+
+/* controles deslizantes */
+.sliders{display:grid;grid-template-columns:minmax(0,1fr);gap:18px;margin-top:4px}
+.sl{display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:10px;align-items:baseline;min-width:0}
+.sl label{font-weight:600;font-size:16px}
+.sl output{font-family:var(--mono);font-size:15px;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+.sl .ends{grid-column:1 / -1;display:flex;justify-content:space-between;margin-top:-4px;font-size:15px;line-height:1.2;color:var(--muted);pointer-events:none}
+.sl input[type=range]{grid-column:1 / -1;-webkit-appearance:none;appearance:none;display:block;width:100%;height:44px;margin:0;padding:0;background:transparent;cursor:pointer;touch-action:pan-y;
+  --lo:0; --hi:0; --from:calc(14px + (100% - 28px) * var(--lo)); --to:calc(14px + (100% - 28px) * var(--hi));
+  --track:linear-gradient(to right,var(--line) 0,var(--line) var(--from),var(--accent) var(--from),var(--accent) var(--to),var(--line) var(--to),var(--line) 100%)}
+.sl input.bi{background:linear-gradient(var(--muted),var(--muted)) 50% 50% / 2px 16px no-repeat}
+.sl input:not(.bi){--from:0px}
+.sl input[type=range]::-webkit-slider-runnable-track{height:6px;border-radius:3px;background:var(--track)}
+.sl input[type=range]::-moz-range-track{height:6px;border-radius:3px;background:var(--track)}
+.sl input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:28px;height:28px;margin-top:-11px;border-radius:50%;
+  background:var(--accent);border:3px solid var(--bg);box-shadow:0 0 0 1px var(--accent)}
+.sl input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:var(--accent);border:3px solid var(--bg);box-shadow:0 0 0 1px var(--accent)}
+.sl input[type=range]:focus-visible{outline:none}                                       /* o foco vai no botão: um anel grosso em volta dele */
+.sl input[type=range]:focus-visible::-webkit-slider-thumb{box-shadow:0 0 0 3px var(--bg),0 0 0 6px var(--accent)}
+.sl input[type=range]:focus-visible::-moz-range-thumb{box-shadow:0 0 0 3px var(--bg),0 0 0 6px var(--accent)}
+
+/* legenda completa */
+.leg{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:minmax(0,1fr);border-top:1px solid var(--line)}
+.leg-item{display:grid;grid-template-columns:minmax(0,1fr);gap:4px;padding:6px 0 16px;border-bottom:1px solid var(--line)}
+.leg-head{display:grid;grid-template-columns:26px minmax(0,1fr) auto;align-items:center;column-gap:11px;width:100%;min-height:48px;padding:6px 0;
+  border:0;border-radius:10px;background:none;text-align:left;cursor:pointer}
+.leg-name{font-family:var(--display);font-stretch:condensed;font-weight:700;font-size:20px;line-height:1.15}
+.leg-act{padding:6px 12px;border:1px solid var(--line);border-radius:99px;background:var(--panel);color:var(--accent);font-size:15px;font-weight:500;line-height:1.2;white-space:nowrap}
+@media (hover:hover){ .leg-head:hover .leg-act{border-color:var(--accent)} }
+.leg-head[aria-pressed="true"] .num{background:var(--accent);color:var(--on-accent)}
+.leg-head[aria-pressed="true"] .leg-act{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.leg-now{margin:-4px 0 4px 37px;font-size:15px;color:var(--muted)}
+.leg-now b{font-weight:600;color:var(--ink)}
+.leg-now.is-short b{color:var(--short)} .leg-now.is-long b{color:var(--long)}
+.leg dl{margin:0 0 0 37px;display:grid;grid-template-columns:auto minmax(0,1fr);gap:5px 12px}
+.leg dt{font-size:15px;color:var(--muted);padding-top:1px}
+.leg dd{margin:0;max-width:52ch;text-wrap:pretty}
+
+/* rodapé */
+.foot{display:grid;grid-template-columns:minmax(0,1fr);gap:10px}
+.care{margin:0;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:var(--panel);font-size:15px;max-width:62ch}
+.credit{margin:0;font-size:15px;color:var(--muted);max-width:62ch}
+
+/* teclado: o que recebe foco rola até ficar ABAIXO da prancha presa, não atrás dela */
+.side :is(button,input){scroll-margin-top:calc(min(100vw - var(--gl) - var(--gr),var(--plate-w)) * 1200 / 876 + env(safe-area-inset-top,0px) + 30px);scroll-margin-bottom:16px}
+.no3d .side :is(button,input){scroll-margin-top:16px}
+
+/* tablet em pé: a mesma coluna, mais estreita e centrada */
+@media (min-width:600px){ .page > :not(.plate-col){width:100%;max-width:640px;margin-inline:auto} .keys{grid-template-columns:repeat(2,minmax(0,1fr));max-width:430px} }
+@container side (max-width:300px){ .keys{grid-template-columns:minmax(0,1fr)} }       /* coluna estreita (celular deitado): uma chave por linha */
+
+/* ------------------------------------------- computador (e celular deitado) */
+@media (min-width:900px), (min-width:600px) and (orientation:landscape) and (max-height:560px){
+  .page{--pw:min(50vw,calc(86vh * 876 / 1200));grid-template-columns:var(--pw) minmax(0,540px);grid-template-rows:auto 1fr;justify-content:center;align-items:start;column-gap:44px;row-gap:22px;padding-block:22px 44px}
+  .page > :not(.plate-col){max-width:none;margin-inline:0}
+  .plate-col{grid-column:1;grid-row:1 / span 2;top:calc(env(safe-area-inset-top,0px) + 22px);margin:0;padding:0;background:none}
+  .plate-col::after{display:none}
+  .plate{width:100%;margin:0}
+  .top{grid-column:2;grid-row:1}
+  .side{grid-column:2;grid-row:2}
+  .side :is(button,input){scroll-margin-top:16px}
+}
+@media (min-width:900px){
+  h1{font-size:36px}
+  .key{top:10px;right:10px;width:min(50%,232px)}
+  .views{right:12px;bottom:12px} .back-ref{left:12px;bottom:12px}
+}
+/* celular deitado: a prancha fica baixa e estreita demais para a legenda caber por cima do desenho; ela vai para o
+   LADO, dentro do mesmo cartão branco (a coluna da prancha cresce o bastante para isso) */
+@media (min-width:600px) and (orientation:landscape) and (max-height:480px){
+  .page{--kw:clamp(140px,26vw - 30px,172px);grid-template-columns:calc(var(--pw) + var(--kw)) minmax(0,540px);column-gap:24px}
+  .plate{display:grid;grid-template-columns:var(--pw) var(--kw);align-items:start}
+  .plate.is-fail{display:block}
+  .key{position:static;width:auto;padding:4px 4px 0 0}
+}
+@media (prefers-reduced-motion:reduce){ *,*::before,*::after{transition:none!important;animation:none!important} }
 </style>
-<div id="stage"><canvas id="ev-canvas" width="876" height="1200" aria-label="Prancha anatômica 3D da escápula: arraste para girar"></canvas></div>
+
+<div class="page" id="ev-page" lang="pt-BR">
+  <header class="top">
+    <p class="eyebrow">Escápula Viva</p>
+    <h1>Prancha 3D</h1>
+    <p class="hint" id="ev-hint"><span class="touch">Arraste para girar. Dois dedos para aproximar. Toque duas vezes para voltar.</span><span class="mouse">Arraste para girar. Role para aproximar. Clique duas vezes para voltar.</span></p>
+  </header>
+
+  <div class="plate-col">
+    <figure class="plate" id="ev-plate" aria-busy="true">
+      <canvas id="ev-canvas" width="876" height="1200" tabindex="0" role="application" aria-roledescription="modelo 3D"
+        aria-label="Prancha anatômica 3D: costas com a escápula, o elevador da escápula, os romboides e o serrátil anterior. Arraste para girar; no teclado, setas giram, mais e menos aproximam e zero volta à vista original."></canvas>
+
+      <ol class="key" id="ev-key" aria-label="Músculos numerados na prancha">
+        <li><button type="button" id="ev-key-1" data-muscle="1" aria-pressed="false"><span class="num" aria-hidden="true">1</span><span class="key-name">Elevador da escápula</span><span class="key-now" id="ev-key-now-1" hidden></span></button></li>
+        <li><button type="button" id="ev-key-2" data-muscle="2" aria-pressed="false"><span class="num" aria-hidden="true">2</span><span class="key-name">Romboide menor</span><span class="key-now" id="ev-key-now-2" hidden></span></button></li>
+        <li><button type="button" id="ev-key-3" data-muscle="3" aria-pressed="false"><span class="num" aria-hidden="true">3</span><span class="key-name">Romboide maior</span><span class="key-now" id="ev-key-now-3" hidden></span></button></li>
+        <li><button type="button" id="ev-key-4" data-muscle="4" aria-pressed="false"><span class="num" aria-hidden="true">4</span><span class="key-name">Serrátil anterior</span><span class="key-now" id="ev-key-now-4" hidden></span></button></li>
+      </ol>
+
+      <button type="button" class="pill back-ref" id="ev-view-ref" hidden>Vista original</button>
+      <div class="views" id="ev-views" role="group" aria-label="Vistas" hidden>
+        <button type="button" class="pill" id="ev-view-back" data-view="back" aria-pressed="false">De trás</button>
+        <button type="button" class="pill" id="ev-view-right" data-view="right" aria-pressed="false">De lado</button>
+      </div>
+
+      <div class="loading" id="ev-loading" role="status">
+        <span id="ev-loading-txt">Montando o modelo…</span>
+        <span class="loading-bar" aria-hidden="true"><i id="ev-bar"></i></span>
+      </div>
+      <div class="fail" id="ev-fail" role="alert" hidden>
+        <p><strong id="ev-fail-tit">Este aparelho não conseguiu abrir o 3D.</strong> <span id="ev-fail-txt">Tente outro navegador ou atualize o sistema.</span></p>
+      </div>
+    </figure>
+  </div>
+
+  <div class="side">
+    <section class="sec" id="ev-sec-keys" aria-label="O que mostrar">
+      <div class="keys">
+        <button type="button" class="chip tog" id="ev-t-num" aria-pressed="true">Números</button>
+        <button type="button" class="chip tog" id="ev-t-body" aria-pressed="true">Corpo</button>
+        <button type="button" class="chip tog" id="ev-t-breath" aria-pressed="false">Respirar</button>
+        <button type="button" class="chip tog" id="ev-t-tint" aria-pressed="false">Encurta e alonga</button>
+      </div>
+      <p class="tint-key" id="ev-tint-key" hidden><span><i class="r"></i>vermelho: encurta</span><span><i class="b"></i>azul: alonga</span></p>
+    </section>
+
+    <section class="sec" id="ev-sec-move" aria-labelledby="ev-move-h">
+      <h2 id="ev-move-h">Mover a escápula</h2>
+      <div class="presets" role="group" aria-label="Atalhos de movimento">
+        <button type="button" class="chip" id="ev-p-rest" data-preset="rest" aria-pressed="true">Repouso</button>
+        <button type="button" class="chip" id="ev-p-shrug" data-preset="shrug" aria-pressed="false">Ombros na orelha</button>
+        <button type="button" class="chip" id="ev-p-retract" data-preset="retract" aria-pressed="false">Escápulas juntas</button>
+        <button type="button" class="chip" id="ev-p-push" data-preset="push" aria-pressed="false">Empurrar à frente</button>
+        <button type="button" class="chip" id="ev-p-raise" data-preset="raise" aria-pressed="false">Braço para cima</button>
+      </div>
+      <div class="sliders">
+        <div class="sl">
+          <label for="ev-elev">Subir e descer</label><output id="ev-elev-out" for="ev-elev">repouso</output>
+          <input type="range" class="bi" id="ev-elev" min="-1" max="1" step="0.01" value="0">
+          <div class="ends" aria-hidden="true"><span>desce</span><span>sobe</span></div>
+        </div>
+        <div class="sl">
+          <label for="ev-retr">Juntar e afastar</label><output id="ev-retr-out" for="ev-retr">repouso</output>
+          <input type="range" class="bi" id="ev-retr" min="-1" max="1" step="0.01" value="0">
+          <div class="ends" aria-hidden="true"><span>afasta</span><span>junta</span></div>
+        </div>
+        <div class="sl">
+          <label for="ev-rot">Girar para cima</label><output id="ev-rot-out" for="ev-rot">repouso</output>
+          <input type="range" id="ev-rot" min="0" max="1" step="0.01" value="0">
+          <div class="ends" aria-hidden="true"><span>repouso</span><span>braço no alto</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="sec" id="ev-sec-leg" aria-labelledby="ev-leg-h">
+      <h2 id="ev-leg-h">Legenda</h2>
+      <ol class="leg" id="ev-leg">
+        <li class="leg-item">
+          <button type="button" class="leg-head" id="ev-leg-1" data-muscle="1" aria-pressed="false"><span class="num" aria-hidden="true">1</span><span class="leg-name">Elevador da escápula</span><span class="leg-act">ver só este</span></button>
+          <p class="leg-now" id="ev-now-1">agora: <b>em repouso</b></p>
+          <dl><dt>Origem</dt><dd>Processos transversos de C1&nbsp;a&nbsp;C4.</dd>
+            <dt>Inserção</dt><dd>Parte de cima da borda medial da escápula.</dd>
+            <dt>Ação</dt><dd>Eleva a escápula.</dd></dl>
+        </li>
+        <li class="leg-item">
+          <button type="button" class="leg-head" id="ev-leg-2" data-muscle="2" aria-pressed="false"><span class="num" aria-hidden="true">2</span><span class="leg-name">Romboide menor</span><span class="leg-act">ver só este</span></button>
+          <p class="leg-now" id="ev-now-2">agora: <b>em repouso</b></p>
+          <dl><dt>Origem</dt><dd>Processos espinhosos de C7&nbsp;e&nbsp;T1 e ligamento nucal.</dd>
+            <dt>Inserção</dt><dd>Parte de cima da borda medial da escápula.</dd>
+            <dt>Ação</dt><dd>Aproxima a escápula da coluna (retração) e gira a escápula para baixo.</dd></dl>
+        </li>
+        <li class="leg-item">
+          <button type="button" class="leg-head" id="ev-leg-3" data-muscle="3" aria-pressed="false"><span class="num" aria-hidden="true">3</span><span class="leg-name">Romboide maior</span><span class="leg-act">ver só este</span></button>
+          <p class="leg-now" id="ev-now-3">agora: <b>em repouso</b></p>
+          <dl><dt>Origem</dt><dd>Processos espinhosos de T2&nbsp;a&nbsp;T5.</dd>
+            <dt>Inserção</dt><dd>Borda medial da escápula.</dd>
+            <dt>Ação</dt><dd>Aproxima a escápula da coluna (retração); abre o peito.</dd></dl>
+        </li>
+        <li class="leg-item">
+          <button type="button" class="leg-head" id="ev-leg-4" data-muscle="4" aria-pressed="false"><span class="num" aria-hidden="true">4</span><span class="leg-name">Serrátil anterior</span><span class="leg-act">ver só este</span></button>
+          <p class="leg-now" id="ev-now-4">agora: <b>em repouso</b></p>
+          <dl><dt>Origem</dt><dd>Costelas 1&nbsp;a&nbsp;9.</dd>
+            <dt>Inserção</dt><dd>Face da frente da escápula, junto à borda medial.</dd>
+            <dt>Ação</dt><dd>Leva a escápula para a frente sobre as costelas, segura a escápula colada ao tórax ao empurrar (flexão de braço) e gira a escápula para o braço subir.</dd></dl>
+        </li>
+      </ol>
+    </section>
+
+    <footer class="foot">
+      <p class="care">Dor aguda, formigamento ou perda de força pedem avaliação de fisioterapeuta ou médico. Esta página explica o movimento; não faz diagnóstico.</p>
+      <p class="credit">Modelo 3D desenhado por código, inspirado em pranchas de atlas de anatomia.</p>
+    </footer>
+  </div>
+</div>
 <!--EV:SCRIPTS-->

@@ -179,7 +179,13 @@ const spine = EV.spine = {levels: LEVELS.slice()};
    corpo vertebral) da extremidade; xcc = distância da extremidade à linha média; xa = distância do ângulo à linha média;
    insp = rotação (graus) em torno do eixo do colo na inspiração completa;
    ka = fração da queda já vencida no ângulo (as de baixo descem logo depois do tubérculo); kl = fração da queda no
-   ponto mais lateral; ke = fração da queda na extremidade (a 10ª volta a subir até a margem costal). */
+   ponto mais lateral; ke = fração da queda na extremidade (a 10ª volta a subir até a margem costal).
+   Opcionais (as costelas 8–12 foram ajustadas às DUAS vistas da referência — o lado direito e o esquerdo da prancha
+   são um par estéreo do mesmo arco): za = quanto o ângulo fica atrás do tubérculo (cm; padrão 0,75); da = queda do
+   tubérculo ao ângulo em cm (substitui ka); fl = fração frente/trás do ponto mais lateral (padrão 0,47);
+   py / yq = expoentes do perfil de queda entre ângulo → lateral e lateral → extremidade (1 = linear), ou
+   yp / ya = as frações da queda nos dois pontos intermediários de cada trecho, dadas diretamente;
+   nas flutuantes: e1, ez = expoentes da curva em planta (x e z) e py = perfil de queda até a ponta. */
 const COST = [null,
   {W: 5.4,  drop: 4.0,  Dp: 5.6,  xcc: 3.2,  xa: 4.5, insp: 3.8, ka: 0,    kl: 0.56, ke: 1},
   {W: 7.9,  drop: 6.0,  Dp: 8.0,  xcc: 4.2,  xa: 5.3, insp: 4.5, ka: 0.08, kl: 0.58, ke: 1},
@@ -188,11 +194,11 @@ const COST = [null,
   {W: 11.8, drop: 9.5,  Dp: 12.5, xcc: 6.7,  xa: 6.9, insp: 6.0, ka: 0.08, kl: 0.66, ke: 1},
   {W: 12.5, drop: 10.5, Dp: 13.3, xcc: 7.7,  xa: 7.3, insp: 6.2, ka: 0.08, kl: 0.68, ke: 1},
   {W: 13.0, drop: 11.5, Dp: 13.8, xcc: 8.9,  xa: 7.6, insp: 6.5, ka: 0.08, kl: 0.70, ke: 1},
-  {W: 13.2, drop: 12.5, Dp: 11.6, xcc: 10.2, xa: 7.9, insp: 6.5, ka: 0.10, kl: 0.75, ke: 1},
-  {W: 13.0, drop: 12.5, Dp: 9.4,  xcc: 11.2, xa: 8.0, insp: 6.2, ka: 0.18, kl: 0.86, ke: 1},
-  {W: 12.4, drop: 12.0, Dp: 6.8,  xcc: 11.2, xa: 7.8, insp: 5.8, ka: 0.40, kl: 0.95, ke: 0.86},
-  {W: 10.2, drop: 11.5, Dp: 1.4,  xcc: 10.2, xa: 5.4, insp: 4.2, ka: 0.30, kl: 0,    ke: 1},
-  {W: 7.6,  drop: 6.8,  Dp: -1.0, xcc: 7.6,  xa: 4.4, insp: 3.0, ka: 0.30, kl: 0,    ke: 1}];
+  {W: 13.3, drop: 12.5, Dp: 11.0, xcc: 9.3, xa: 7.7, insp: 6.5, ka: 0.10, kl: 0.768, ke: 0.94, za: 1.5, da: 0.7, fl: 0.63, py: 0.85, yq: 0.5},
+  {W: 12.65, drop: 12.5, Dp: 8.8, xcc: 9.5, xa: 6.05, insp: 6.2, ka: 0.18, kl: 0.846, ke: 0.90, za: 2.6, da: 0.43, fl: 0.574, yp: [0.293, 0.651], ya: [0.3, 0.68]},
+  {W: 11.03, drop: 12.18, Dp: 7.45, xcc: 10.26, xa: 4.92, insp: 5.8, ka: 0.40, kl: 1,  ke: 0.891, za: 3.0, da: 0.88, fl: 0.653, yp: [0.372, 0.722], ya: [0.05, 0.661]},
+  {W: 10.2, drop: 11.15, Dp: 3.1, xcc: 10.2, xa: 5.4, insp: 4.2, ka: 0.30, kl: 0,    ke: 1, za: 1.8, da: 1.17, e1: 0.6, py: 0.54, ez: 1.49},
+  {W: 8.4,  drop: 6.65, Dp: -1.4, xcc: 8.4,  xa: 5.5, insp: 3.0, ka: 0.30, kl: 0,    ke: 1, za: 1.7, da: 2.4, e1: 0.95, py: 0.59, ez: 0.9}];
 const RIB_T = [0, 0.10, 0.22, 0.33, 0.44, 0.55, 0.70, 0.85, 1];   // parâmetro t de cada ponto de controle
 const RIB_N = 96;                                                  // amostras da tabela densa por costela
 
@@ -206,27 +212,30 @@ const ribCtl = [null];        // pontos de controle em repouso (lado direito)
     const tub = v.tpTip(1).add((i <= 10 ? V(0.25, -0.2, -0.7) : V(0.6, -0.5, -0.2)).applyQuaternion(v.quat));
     const y0 = head.y, zf = v.pos.z - c.Dp;
     const xa = i >= 11 ? c.xa : Math.max(c.xa, tub.x + 0.5);
-    const ang = V(xa, tub.y - (i === 1 ? 0.15 : Math.max(0.35 + 0.045 * c.drop, c.ka * c.drop)), tub.z + (i === 1 ? 0.15 : 0.75));
+    const da = c.da !== undefined ? c.da : (i === 1 ? 0.15 : Math.max(0.35 + 0.045 * c.drop, c.ka * c.drop));
+    const ang = V(xa, tub.y - da, tub.z + (c.za !== undefined ? c.za : (i === 1 ? 0.15 : 0.75)));
     const P = [head, tub, ang];
     if (i <= 10){
-      const zl = lerp(ang.z, zf, i === 1 ? 0.52 : 0.47), yl = y0 - c.drop * c.kl, ye = y0 - c.drop * c.ke;
+      const zl = lerp(ang.z, zf, c.fl !== undefined ? c.fl : (i === 1 ? 0.52 : 0.47)), yl = y0 - c.drop * c.kl, ye = y0 - c.drop * c.ke;
       const e1 = 0.95, e2 = i <= 7 ? 0.82 : 0.95;            // expoentes das superelipses (frente mais achatada)
-      for (const f of [1 / 3, 2 / 3]){
-        const a = f * Math.PI / 2;
-        P.push(V(xa + (c.W - xa) * Math.pow(Math.sin(a), e1), lerp(ang.y, yl, f * 0.96), zl + (ang.z - zl) * Math.pow(Math.cos(a), e1)));
+      const py = c.py || 1, yq = c.yq || 1;
+      for (let n = 0; n < 2; n++){
+        const f = (n + 1) / 3, a = f * Math.PI / 2;
+        P.push(V(xa + (c.W - xa) * Math.pow(Math.sin(a), e1), lerp(ang.y, yl, c.yp ? c.yp[n] : Math.pow(f, py) * 0.96), zl + (ang.z - zl) * Math.pow(Math.cos(a), e1)));
       }
       P.push(V(c.W, yl, zl));
-      for (const f of [1 / 3, 2 / 3]){
-        const a = f * Math.PI / 2;
-        P.push(V(c.xcc + (c.W - c.xcc) * Math.pow(Math.cos(a), e2), lerp(yl, ye, f), zl + (zf - zl) * Math.pow(Math.sin(a), e2)));
+      for (let n = 0; n < 2; n++){
+        const f = (n + 1) / 3, a = f * Math.PI / 2;
+        P.push(V(c.xcc + (c.W - c.xcc) * Math.pow(Math.cos(a), e2), lerp(yl, ye, c.ya ? c.ya[n] : Math.pow(f, yq)), zl + (zf - zl) * Math.pow(Math.sin(a), e2)));
       }
       P.push(V(c.xcc, ye, zf));
     } else {
       /* flutuantes: do ângulo descem para fora e um pouco para a frente até a ponta livre */
       const tip = V(c.W, y0 - c.drop, zf);
+      const e1 = c.e1 || 1, ez = c.ez || 1.2, py = c.py || 0.9;
       for (let k = 1; k <= 5; k++){
         const f = k / 6, a = f * Math.PI / 2;
-        P.push(V(xa + (tip.x - xa) * Math.sin(a), lerp(ang.y, tip.y, Math.pow(f, 0.9)), tip.z + (ang.z - tip.z) * Math.pow(Math.cos(a), 1.2)));
+        P.push(V(xa + (tip.x - xa) * Math.pow(Math.sin(a), e1), lerp(ang.y, tip.y, Math.pow(f, py)), tip.z + (ang.z - tip.z) * Math.pow(Math.cos(a), ez)));
       }
       P.push(tip);
     }
@@ -286,15 +295,26 @@ ribs.frame = (i, t, side, state, alvo) => {
   return o;
 };
 /* Seção achatada: [meia-altura (ao longo de `up`), meia-espessura (ao longo de `out`)]. A 1ª costela é deitada.
-   As costelas da referência são esbeltas (~0,9–1 cm de altura, com espaços intercostais largos). */
+   Na referência as costelas são FITAS: cabeça e colo roliços (~0,8 cm), 1,2–1,6 cm de altura no corpo (as de
+   baixo são as mais largas); a 10ª afina na ponta que sobe para a margem costal e as flutuantes são lâminas que
+   terminam em ponta. A meia-espessura do corpo (0,27) não mudou: é ela que entra na
+   superfície de EV.thorax. */
 ribs.radii = (i, t) => {
   const pesc = smoothstep(0.0, 0.2, t);                           // cabeça/colo roliços → corpo achatado
-  let a = lerp(0.40, 0.48, pesc), e = lerp(0.38, 0.27, pesc);
-  if (i === 1){ a = lerp(0.38, 0.30, pesc); e = lerp(0.40, 0.75, pesc); }
-  else if (i === 2){ a = lerp(0.40, 0.46, pesc); e = lerp(0.38, 0.36, pesc); }
-  if (i >= 11){ const k = 1 - 0.5 * smoothstep(0.55, 1, t); a *= k * 0.92; e *= k; }
-  else if (i > 2){ a *= 1 + 0.18 * smoothstep(0.7, 1, t); }
-  return [a, e];
+  if (i === 1) return [lerp(0.38, 0.30, pesc), lerp(0.40, 0.75, pesc)];
+  if (i === 2) return [lerp(0.40, 0.46, pesc) + 0.07 * smoothstep(0.2, 0.5, t), lerp(0.38, 0.36, pesc)];
+  if (i >= 11){
+    /* flutuantes: lâminas (a 12ª já larga desde o colo, a 11ª alarga aos poucos) que acabam em ponta */
+    const ponta = 1 - smoothstep(i === 11 ? 0.84 : 0.9, 1, t), k = 0.2 + 0.8 * Math.pow(ponta, 0.8);
+    const a = i === 11 ? lerp(lerp(0.38, 0.29, smoothstep(0.02, 0.12, t)), 0.58, smoothstep(0.15, 0.7, t)) : lerp(0.36, 0.46, smoothstep(0.05, 0.3, t));
+    return [a * k, lerp(0.36, i === 11 ? 0.24 : 0.21, pesc) * (0.5 + 0.5 * ponta)];
+  }
+  /* 3ª–8ª: a fita já tem quase a altura toda no tubérculo (vista por trás ela fica de perfil até o ângulo);
+     9ª e 10ª: colo esbelto mais comprido, que alarga depois do ângulo */
+  const alto = i >= 9 ? 0.75 : 0.54 + 0.025 * i;                  // corpo: 3ª 0,62 … 8ª 0,74; 9ª e 10ª 0,75
+  let a = i >= 9 ? lerp(lerp(0.38, 0.31, smoothstep(0.02, 0.12, t)), alto, smoothstep(0.13, 0.31, t)) : lerp(0.38, alto, smoothstep(0.04, 0.30, t));
+  if (i === 10) a *= 1 - 0.6 * smoothstep(0.86, 1, t);
+  return [a, lerp(0.38, 0.27, pesc) + (i >= 9 ? 0.04 * smoothstep(0.16, 0.42, t) : 0)];
 };
 ribs.count = 12;
 /* extra: parâmetros de cada costela (somente leitura) */
@@ -389,9 +409,10 @@ ribs.cartilage = (i, s, side, state, alvo) => {
 const TH = {NT: 65, NY: 0, y0: 0, y1: 0, tabs: [], cartHalf: 0.33, folga: 0.06, queda: 0.3};
 let thoraxZc;
 (() => {
-  /* eixo central: reta ajustada entre o meio (frente/trás) na altura da 2ª e da 9ª costelas */
-  const mid = i => { const P = ribCtl[i]; return {y: P[5].y, z: (P[2].z + P[8].z) / 2}; };
-  const a = mid(2), b = mid(9), k = (b.z - a.z) / (b.y - a.y);
+  /* eixo central: reta ajustada entre o meio (frente/trás) na altura da 2ª e da 9ª costelas. Os dois pontos ficam
+     CONGELADOS nos valores da fundação: o eixo é só o referencial cilíndrico de wrap/out/clearance/frame, e não
+     deve andar quando o trajeto de uma costela é afinado (quem já assentou peças sobre o gradil não se desloca). */
+  const a = {y: 40.0156, z: -2.08483}, b = {y: 15.8911, z: -2.14212}, k = (b.z - a.z) / (b.y - a.y);
   thoraxZc = y => a.z + k * (clamp(y, b.y - 6, a.y + 3) - a.y);
 })();
 function buildThoraxTable(breath){
@@ -419,7 +440,7 @@ function buildThoraxTable(breath){
     if (i > 10) for (let d = 0.05; d < 0.16; d += 0.05) L.push([l[0] + d, l[1], l[2]]);
     polys.push(pre.concat(L));
   }
-  const fade = new Float32Array(NT * NY);
+  const fade = new Float32Array(NT * NY), ents = [];
   for (let j = 0; j < NT; j++){
     const th = j / (NT - 1) * Math.PI, ent = [];
     for (const L of polys){
@@ -432,7 +453,19 @@ function buildThoraxTable(breath){
       }
     }
     ent.sort((A, B) => B[0] - A[0]);                              // de cima para baixo
-    const top = ent[0], bot = ent[ent.length - 1];
+    ents.push(ent);
+  }
+  /* fundo de cada coluna = a altura mais baixa entre ela e as vizinhas (±2 colunas ≈ ±6°): a margem costal sobe
+     quase na vertical e, sem isso, a cúpula de baixo cortaria a cartilagem (e a ponta da 10ª) ao meio. A cúpula
+     começa 1 cm abaixo do eixo da costela mais baixa (a fita tem até ~0,8 cm de meia-altura). */
+  const fundo = new Float32Array(NT);
+  for (let j = 0; j < NT; j++){
+    let m = 1e9;
+    for (let d = -2; d <= 2; d++){ const e = ents[clamp(j + d, 0, NT - 1)]; if (e.length && e[e.length - 1][0] < m) m = e[e.length - 1][0]; }
+    fundo[j] = m;
+  }
+  for (let j = 0; j < NT; j++){
+    const ent = ents[j], top = ent[0], bot = ent[ent.length - 1];
     for (let k = 0; k < NY; k++){
       const y = lerp(y0, y1, k / (NY - 1));
       let r = 0, f = 0;
@@ -441,7 +474,7 @@ function buildThoraxTable(breath){
         if (y >= top[0]) r = top[1];
         else if (y <= bot[0]) r = bot[1];
         else { let m = 0; while (ent[m + 1][0] > y) m++; const A = ent[m], B = ent[m + 1]; r = lerp(A[1], B[1], (A[0] - y) / Math.max(1e-6, A[0] - B[0])); }
-        f = (1 - smoothstep(0.7, 3.7, y - top[0])) * (1 - smoothstep(0.4, 2.0, bot[0] - y));
+        f = (1 - smoothstep(0.7, 3.7, y - top[0])) * (1 - smoothstep(1.0, 2.6, fundo[j] - y));
       }
       tab[k * NT + j] = r; fade[k * NT + j] = f;
     }
@@ -1131,7 +1164,8 @@ mesh.ensureColor = geom => {
 
 /* ==================================================================== TEXTURAS */
 /* extra: paleta compartilhada (cores CSS em sRGB, "como se vê na tela"). Texturas e cores feitas dentro das peças
-   devem ler daqui, para o conjunto mudar junto quando a paleta for afinada. */
+   devem ler daqui, para o conjunto mudar junto quando a paleta for afinada. São as cores da SUPERFÍCIE (albedo):
+   na tela as sombras saem mais escuras e as luzes mais claras, por causa da luz e do acabamento dos materiais. */
 EV.pal = {
   muscle: {base: '#b25421', light: '#d47a40', dark: '#6a280d'},
   tendon: {base: '#e2c188', light: '#f3dfb4', dark: '#b9945c'},
@@ -1139,8 +1173,10 @@ EV.pal = {
 };
 const tex = EV.tex = {};
 function rng(seed){ let a = seed >>> 0; return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
-/* Textura de fibras correndo ao longo de X (uv.x), ladrilhável nas duas direções. As estrias têm várias larguras
-   (das finas às faixas largas), para que as fibras continuem visíveis quando a textura é reduzida na tela.
+/* Textura de fibras correndo ao longo de X (uv.x), ladrilhável nas duas direções. Cada estria é uma lente fina
+   (ponta afilada, como um fascículo), em várias escalas: faixas tonais largas e muito suaves, feixes grossos,
+   feixes, fibras finas e uns poucos septos escuros compridos — assim as fibras continuam visíveis quando a
+   textura é reduzida na tela (num dedo do serrátil cada texel vale ~0,1 mm), sem virar veio de madeira.
    opts: {size (512), base, light, dark (cores CSS), streaks (1 = densidade padrão), seed (7), contrast (1),
           gray: true (versão em tons de cinza para bumpMap, com o mesmo desenho da versão colorida de mesma seed)}. */
 tex.fibers = opts => {
@@ -1148,18 +1184,27 @@ tex.fibers = opts => {
   const x = cv.getContext('2d'), rnd = rng(o.seed || 7), gray = !!o.gray, k = o.contrast === undefined ? 1 : o.contrast, dens = o.streaks === undefined ? 1 : o.streaks;
   const base = gray ? '#808080' : (o.base || EV.pal.muscle.base), light = gray ? '#ffffff' : (o.light || EV.pal.muscle.light), dark = gray ? '#000000' : (o.dark || EV.pal.muscle.dark);
   x.fillStyle = base; x.fillRect(0, 0, S, S);
-  x.lineCap = 'round';
-  /* [quantidade, espessura mín., máx., opacidade mín., máx., comprimento mín. (fração de S), máx.] */
-  const niveis = [[50, 10, 30, 0.05, 0.13, 0.5, 1.0], [320, 2.5, 8, 0.07, 0.20, 0.25, 0.9], [1300, 0.5, 2.0, 0.12, 0.42, 0.10, 0.7]];
-  for (const [n, w0, w1, a0, a1, l0, l1] of niveis){
+  const e = S / 512;                                                    // as medidas abaixo são para 512 px
+  /* [quantidade, largura mín., máx. (px), opacidade mín., máx., comprimento mín., máx. (fração de S), fração de claras] */
+  const niveis = [
+    [18, 30, 80, 0.05, 0.11, 0.7, 1.5, 0.5],                           // faixas tonais largas
+    [110, 9, 24, 0.06, 0.15, 0.35, 1.1, 0.5],                          // feixes grossos
+    [380, 3.0, 9.0, 0.07, 0.18, 0.30, 1.0, 0.48],                      // feixes
+    [1400, 0.8, 2.4, 0.08, 0.26, 0.10, 0.60, 0.42],                    // fibras finas
+    [34, 1.4, 4.2, 0.26, 0.50, 0.40, 1.2, 0],                          // septos escuros entre os feixes
+    [12, 4.5, 9.0, 0.16, 0.30, 0.55, 1.3, 0]];                         // …e uns poucos sulcos mais largos
+  for (const [n, w0, w1, a0, a1, l0, l1, fc] of niveis){
     for (let i = 0; i < n * dens; i++){
-      const y = rnd() * S, x0 = rnd() * S, len = S * lerp(l0, l1, rnd() * rnd()), w = lerp(w0, w1, rnd() * rnd()), claro = rnd() < 0.45;
-      const al = lerp(a0, a1, rnd()) * k * (claro ? 0.85 : 1), amp = rnd() * 2.4, ph = rnd() * 7, fr = (1 + Math.floor(rnd() * 2)) * 2 * Math.PI / S;
-      x.strokeStyle = claro ? light : dark; x.globalAlpha = Math.min(1, al); x.lineWidth = w;
-      for (const ox of [-S, 0]) for (const oy of [-S, 0, S]){                      // repete nas bordas para ladrilhar
-        x.beginPath();
-        for (let q = 0; q <= len; q += 16){ const xx = x0 + q + ox, yy = y + oy + Math.sin(ph + (x0 + q) * fr) * amp; if (q === 0) x.moveTo(xx, yy); else x.lineTo(xx, yy); }
-        x.stroke();
+      const y = rnd() * S, x0 = rnd() * S, len = S * lerp(l0, l1, rnd() * rnd()), w = e * lerp(w0, w1, rnd() * rnd()), claro = rnd() < fc;
+      const al = lerp(a0, a1, rnd()) * k * (claro ? 0.9 : 1), ang = (rnd() - 0.5) * 0.035;
+      x.fillStyle = claro ? light : dark; x.globalAlpha = Math.min(1, al);
+      const rx = len / 2, ry = w / 2, by = ry + Math.abs(ang) * rx + 1;
+      for (const ox of [-S, 0, S]){
+        if (x0 + ox + rx < 0 || x0 + ox - rx > S) continue;
+        for (const oy of [-S, 0, S]){                                   // repete nas bordas para ladrilhar
+          if (y + oy + by < 0 || y + oy - by > S) continue;
+          x.beginPath(); x.ellipse(x0 + ox, y + oy, rx, ry, ang, 0, 6.2832); x.fill();
+        }
       }
     }
   }
@@ -1177,27 +1222,104 @@ const mats = EV.mats = {};
 /* No three.js r128 as cores em hexadecimal são tomadas como lineares; srgb() converte uma cor "como se vê na tela"
    (sRGB) para o espaço linear dos materiais. (extra: EV.srgb) */
 const srgb = EV.srgb = hex => new T.Color(hex).convertSRGBToLinear();
-/* Escurece e tinge a superfície nos ângulos rasantes: o sombreado suave + o "contorno" fino do render de atlas.
-   cor = [r, g, b] que multiplica a luz na borda; forca/pot = faixa larga e suave; linha = traço fino no contorno. */
-function rim(m, cor, forca, pot, linha){
-  /* extra: m.userData.evTint.value = (r, g, b lineares, quantidade 0..1). O app escreve aqui para tingir o músculo
-     (vermelho = encurtado, azul = esticado): a cor final é MISTURADA com a tinta modulada pela luminância, de modo
-     que o azul aparece azul mesmo sobre a textura laranja (multiplicar material.color só escurecia). */
+/* extra: EV.mats.look — parâmetros globais do acabamento, lidos por todos os materiais (o app os ajusta):
+   px.value = espessura do traço de contorno em pixels do canvas (o app a escala com o tamanho da tela);
+   cage.value = (y de baixo, y de cima, z do eixo) do gradil costal, para a penumbra do lado de dentro;
+   box.value = direção, no espaço da CÂMERA, da caixa de luz virtual que dá o brilho largo (junto da câmera, um
+   pouco acima: na prancha só o que está bem de frente para quem olha — a escápula direita, o sacro — fica branco). */
+const LOOK = mats.look = {px: {value: 1.3}, cage: {value: new T.Vector3(3, 51, -2.1)}, box: {value: new T.Vector3(0.0, 0.16, 1).normalize()}};
+try { const r = EV.thorax.range(); LOOK.cage.value.set(r[0], r[1], EV.thorax.center((r[0] + r[1]) / 2).z); } catch (e) { /* fica o padrão */ }
+/* Acabamento de "render de atlas" aplicado sobre o MeshStandardMaterial:
+   - ganho: exposição própria do material (as luzes da cena ficam como o corpo fantasma precisa), com um joelho
+     opcional que comprime as luzes canal a canal (como um filme): no osso, o claro-escuro e a cor pintados nas
+     malhas (oclusão de ambiente creme ou lavanda) saem suaves como as peças os calibraram, e o marfim não estoura;
+   - brilho: reflexo LARGO e macio de uma caixa de luz virtual junto da câmera (porcelana / osso polido / músculo
+     úmido): clareia o que está de frente para quem olha, só onde chega luz direta (some na sombra e por dentro);
+   - embaixo: o que olha para o chão escurece e esfria (osso: lavanda; músculo: castanho) — é o que separa a
+     face de cima da de baixo das costelas e cava os sulcos entre os feixes;
+   - dentro: as superfícies do tronco viradas para o EIXO do gradil (face interna das costelas do outro lado, face
+     costal da escápula, o lado de baixo dos músculos) recebem uma penumbra oliva — a luz de céu não entra na caixa;
+   - sombra: nas partes escuras a cor é multiplicada por uma tinta (osso: lavanda; músculo: vermelho-tijolo),
+     de modo que a cor muda de matiz da luz para a sombra em vez de só escurecer;
+   - borda: escurece e tinge a superfície nos ângulos rasantes (faixa larga e suave, dá volume aos feixes);
+   - traço: contorno fino de espessura constante NA TELA (distância até a silhueta estimada pelas derivadas de N·V),
+     que não engrossa nas faces planas vistas de raspão;
+   - tinta de estado: m.userData.evTint.value = (r, g, b lineares, quantidade 0..1). O app escreve aqui para tingir
+     o músculo (vermelho = encurtado, azul = esticado); a cor final é MISTURADA com a tinta modulada pela
+     luminância, de modo que o azul aparece azul mesmo sobre a textura laranja.
+   c: {gain, knee (saída = gain·x / (1 + knee·x)), toe (pé da curva: subtrai um pouco de cada canal nas partes
+       iluminadas, o que aviva o laranja sem enegrecer as sombras), spec: [r,g,b] cor do brilho,
+       specP: expoente (menor = mais largo), box: [x,y,z] direção própria da caixa de luz (padrão:
+       EV.mats.look.box), rim: [r,g,b] cor na borda, rimS: força, rimP: potência, line: [r,g,b] cor do traço,
+       lineS: força do traço, shade: [r,g,b] tinta das sombras, shadeL: luminância (linear) acima da qual a tinta
+       some, in: [r,g,b] penumbra de dentro, inS: força, under: [r,g,b] tinta do que olha para baixo,
+       underS: quanto escurece (1 = nada)}. */
+function rim(m, c){
   const tint = m.userData.evTint = {value: new T.Vector4(0, 0, 0, 0)};
   m.onBeforeCompile = sh => {
-    sh.uniforms.evRimC = {value: new T.Vector3(cor[0], cor[1], cor[2])};
-    sh.uniforms.evRimS = {value: new T.Vector3(forca, pot, linha || 0)};
+    const v3 = a => new T.Vector3(a[0], a[1], a[2]);
+    sh.uniforms.evGain = {value: new T.Vector3(c.gain, c.knee || 0, c.toe || 0)};
+    sh.uniforms.evSpec = {value: new T.Vector4(c.spec[0], c.spec[1], c.spec[2], c.specP)};
+    sh.uniforms.evRimC = {value: v3(c.rim)};
+    sh.uniforms.evRimS = {value: new T.Vector3(c.rimS, c.rimP, c.lineS)};
+    sh.uniforms.evLineC = {value: v3(c.line)};
+    sh.uniforms.evShade = {value: new T.Vector4(c.shade[0], c.shade[1], c.shade[2], c.shadeL)};
+    sh.uniforms.evIn = {value: new T.Vector4(c.in[0], c.in[1], c.in[2], c.inS)};
+    sh.uniforms.evUnder = {value: new T.Vector4(c.under[0], c.under[1], c.under[2], c.underS)};
+    sh.uniforms.evCage = LOOK.cage; sh.uniforms.evPx = LOOK.px;
+    sh.uniforms.evBox = c.box ? {value: v3(c.box).normalize()} : LOOK.box;
     sh.uniforms.evTint = tint;
+    sh.vertexShader = sh.vertexShader
+      .replace('#include <common>', '#include <common>\nvarying vec3 vEvW;')
+      .replace('#include <project_vertex>', '#include <project_vertex>\n  vEvW = (modelMatrix * vec4(transformed, 1.0)).xyz;');
     sh.fragmentShader = sh.fragmentShader
-      .replace('#include <common>', '#include <common>\nuniform vec3 evRimC;\nuniform vec3 evRimS;\nuniform vec4 evTint;')
-      .replace('gl_FragColor = vec4( outgoingLight, diffuseColor.a );',
-        'float evF = 1.0 - clamp(abs(dot(normalize(vViewPosition), normal)), 0.0, 1.0);\n  outgoingLight *= mix(vec3(1.0), evRimC, clamp(evRimS.x * pow(evF, evRimS.y) + evRimS.z * pow(evF, 7.0), 0.0, 1.0));\n  outgoingLight = mix(outgoingLight, evTint.rgb * (0.22 + 1.7 * dot(outgoingLight, vec3(0.30, 0.59, 0.11))), evTint.a);\n  gl_FragColor = vec4( outgoingLight, diffuseColor.a );');
+      .replace('#include <common>', '#include <common>\nvarying vec3 vEvW;\nuniform vec3 evGain;\nuniform vec4 evSpec;\nuniform vec3 evRimC;\nuniform vec3 evRimS;\nuniform vec3 evLineC;\nuniform vec4 evShade;\nuniform vec4 evIn;\nuniform vec4 evUnder;\nuniform vec3 evCage;\nuniform vec3 evBox;\nuniform float evPx;\nuniform vec4 evTint;')
+      .replace('gl_FragColor = vec4( outgoingLight, diffuseColor.a );', [
+        'vec3 evV = normalize(vViewPosition);',
+        'float evNV = clamp(abs(dot(evV, geometryNormal)), 0.0, 1.0);',
+        'float evF = 1.0 - evNV;',
+        /* dentro do gradil */
+        'vec3 evWN = inverseTransformDirection(geometryNormal, viewMatrix);',
+        'vec2 evR = vEvW.xz - vec2(0.0, evCage.z);',
+        'float evRd = max(length(evR), 1e-3);',
+        'float evK = clamp(-dot(evWN.xz, evR) / evRd, 0.0, 1.0) * smoothstep(2.5, 7.0, evRd) * smoothstep(evCage.x - 3.0, evCage.x + 7.0, vEvW.y) * (1.0 - smoothstep(evCage.y - 7.0, evCage.y + 1.0, vEvW.y));',
+        /* pé + ganho + brilho largo da caixa de luz (só onde há luz direta) */
+        'float evE = dot(reflectedLight.directDiffuse, vec3(0.3333)) / max(dot(material.diffuseColor, vec3(0.3333)), 0.02);',
+        'outgoingLight = max(outgoingLight - evGain.z * min(dot(outgoingLight, vec3(0.2126, 0.7152, 0.0722)) / 0.12, 1.0), vec3(0.0));',
+        'outgoingLight *= evGain.x / (1.0 + evGain.y * outgoingLight);',
+        'outgoingLight += evSpec.rgb * pow(max(dot(normal, normalize(evV + evBox)), 0.0), evSpec.a) * smoothstep(0.10, 0.42, evE) * (1.0 - evK);',
+        'outgoingLight *= mix(vec3(1.0), evIn.rgb, evIn.a * evK);',
+        /* embaixo + sombras tingidas; as duas tintas somem onde a cor de vértice já vem lavanda — o crânio traz a
+           sua própria sombra de baixo pintada na malha */
+        'float evLav = 0.0;',
+        '#ifdef USE_COLOR',
+        '  evLav = clamp((vColor.b - 0.5 * (vColor.r + vColor.g)) * 14.0, 0.0, 1.0);',
+        '#endif',
+        'outgoingLight *= mix(vec3(1.0), evUnder.rgb * evUnder.a, smoothstep(-0.05, -0.75, evWN.y) * (1.0 - evLav));',
+        'float evL = dot(outgoingLight, vec3(0.2126, 0.7152, 0.0722));',
+        'outgoingLight *= mix(mix(evShade.rgb, vec3(dot(evShade.rgb, vec3(0.3333))), evLav), vec3(1.0), smoothstep(0.0, evShade.a, evL));',
+        /* borda larga + traço fino */
+        'outgoingLight *= mix(vec3(1.0), evRimC, clamp(evRimS.x * pow(evF, evRimS.y), 0.0, 1.0));',
+        'float evD = evNV / max(fwidth(evNV), 1e-5);',
+        'float evLn = (1.0 - smoothstep(evPx, evPx * 2.4, evD)) * (1.0 - smoothstep(0.30, 0.62, evNV)) * evRimS.z;',
+        'outgoingLight *= mix(vec3(1.0), evLineC, evLn);',
+        /* tinta de estado */
+        'outgoingLight = mix(outgoingLight, evTint.rgb * (0.22 + 1.7 * dot(outgoingLight, vec3(0.30, 0.59, 0.11))), evTint.a);',
+        'gl_FragColor = vec4( outgoingLight, diffuseColor.a );'].join('\n  '));
   };
-  m.customProgramCacheKey = () => 'evrim';
+  m.customProgramCacheKey = () => 'evlook';
   return m;
 }
-mats.bone = o => rim(new T.MeshStandardMaterial(Object.assign({color: srgb(0xf6ecd0), roughness: 0.34, metalness: 0.0, vertexColors: true}, o || {})), [0.42, 0.38, 0.27], 0.42, 1.5, 0.75);
-mats.cartilage = o => rim(new T.MeshStandardMaterial(Object.assign({color: srgb(0xefe2b8), roughness: 0.42, metalness: 0.0, vertexColors: true}, o || {})), [0.45, 0.39, 0.25], 0.45, 1.5, 0.7);
+const OSSO = {gain: 1.25, knee: 0.9, spec: [0.36, 0.36, 0.34], specP: 12, rim: [0.74, 0.70, 0.44], rimS: 0.75, rimP: 2.6, line: [0.30, 0.28, 0.22], lineS: 0.80,
+  shade: [0.98, 0.96, 1.04], shadeL: 0.40, in: [0.86, 0.85, 0.78], inS: 0.72, under: [1.0, 0.95, 1.36], underS: 0.70};
+/* no músculo a caixa de luz fica mais alta: o brilho corre pelo alto de cada feixe roliço e não lava as lâminas largas */
+const CARNE = {gain: 1.10, toe: 0.006, spec: [0.24, 0.10, 0.038], specP: 14, box: [-0.25, 0.85, 1], rim: [0.46, 0.25, 0.17], rimS: 0.82, rimP: 1.7, line: [0.30, 0.16, 0.11], lineS: 0.75,
+  shade: [1.0, 0.93, 0.86], shadeL: 0.15, in: [0.72, 0.62, 0.58], inS: 0.7, under: [1.0, 0.82, 0.76], underS: 0.76};
+const FAIXA = {gain: 1.10, toe: 0.006, spec: [0.10, 0.09, 0.07], specP: 10, rim: [0.66, 0.54, 0.38], rimS: 0.55, rimP: 1.8, line: [0.40, 0.31, 0.22], lineS: 0.60,
+  shade: [0.97, 0.92, 0.86], shadeL: 0.35, in: [0.60, 0.55, 0.45], inS: 0.8, under: [1.0, 0.92, 0.88], underS: 0.76};
+mats.bone = o => rim(new T.MeshStandardMaterial(Object.assign({color: srgb(EV.pal.bone), roughness: 0.42, metalness: 0.0, vertexColors: true}, o || {})), OSSO);
+mats.cartilage = o => rim(new T.MeshStandardMaterial(Object.assign({color: srgb(EV.pal.cartilage), roughness: 0.48, metalness: 0.0, vertexColors: true}, o || {})),
+  Object.assign({}, OSSO, {spec: [0.20, 0.20, 0.18], rim: [0.70, 0.62, 0.40]}));
 let _fibC = null, _fibB = null, _tenC = null;
 /* Clones de textura por `repeat`, reaproveitados entre materiais: no r128 cada clone é um upload próprio na GPU,
    e um material por digitação multiplicaria as texturas. (Por isso `material.map` é compartilhado: para outro
@@ -1210,20 +1332,22 @@ const texClone = (t, rep) => {
   return c;
 };
 /* Músculo: laranja de atlas com fibras ao longo de uv.x. opts: {repeat: [u, v] (padrão [1, 1]; em tubos v deve
-   ser inteiro para não aparecer emenda), bump (relevo das fibras em cm, 0.04), ...demais opções do material}. */
+   ser inteiro para não aparecer emenda), bump (relevo das fibras em cm, 0.04), ...demais opções do material}.
+   Fosco de propósito (roughness 0.72): o reflexo branco das luzes lavava o laranja das lâminas largas; o brilho
+   úmido do músculo vem da caixa de luz do acabamento, que é alaranjado. */
 mats.muscle = opts => {
   const o = Object.assign({}, opts || {}), rep = o.repeat || [1, 1], bump = o.bump === undefined ? 0.04 : o.bump;
   delete o.repeat; delete o.bump;
   if (!_fibC){ _fibC = tex.fibers({seed: 11}); _fibB = tex.fibers({seed: 11, gray: true}); }
   return rim(new T.MeshStandardMaterial(Object.assign({color: 0xffffff, map: texClone(_fibC, rep), bumpMap: texClone(_fibB, rep), bumpScale: bump,
-    roughness: 0.6, metalness: 0.0, vertexColors: true}, o)), [0.42, 0.20, 0.13], 0.55, 1.6, 0.6);
+    roughness: 0.72, metalness: 0.0, vertexColors: true}, o)), CARNE);
 };
 /* Tendão / aponeurose: creme com fibras discretas. opts: {repeat: [u, v]}. */
 mats.tendon = opts => {
   const o = Object.assign({}, opts || {}), rep = o.repeat || [2, 2];
   delete o.repeat;
-  if (!_tenC) _tenC = tex.fibers({seed: 23, base: EV.pal.tendon.base, light: EV.pal.tendon.light, dark: EV.pal.tendon.dark, streaks: 0.7, contrast: 0.75});
-  return rim(new T.MeshStandardMaterial(Object.assign({color: 0xffffff, map: texClone(_tenC, rep), roughness: 0.5, metalness: 0.0, vertexColors: true}, o)), [0.55, 0.45, 0.30], 0.45, 1.6, 0.5);
+  if (!_tenC) _tenC = tex.fibers({seed: 23, base: EV.pal.tendon.base, light: EV.pal.tendon.light, dark: EV.pal.tendon.dark, streaks: 0.8, contrast: 0.7});
+  return rim(new T.MeshStandardMaterial(Object.assign({color: 0xffffff, map: texClone(_tenC, rep), roughness: 0.5, metalness: 0.0, vertexColors: true}, o)), FAIXA);
 };
 /* Corpo "fantasma": rosa-claro translúcido, desenhado ANTES de tudo e sem escrever profundidade (fica atrás dos
    ossos e músculos), mais opaco nos ângulos rasantes. opts: {color, opacity (centro), rim (borda)}. */
