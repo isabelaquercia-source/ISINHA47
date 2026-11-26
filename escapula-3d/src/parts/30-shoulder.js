@@ -10,10 +10,13 @@
                  fossas rasas; dobra para a frente acima da espinha (fossa supraespinal);
      · espinha — "loft" ao longo de x: em cada corte x = const a seção é um quadrilátero arredondado
                  (base de cima, crista, lábio de baixo, base de baixo) cujos vértices mudam suavemente; nasce baixa
-                 e larga na raiz, sobe para fora, e depois da incisura espinoglenoidal solta-se da lâmina;
+                 e larga na raiz e sobe para fora; a borda lateral livre (incisura espinoglenoidal) é cavada por
+                 um cilindro;
      · acrômio — placa plana inclinada (prateleira) com contorno 2D próprio, do ângulo do acrômio à ponta;
      · colo, glenoide (com a cavidade cavada), tubérculo infraglenoidal e processo coracoide em gancho.
    A malha passa pelos marcos de EV.scap.L e a borda medial segue EV.scap.medial(t) (onde os músculos se prendem).
+   Depois do fromSDF há um acabamento local (alisamento + projeção de volta na superfície, normais, sombreado de
+   atlas gravado na cor de vértice). A face costal não é mais funda que a da peça provisória (folga do gradil).
 
    CLAVÍCULA: tubo em S de seção variável (extremidade esternal grossa, corpo roliço, extremidade acromial chata),
    construído uma vez num referencial próprio (X = esternoclavicular → acromioclavicular) e tratado como rígido:
@@ -51,8 +54,8 @@ EV.register('shoulder', ({THREE, EV, quality}) => {
     return out;
   }
   /* Campo de distância 2D com sinal (negativo dentro) de um contorno fechado, amostrado numa grade e lido com
-     interpolação bilinear. Os atributos de cada vértice do contorno (colunas 2…) são guardados na grade pelo ponto
-     mais próximo da borda. ler(F, x, y) escreve [distância, atributos…] em F.o. */
+     interpolação bilinear. Os atributos dos vértices do contorno (colunas 2…) vão para a grade como média ponderada
+     pela proximidade da borda. ler(F, x, y) escreve [distância, atributos…] em F.o (vetor reaproveitado). */
   function campo2D(pts, x0, y0, x1, y1, passo){
     const nx = Math.ceil((x1 - x0) / passo) + 1, ny = Math.ceil((y1 - y0) / passo) + 1, n = pts.length, na = pts[0].length - 2;
     const G = []; for (let a = 0; a <= na; a++) G.push(new Float32Array(nx * ny));
@@ -115,7 +118,7 @@ EV.register('shoulder', ({THREE, EV, quality}) => {
 
   /* =================================================================================== ESCÁPULA (nominal) */
   const nom = v => [v.x * IK, v.y * IK, v.z * IK];
-  const RAIZ = nom(L.root), INF = nom(L.infAngle), ANG = nom(L.acromionAngle), PONTA = nom(L.acromionTip), GLEN = nom(L.glenoid), COR = nom(L.coracoidTip);
+  const INF = nom(L.infAngle), ANG = nom(L.acromionAngle), PONTA = nom(L.acromionTip), GLEN = nom(L.glenoid);
   const COLO = [8.4, -1.7, -1.0];                                    // colo da escápula (junto da glenoide)
 
   /* ---- superfície média da lâmina: plano raiz–ângulo inferior–colo, dobrado para a frente acima da espinha */
@@ -288,7 +291,7 @@ EV.register('shoulder', ({THREE, EV, quality}) => {
   };
   const fEsc = (x, y, z) => K * fNom(x * IK, y * IK, z * IK);
   const geom = EV.mesh.fromSDF(fEsc, {
-    min: [-1.5 * K, -14.6 * K, -5.4 * K], max: [14.3 * K, 4.6 * K, 2.4 * K], cell: 0.215 / Math.pow(q, 0.35),                                  // a célula cresce pouco no celular (lâmina fina)
+    min: [-1.5 * K, -14.6 * K, -5.4 * K], max: [14.3 * K, 4.6 * K, 2.4 * K], cell: 0.215 / Math.pow(q, 0.35),   // a célula cresce pouco no celular (lâmina fina)
     ao: true, aoColor: [0.55, 0.53, 0.68], aoRadius: 1.6, aoStrength: 1.15
   });
   {
