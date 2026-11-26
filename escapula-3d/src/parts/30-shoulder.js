@@ -307,14 +307,13 @@ EV.register('shoulder', ({THREE, EV, quality}) => {
         const o = v * 3, ic = 1 / (cnt[v] || 1);
         let x = P[o] + 0.55 * (acc[o] * ic - P[o]), y = P[o + 1] + 0.55 * (acc[o + 1] * ic - P[o + 1]), z = P[o + 2] + 0.55 * (acc[o + 2] * ic - P[o + 2]);
         for (let n = 0; n < 2; n++){
-          if (n === 0 || it === 1) grad(x, y, z, o);
+          if (n === 0 || it === 1) grad(x, y, z, o);                    // na última passada a normal final é a do ponto já projetado
           const d = EV.clamp(fEsc(x, y, z), -0.12, 0.12);
           x -= d * Nn[o]; y -= d * Nn[o + 1]; z -= d * Nn[o + 2];
         }
         P[o] = x; P[o + 1] = y; P[o + 2] = z;
       }
     }
-    for (let o = 0; o < P.length; o += 3) grad(P[o], P[o + 1], P[o + 2], o);
     /* sombreado de atlas gravado na cor de vértice: o que olha para baixo (debaixo da espinha, do acrômio, das bordas)
        puxa para um cinza-lavanda, por cima da oclusão de ambiente que o fromSDF já gravou */
     const C = geom.attributes.color.array;
