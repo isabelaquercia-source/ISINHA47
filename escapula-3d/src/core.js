@@ -404,8 +404,8 @@ ribs.cartilage = (i, s, side, state, alvo) => {
    costelas e cartilagens (em repouso, em meia inspiração e em inspiração completa; entre elas, interpolação).
    Atrás, entre os dois ângulos das costelas, a superfície é plana (ponte sobre a goteira paravertebral).
    A superfície passa por FORA do osso (o raio inclui a meia-espessura de cada costela) e só existe na faixa das
-   costelas: acima da 1ª o raio cai a zero em ~4 cm e abaixo da mais baixa em ~2 cm (cúpulas), de modo que
-   pescoço, crânio e lombar ficam "fora" do gradil (wrap não mexe neles). */
+   costelas: acima da 1ª o raio cai a zero em ~4 cm e abaixo da mais baixa entre 1 e 2,6 cm (cúpulas), de modo
+   que pescoço, crânio e lombar ficam "fora" do gradil (wrap não mexe neles). */
 const TH = {NT: 65, NY: 0, y0: 0, y1: 0, tabs: [], cartHalf: 0.33, folga: 0.06, queda: 0.3};
 let thoraxZc;
 (() => {
@@ -1253,7 +1253,8 @@ try { const r = EV.thorax.range(); LOOK.cage.value.set(r[0], r[1], EV.thorax.cen
        EV.mats.look.box), rim: [r,g,b] cor na borda, rimS: força, rimP: potência, line: [r,g,b] cor do traço,
        lineS: força do traço, shade: [r,g,b] tinta das sombras, shadeL: luminância (linear) acima da qual a tinta
        some, in: [r,g,b] penumbra de dentro, inS: força, under: [r,g,b] tinta do que olha para baixo,
-       underS: quanto escurece (1 = nada)}. */
+       underS: quanto escurece (1 = nada), underN: [a, b] faixa da normal (componente Y no mundo) em que a tinta
+       entra — de a (nada) a b (toda); padrão [-0.05, -0.75]}. */
 function rim(m, c){
   const tint = m.userData.evTint = {value: new T.Vector4(0, 0, 0, 0)};
   m.onBeforeCompile = sh => {
@@ -1266,6 +1267,7 @@ function rim(m, c){
     sh.uniforms.evShade = {value: new T.Vector4(c.shade[0], c.shade[1], c.shade[2], c.shadeL)};
     sh.uniforms.evIn = {value: new T.Vector4(c.in[0], c.in[1], c.in[2], c.inS)};
     sh.uniforms.evUnder = {value: new T.Vector4(c.under[0], c.under[1], c.under[2], c.underS)};
+    sh.uniforms.evUnderN = {value: new T.Vector2(c.underN ? c.underN[0] : -0.05, c.underN ? c.underN[1] : -0.75)};
     sh.uniforms.evCage = LOOK.cage; sh.uniforms.evPx = LOOK.px;
     sh.uniforms.evBox = c.box ? {value: v3(c.box).normalize()} : LOOK.box;
     sh.uniforms.evTint = tint;
@@ -1273,7 +1275,7 @@ function rim(m, c){
       .replace('#include <common>', '#include <common>\nvarying vec3 vEvW;')
       .replace('#include <project_vertex>', '#include <project_vertex>\n  vEvW = (modelMatrix * vec4(transformed, 1.0)).xyz;');
     sh.fragmentShader = sh.fragmentShader
-      .replace('#include <common>', '#include <common>\nvarying vec3 vEvW;\nuniform vec3 evGain;\nuniform vec4 evSpec;\nuniform vec3 evRimC;\nuniform vec3 evRimS;\nuniform vec3 evLineC;\nuniform vec4 evShade;\nuniform vec4 evIn;\nuniform vec4 evUnder;\nuniform vec3 evCage;\nuniform vec3 evBox;\nuniform float evPx;\nuniform vec4 evTint;')
+      .replace('#include <common>', '#include <common>\nvarying vec3 vEvW;\nuniform vec3 evGain;\nuniform vec4 evSpec;\nuniform vec3 evRimC;\nuniform vec3 evRimS;\nuniform vec3 evLineC;\nuniform vec4 evShade;\nuniform vec4 evIn;\nuniform vec4 evUnder;\nuniform vec2 evUnderN;\nuniform vec3 evCage;\nuniform vec3 evBox;\nuniform float evPx;\nuniform vec4 evTint;')
       .replace('gl_FragColor = vec4( outgoingLight, diffuseColor.a );', [
         'vec3 evV = normalize(vViewPosition);',
         'float evNV = clamp(abs(dot(evV, geometryNormal)), 0.0, 1.0);',
@@ -1295,7 +1297,7 @@ function rim(m, c){
         '#ifdef USE_COLOR',
         '  evLav = clamp((vColor.b - 0.5 * (vColor.r + vColor.g)) * 14.0, 0.0, 1.0);',
         '#endif',
-        'outgoingLight *= mix(vec3(1.0), evUnder.rgb * evUnder.a, smoothstep(-0.05, -0.75, evWN.y) * (1.0 - evLav));',
+        'outgoingLight *= mix(vec3(1.0), evUnder.rgb * evUnder.a, smoothstep(evUnderN.x, evUnderN.y, evWN.y) * (1.0 - evLav));',
         'float evL = dot(outgoingLight, vec3(0.2126, 0.7152, 0.0722));',
         'outgoingLight *= mix(mix(evShade.rgb, vec3(dot(evShade.rgb, vec3(0.3333))), evLav), vec3(1.0), smoothstep(0.0, evShade.a, evL));',
         /* borda larga + traço fino */
@@ -1310,12 +1312,12 @@ function rim(m, c){
   m.customProgramCacheKey = () => 'evlook';
   return m;
 }
-const OSSO = {gain: 1.25, knee: 0.9, spec: [0.36, 0.36, 0.34], specP: 12, rim: [0.74, 0.70, 0.44], rimS: 0.75, rimP: 2.6, line: [0.30, 0.28, 0.22], lineS: 0.80,
-  shade: [0.98, 0.96, 1.04], shadeL: 0.40, in: [0.86, 0.85, 0.78], inS: 0.72, under: [1.0, 0.95, 1.36], underS: 0.70};
+const OSSO = {gain: 1.25, knee: 0.9, spec: [0.40, 0.40, 0.38], specP: 12, rim: [0.78, 0.74, 0.54], rimS: 0.62, rimP: 2.8, line: [0.30, 0.28, 0.22], lineS: 0.80,
+  shade: [0.97, 0.96, 1.12], shadeL: 0.50, in: [0.86, 0.85, 0.80], inS: 0.72, under: [1.0, 0.95, 1.40], underS: 0.70, underN: [0.12, -0.65]};
 /* no músculo a caixa de luz fica mais alta: o brilho corre pelo alto de cada feixe roliço e não lava as lâminas largas */
-const CARNE = {gain: 1.10, toe: 0.006, spec: [0.24, 0.10, 0.038], specP: 14, box: [-0.25, 0.85, 1], rim: [0.46, 0.25, 0.17], rimS: 0.82, rimP: 1.7, line: [0.30, 0.16, 0.11], lineS: 0.75,
+const CARNE = {gain: 1.09, toe: 0.003, spec: [0.24, 0.10, 0.038], specP: 14, box: [-0.25, 0.85, 1], rim: [0.46, 0.25, 0.17], rimS: 0.82, rimP: 1.7, line: [0.30, 0.16, 0.11], lineS: 0.75,
   shade: [1.0, 0.93, 0.86], shadeL: 0.15, in: [0.72, 0.62, 0.58], inS: 0.7, under: [1.0, 0.82, 0.76], underS: 0.76};
-const FAIXA = {gain: 1.10, toe: 0.006, spec: [0.10, 0.09, 0.07], specP: 10, rim: [0.66, 0.54, 0.38], rimS: 0.55, rimP: 1.8, line: [0.40, 0.31, 0.22], lineS: 0.60,
+const FAIXA = {gain: 1.09, toe: 0.003, spec: [0.10, 0.09, 0.07], specP: 10, rim: [0.66, 0.54, 0.38], rimS: 0.55, rimP: 1.8, line: [0.40, 0.31, 0.22], lineS: 0.60,
   shade: [0.97, 0.92, 0.86], shadeL: 0.35, in: [0.60, 0.55, 0.45], inS: 0.8, under: [1.0, 0.92, 0.88], underS: 0.76};
 mats.bone = o => rim(new T.MeshStandardMaterial(Object.assign({color: srgb(EV.pal.bone), roughness: 0.42, metalness: 0.0, vertexColors: true}, o || {})), OSSO);
 mats.cartilage = o => rim(new T.MeshStandardMaterial(Object.assign({color: srgb(EV.pal.cartilage), roughness: 0.48, metalness: 0.0, vertexColors: true}, o || {})),

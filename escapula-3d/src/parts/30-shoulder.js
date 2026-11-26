@@ -21,6 +21,7 @@
 (() => {
 EV.register('shoulder', ({THREE, EV, quality}) => {
   const S = EV.sdf, L = EV.scap.L, group = new THREE.Group(), osso = EV.mats.bone();
+  const TT = window.EV_SH_T = {}, T0 = performance.now(); let nEval = 0;
   const K = -L.infAngle.y / 13.4, IK = 1 / K;                        // escala das medidas nominais
   const q = EV.clamp(quality || 1, 0.3, 1.5);
   const PI = Math.PI;
@@ -133,13 +134,13 @@ EV.register('shoulder', ({THREE, EV, quality}) => {
      borda), viés (deslocamento dorsal do centro da borda)], no sentido ângulo superior → borda superior → colo →
      borda lateral → ângulo inferior → borda medial */
   const borda = [
-    [1.22, 3.72, 0.30, 0.6, 0], [1.75, 3.56, 0.27, 0.55, 0], [2.40, 3.25, 0.25, 0.5, 0], [3.30, 2.82, 0.24, 0.5, 0], [4.50, 2.25, 0.24, 0.5, 0],
-    [5.60, 1.75, 0.24, 0.5, 0], [6.45, 1.42, 0.25, 0.5, 0],                                   // incisura da escápula
-    [7.00, 1.55, 0.30, 0.6, -0.05], [7.75, 1.95, 0.42, 0.8, -0.15], [8.70, 1.62, 0.55, 1.0, -0.28], [9.22, 0.30, 0.66, 1.2, -0.30],
+    [1.22, 3.72, 0.33, 0.6, 0], [1.75, 3.56, 0.32, 0.55, 0], [2.40, 3.25, 0.32, 0.5, 0], [3.30, 2.82, 0.32, 0.5, 0], [4.50, 2.25, 0.32, 0.5, 0],
+    [5.60, 1.75, 0.32, 0.5, 0], [6.45, 1.42, 0.32, 0.5, 0],                                   // incisura da escápula
+    [7.00, 1.55, 0.34, 0.6, -0.05], [7.75, 1.95, 0.42, 0.8, -0.15], [8.70, 1.62, 0.55, 1.0, -0.28], [9.22, 0.30, 0.66, 1.2, -0.30],
     [9.45, -0.90, 0.75, 1.3, 0], [9.45, -2.40, 0.75, 1.3, 0], [9.30, -3.50, 0.68, 1.3, 0.05],   // atrás da glenoide
-    [8.67, -4.30, 0.60, 1.5, 0.14], [7.85, -4.66, 0.58, 1.7, 0.20], [7.20, -5.20, 0.56, 1.8, 0.23], [6.60, -6.20, 0.55, 1.8, 0.24],
-    [5.94, -7.20, 0.55, 1.8, 0.24], [5.39, -7.97, 0.55, 1.8, 0.24], [4.85, -8.70, 0.55, 1.8, 0.24], [4.30, -9.47, 0.55, 1.8, 0.24],
-    [3.92, -10.20, 0.55, 1.7, 0.23], [3.59, -10.98, 0.55, 1.6, 0.21], [3.30, -11.75, 0.54, 1.5, 0.18], [2.93, -12.50, 0.53, 1.4, 0.14],
+    [8.67, -4.30, 0.60, 1.6, 0.12], [7.85, -4.66, 0.58, 1.9, 0.15], [7.20, -5.20, 0.56, 2.1, 0.17], [6.60, -6.20, 0.55, 2.1, 0.18],
+    [5.94, -7.20, 0.55, 2.1, 0.18], [5.39, -7.97, 0.55, 2.1, 0.18], [4.85, -8.70, 0.55, 2.0, 0.18], [4.30, -9.47, 0.55, 2.0, 0.18],
+    [3.92, -10.20, 0.55, 1.9, 0.18], [3.59, -10.98, 0.55, 1.7, 0.17], [3.30, -11.75, 0.54, 1.5, 0.16], [2.93, -12.50, 0.53, 1.4, 0.13],
     [2.39, -13.10, 0.52, 1.3, 0.10], [1.84, -13.60, 0.54, 1.3, 0.10], [1.30, -13.82, 0.54, 1.3, 0.10], [0.80, -13.72, 0.52, 1.2, 0.09],
     [0.42, -13.30, 0.48, 1.1, 0.08]
   ];
@@ -159,7 +160,9 @@ EV.register('shoulder', ({THREE, EV, quality}) => {
       borda.push([a.x * IK - ty * il * fora, a.y * IK + tx * il * fora, 0.20 + 0.26 * ai + 0.08 * as, 0.75 + 0.3 * ai, -0.11 + 0.19 * ai + 0.07 * as]);
     }
   }
+  TT.antesFL = performance.now() - T0;
   const FL = campo2D(contorno(borda, 0.22), -2.2, -15.2, 11.2, 5.2, 0.14);
+  TT.FL = performance.now() - T0; TT.pontosContorno = contorno(borda, 0.22).length; TT.grade = FL.nx * FL.ny;
   const HFD = 0.20, HFV = 0.21;                                       // meia-espessura da lâmina nas fossas (dorsal / costal)
   const relevo = (x, y) => {                                          // ondulação suave da face dorsal (fossa infraespinal)
     const a = (x - 3.3) / 2.7, b = (y + 5.8) / 4.2, c = (x - 5.6) / 1.3, d = (y + 3.2) / 2.2;
@@ -177,7 +180,6 @@ EV.register('shoulder', ({THREE, EV, quality}) => {
   /* ---- espinha: loft ao longo de x. Seção = quadrilátero arredondado [x, base de cima (y, z), crista (y, z), lábio de
      baixo (y, z), base de baixo (y, z), raio]. A placa é inclinada para cima: a crista pende sobre a fossa
      supraespinal, e a face de baixo desce em rampa até a fossa infraespinal (rampa cada vez mais larga para fora). */
-  const zb = (x, y) => z0(x, y) - 0.05;
   const ESP = [
     [-0.1,  0.30, 0, 0.10, -0.05, -0.10, -0.08, -0.20, 0, 0.20],
     [0.6,   0.20, 0, 0.10,  0.05, -0.08,  0.02, -0.10, 0, 0.24],
@@ -191,15 +193,15 @@ EV.register('shoulder', ({THREE, EV, quality}) => {
     [7.3,  -0.26, 0, 0.80,  1.19, -0.10,  0.44, -1.12, 0, 0.40],
     [7.9,  -0.30, 0, 0.82,  1.21, -0.12,  0.44, -1.20, 0, 0.40],
     [8.6,  -0.30, 0, 0.82,  1.21, -0.10,  0.46, -1.18, 0, 0.40],
-    [9.3,  -0.20, 0, 0.82,  1.21,  0.35,  0.90, -0.85, 0, 0.40]
-  ].map(r => { r[2] = zb(r[0], r[1]); r[8] = zb(r[0], r[7]); return r; }).concat([
+    [9.2,  -0.20, 0, 0.83,  1.22,  0.30,  0.86, -0.85, 0, 0.34]
+  ].map(r => { r[2] = z0(r[0], r[1]) + r[9] - 0.15; r[8] = z0(r[0], r[7]) + r[9] - 0.15; return r; }).concat([    // bases dentro da espessura da lâmina
     /* raiz do acrômio: só a faixa da crista, que termina dentro da placa do acrômio */
-    [9.55, 1.00, 0.95, 0.82, 1.21, 0.62, 1.06, 0.90, 0.85, 0.38],
-    [9.9,  0.95, 1.10, 0.84, 1.20, 0.78, 1.15, 0.90, 1.05, 0.28]
+    [9.5,  0.90, 1.10, 0.84, 1.22, 0.62, 1.08, 0.85, 1.00, 0.30],
+    [9.9,  0.90, 1.14, 0.86, 1.19, 0.84, 1.17, 0.88, 1.12, 0.20]
   ]);
   const TS = tabela(ESP, 0.05), TC = TS.cols;
   /* incisura espinoglenoidal: borda lateral livre da espinha, côncava — um cilindro ao longo de y cava a cunha */
-  const NCX = 10.6, NCZ = -1.6, NCR = 2.75, NCL = 9.6;
+  const NCX = 10.2, NCZ = -2.0, NCR = 2.6;
   const py = new Float64Array(4), pz = new Float64Array(4);
   const espinha = (x, y, z) => {
     let u = (x - TS.x0) * TS.ip, fora = 0;
@@ -217,8 +219,7 @@ EV.register('shoulder', ({THREE, EV, quality}) => {
     }
     let d = (dentro ? -1 : 1) * Math.sqrt(best) - r;
     if (fora > 0) d = d > 0 ? Math.sqrt(d * d + fora * fora) : (d > fora ? d : fora);
-    const corte = Math.max(Math.hypot(x - NCX, z - NCZ) - NCR, x - NCL);            // < 0 dentro do que é cavado
-    return smax(d, -corte, 0.25) * 0.92;
+    return smax(d, NCR - Math.hypot(x - NCX, z - NCZ), 0.25) * 0.92;
   };
 
   /* ---- acrômio: prateleira plana. Plano por O (na borda posterior, logo abaixo do ângulo), eixo e1 = +x (ao longo
@@ -227,12 +228,12 @@ EV.register('shoulder', ({THREE, EV, quality}) => {
   const dyA = PONTA[1] - AO[1], dzA = PONTA[2] - AO[2], lA = Math.hypot(dyA, dzA);
   /* an = normal do plano (para cima e para trás) = e1 × (ponta − O); a2 = an × e1 = "para a frente" dentro do plano */
   const an = [0, -dzA / lA, dyA / lA], a2 = [0, an[2], -an[1]];
-  const acrP = [                                                     // [p, s, hB]
-    [-2.15, 0.04, 0.38], [-0.90, 0.00, 0.38], [0.00, 0.00, 0.38], [0.62, 0.62, 0.38], [1.18, 1.36, 0.37], [1.78, 1.90, 0.36],
+  const acrP = [                                                     // [p, s, hB]; a ponta medial afila para dentro da crista da espinha
+    [-4.20, 0.42, 0.38], [-3.00, 0.08, 0.38], [-2.00, 0.01, 0.38], [-0.90, 0.00, 0.38], [0.00, 0.00, 0.38], [0.62, 0.62, 0.38], [1.18, 1.36, 0.37], [1.78, 1.90, 0.36],
     [2.18, 2.70, 0.35], [2.27, 3.50, 0.34], [2.02, 4.18, 0.33], [1.57, 4.46, 0.33], [1.12, 4.26, 0.34],
-    [0.75, 3.60, 0.35], [0.35, 3.10, 0.36], [-0.25, 2.70, 0.37], [-0.95, 2.38, 0.38], [-1.70, 2.30, 0.38], [-2.30, 2.10, 0.38], [-2.55, 1.45, 0.38], [-2.45, 0.60, 0.38]
+    [0.75, 3.60, 0.35], [0.35, 3.10, 0.36], [-0.25, 2.70, 0.37], [-0.95, 2.38, 0.38], [-1.70, 2.30, 0.38], [-2.30, 2.10, 0.38], [-2.58, 1.50, 0.38], [-2.80, 0.98, 0.38], [-3.25, 0.70, 0.38]
   ];
-  const FA = campo2D(contorno(acrP, 0.16), -4.0, -1.4, 4.0, 5.9, 0.1);
+  const FA = campo2D(contorno(acrP, 0.16), -5.2, -1.4, 4.0, 5.9, 0.1);
   const HA = 0.34;
   const acromio = (x, y, z) => {
     const ry = y - AO[1], rz = z - AO[2], p = x - AO[0], s = ry * a2[1] + rz * a2[2], c = ry * an[1] + rz * an[2];
@@ -269,22 +270,23 @@ EV.register('shoulder', ({THREE, EV, quality}) => {
   /* ---- união: cada grupo só é avaliado perto da sua caixa (longe dela vale a distância até a caixa, que é um
      limite inferior da distância verdadeira) */
   const caixa = (b, x, y, z) => Math.max(b[0] - x, x - b[3], b[1] - y, y - b[4], b[2] - z, z - b[5]);
-  const BE = [-0.9, -2.0, -1.6, 11.2, 2.5, 1.9], BA = [8.0, 0.0, -3.0, 14.0, 3.6, 2.2], BG = [7.5, -4.1, -2.8, 11.0, 0.3, 0.4], BC = [7.5, -1.0, -5.1, 11.6, 2.8, -0.4];
+  const BE = [-0.9, -2.0, -1.6, 11.2, 2.5, 1.9], BA = [6.4, 0.0, -3.0, 14.0, 3.6, 2.2], BG = [7.5, -4.1, -2.8, 11.0, 0.3, 0.4], BC = [7.5, -1.0, -5.1, 11.6, 2.8, -0.4];
   const MARG = 1.85;
-  const DBG = window.EV_SH_DBG || {};   // TEMPORÁRIO (depuração)
   const fNom = (x, y, z) => {
-    let d = DBG.noL ? 9 : lamina(x, y, z), b;
-    if (!DBG.noE){ b = caixa(BE, x, y, z); if (b < MARG) d = smin(d, espinha(x, y, z), 0.22); else if (b < d) d = b; }
-    if (!DBG.noA){ b = caixa(BA, x, y, z); if (b < MARG) d = smin(d, acromio(x, y, z), 0.35); else if (b < d) d = b; }
-    if (!DBG.noG){ b = caixa(BG, x, y, z); if (b < MARG) d = smin(d, glenoide(x, y, z), 0.40); else if (b < d) d = b; }
-    if (!DBG.noC){ b = caixa(BC, x, y, z); if (b < MARG) d = smin(d, coracoide(x, y, z), 0.45); else if (b < d) d = b; }
+    let d = lamina(x, y, z), b;
+    b = caixa(BE, x, y, z); if (b < MARG) d = smin(d, espinha(x, y, z), 0.22); else if (b < d) d = b;
+    b = caixa(BA, x, y, z); if (b < MARG) d = smin(d, acromio(x, y, z), 0.14); else if (b < d) d = b;
+    b = caixa(BG, x, y, z); if (b < MARG) d = smin(d, glenoide(x, y, z), 0.40); else if (b < d) d = b;
+    b = caixa(BC, x, y, z); if (b < MARG) d = smin(d, coracoide(x, y, z), 0.45); else if (b < d) d = b;
     return d;
   };
-  const fEsc = (x, y, z) => K * fNom(x * IK, y * IK, z * IK);
+  const fEsc = (x, y, z) => { nEval++; return K * fNom(x * IK, y * IK, z * IK); };
+  TT.antesMalha = performance.now() - T0;
   const geom = EV.mesh.fromSDF(fEsc, {
     min: [-1.5 * K, -14.6 * K, -5.4 * K], max: [14.3 * K, 4.6 * K, 2.4 * K], cell: 0.215 / Math.sqrt(q),
     ao: true, aoColor: [0.55, 0.53, 0.68], aoRadius: 1.6, aoStrength: 1.15
   });
+  TT.fromSDF = performance.now() - T0; TT.evalSDF = nEval;
   {
     /* acabamento da malha: os vértices da "surface nets" são médias dos cruzamentos e nas bordas finas (borda
        superior, borda medial) saem serrilhados. Duas passadas de alisamento tangencial (média dos vizinhos) seguidas
@@ -314,6 +316,14 @@ EV.register('shoulder', ({THREE, EV, quality}) => {
         P[o] = x; P[o + 1] = y; P[o + 2] = z;
       }
     }
+    /* triângulos minúsculos que ficaram dobrados nas bordas finas (normal geométrica contra a do vértice): desvira,
+       para o recorte de faces de trás não abrir furinhos */
+    for (let t = 0; t < I.length; t += 3){
+      const a = I[t] * 3, b = I[t + 1] * 3, c = I[t + 2] * 3;
+      const ux = P[b] - P[a], uy = P[b + 1] - P[a + 1], uz = P[b + 2] - P[a + 2], vx = P[c] - P[a], vy = P[c + 1] - P[a + 1], vz = P[c + 2] - P[a + 2];
+      const nx = uy * vz - uz * vy, ny = uz * vx - ux * vz, nz = ux * vy - uy * vx;
+      if (nx * (Nn[a] + Nn[b] + Nn[c]) + ny * (Nn[a + 1] + Nn[b + 1] + Nn[c + 1]) + nz * (Nn[a + 2] + Nn[b + 2] + Nn[c + 2]) < 0){ const k = I[t + 1]; I[t + 1] = I[t + 2]; I[t + 2] = k; }
+    }
     /* sombreado de atlas gravado na cor de vértice: o que olha para baixo (debaixo da espinha, do acrômio, das bordas)
        puxa para um cinza-lavanda, por cima da oclusão de ambiente que o fromSDF já gravou */
     const C = geom.attributes.color.array;
@@ -324,6 +334,7 @@ EV.register('shoulder', ({THREE, EV, quality}) => {
     geom.computeBoundingSphere();
   }
 
+  TT.acab = performance.now() - T0; TT.evalTotal = nEval;
   /* =================================================================================== CLAVÍCULA (rígida) */
   /* referencial próprio: X = esternoclavicular → acromioclavicular, Y = para cima, Z = X × Y (para trás, à direita).
      Dois terços mediais convexos para a frente (−Z), terço lateral convexo para trás (+Z). */
@@ -331,7 +342,7 @@ EV.register('shoulder', ({THREE, EV, quality}) => {
   EV.sternum.sc(1, EV.REST, scv); EV.scap.toWorld(L.ac, 1, EV.REST, acv);
   const CL = scv.distanceTo(acv);                                     // comprimento em repouso
   const cpts = [[0, 0, 0], [0.10, 0.05, -0.45], [0.24, 0.12, -1.20], [0.38, 0.18, -1.45], [0.51, 0.20, -0.95], [0.63, 0.18, -0.05],
-                [0.76, 0.12, 0.85], [0.87, 0.06, 0.95], [0.95, 0.01, 0.50], [0.985, 0, 0.12]].map(p => new THREE.Vector3(p[0] * CL, p[1], p[2]));
+                [0.76, 0.12, 0.85], [0.87, 0.10, 0.95], [0.95, 0.10, 0.50], [0.985, 0.10, 0.12]].map(p => new THREE.Vector3(p[0] * CL, p[1], p[2]));
   const rk = [[0, 1.02, 1.08], [0.07, 0.96, 1.02], [0.20, 0.64, 0.70], [0.40, 0.55, 0.59], [0.60, 0.48, 0.66], [0.78, 0.38, 0.88], [0.92, 0.32, 1.02], [1, 0.31, 0.96]];
   const rr = [0, 0];
   const raioClav = t => {
@@ -355,6 +366,7 @@ EV.register('shoulder', ({THREE, EV, quality}) => {
     const clav = new THREE.Mesh(geomClav, osso); clav.castShadow = clav.receiveShadow = true; group.add(clav);
     return {side, esc, clav};
   });
+  TT.fim = performance.now() - T0;
   const e1 = new THREE.Vector3(), e2 = new THREE.Vector3(), e3 = new THREE.Vector3(), M = new THREE.Matrix4(), ESP_X = new THREE.Matrix4().makeScale(-1, 1, 1);
   return {group,
     update(state){

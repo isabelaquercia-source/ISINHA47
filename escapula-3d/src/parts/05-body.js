@@ -27,11 +27,11 @@ EV.register('body', ({THREE, EV, quality}) => {
     [  6, 12.25, 6.2, -12.0, -3.0, 1.42, 2.2],
     [  9, 12.2, 6.0, -12.2, -3.2, 1.58, 2.2],
     [ 12, 12.7, 6.1, -12.5, -3.2, 1.70, 2.2],
-    [ 14, 13.25, 6.2, -12.7, -3.2, 1.78, 2.4],
-    [ 16, 13.75, 6.4, -12.9, -3.2, 1.86, 2.5],
-    [ 17, 14.0, 6.55, -13.05, -3.2, 1.90, 2.6],
-    [ 18, 14.2, 6.7, -13.2, -3.2, 2.02, 2.7],
-    [ 20, 14.55, 6.95, -13.6, -3.2, 2.32, 2.8],
+    [ 14, 13.35, 6.2, -12.7, -3.2, 1.75, 2.4],
+    [ 16, 13.95, 6.4, -12.9, -3.2, 1.81, 2.5],
+    [ 17, 14.25, 6.55, -13.05, -3.2, 1.84, 2.6],
+    [ 18, 14.45, 6.7, -13.2, -3.2, 1.94, 2.7],
+    [ 20, 14.75, 6.95, -13.6, -3.2, 2.25, 2.8],
     [ 24, 15.2, 7.7, -14.3, -3.2, 2.65, 2.8],
     [ 30, 15.9, 8.85, -14.8, -3.0, 2.60, 2.6],
     [ 35, 16.4, 9.2, -14.6, -2.4, 2.40, 2.5],
@@ -185,7 +185,7 @@ EV.register('body', ({THREE, EV, quality}) => {
   elip(H(0, -8.6, -7.2), [3.1 * hs, 1.9 * hs, 2.4 * hs], 0.8);                               // arcadas dentárias
   elip(H(0, -8.2, -9.0), [2.0 * hs, 1.3 * hs, 1.1 * hs], 0.8);                               // lábios
   elip(H(5.0, -8.1, -2.2), [1.25 * hs, 4.0 * hs, 2.7 * hs], 0.9);                             // masseter sobre o ramo da mandíbula
-  cone(H(4.6, -11.45, -1.7), H(2.75, -11.5, -5.0), 1.0 * hs, 1.0 * hs, 0.45);                 // corpo da mandíbula: borda de baixo …
+  cone(H(4.65, -11.5, -1.9), H(2.75, -11.5, -5.0), 1.12 * hs, 1.0 * hs, 0.45);                 // corpo da mandíbula: borda de baixo …
   cone(H(2.75, -11.5, -5.0), H(1.45, -11.45, -7.15), 1.0 * hs, 1.0 * hs, 0.45);
   cone(H(1.45, -11.45, -7.15), H(0, -11.4, -7.65), 1.0 * hs, 1.0 * hs, 0.45);
   cone(H(4.55, -10.3, -2.1), H(2.6, -10.3, -4.8), 1.0 * hs, 1.0 * hs, 0.45);                  // … e arcada
@@ -205,7 +205,7 @@ EV.register('body', ({THREE, EV, quality}) => {
   cone([18.4, 35, -2.6], [19.3, 13, -1.6], 3.2, 2.8, 1.6);                                   // bíceps
   cone([19.3, 15, 0.8], [19.9, 7.5, 1.0], 3.2, 2.7, 1.2);                                    // cotovelo
   cone([18.7, 11.5, -0.4], [18.9, 8, -0.2], 2.0, 2.0, 1.2);                                  // epicôndilo medial
-  elip([21.3, 6.5, 2.7], [1.3, 1.6, 1.3], 0.8);                                              // olécrano
+  elip([21.5, 7.3, 2.5], [1.3, 1.6, 1.3], 0.8);                                              // olécrano
   elip([18.0, 34.6, -0.5], [5.3, 8.0, 5.6], 0.7);                                            // deltoide (por cima do braço, com vinco na borda)
   cone([19.4, 33, 0], [19.7, 25.5, 0.6], 3.4, 2.1, 0.7);                                     // inserção do deltoide
   /* antebraço em pronação (largo de lado a lado, fino de frente para trás): massa radial (de fora) e ulnar (de dentro) */
@@ -313,7 +313,7 @@ EV.register('body', ({THREE, EV, quality}) => {
      Por vértice: aTinta = (luz da oclusão 0..1, brancura 0..1, força das fibras 0..1) e aFibra = coordenada escalar s
      cujas curvas de nível são as fibras do músculo daquela região (o shader desenha estrias finas em s). */
   const nv = geom.attributes.position.count, pos = geom.attributes.position.array, nor = geom.attributes.normal.array;
-  const tinta = new Float32Array(nv * 3), fibra = new Float32Array(nv), reg = new Uint8Array(nv);
+  const tinta = new Float32Array(nv * 3), fibra = new Float32Array(nv), reg = new Uint8Array(nv), segue = new Float32Array(nv * 4);
   /* brancuras em 3D (elipsoides): [centro, raios, valor] */
   const BR = [
     [[21.2, -10, -9], [4.0, 7.5, 4.5], 0.45],                          // tendões do dorso do antebraço
@@ -353,6 +353,14 @@ EV.register('body', ({THREE, EV, quality}) => {
     else { r = 14; s = y > 2 ? 0.7 * y - 0.7 * z : z; f = 0.8; }                                                          // flanco: serrátil e oblíquos; quadril
     for (const b of BR){ const qx = (ax - b[0][0]) / b[1][0], qy = (y - b[0][1]) / b[1][1], qz = (z - b[0][2]) / b[1][2], k = qx * qx + qy * qy + qz * qz; if (k < 1){ const c = b[2] * sstep(1.0, 0.55, k); if (c > w) w = c; } }
     if (w > 1) w = 1;
+    /* quanto o ponto acompanha o ombro (ver update): x = vetor inteiro, y = só a subida, z = glenoide (0) ↔ acrômio (1); w = respiração */
+    if (r >= 2 && r <= 4){ segue[v * 4] = 1; segue[v * 4 + 2] = sstep(36, 42, y); }
+    else if (r !== 1){
+      const lat = sstep(11.5, 16.5, ax) * sstep(30, 39, y) * (1 - sstep(46, 50, y));
+      const wx = EV.lerp(sstep(2.5, 16, ax), sstep(4, 9, ax), sstep(-0.4, 0.4, nz));
+      segue[v * 4] = lat; segue[v * 4 + 1] = (1 - lat) * wx * sstep(24, 34, y) * (1 - sstep(47.5, 53, y)); segue[v * 4 + 2] = 1;
+      segue[v * 4 + 3] = sstep(7, 17, y) * (1 - sstep(39, 45, y));
+    }
     tinta[v * 3] = luzOc; tinta[v * 3 + 1] = w; tinta[v * 3 + 2] = f * (1 - 0.75 * w); fibra[v] = s; reg[v] = r;
   }
   /* na divisa entre duas regiões a coordenada das fibras salta: ali as estrias somem */
@@ -362,6 +370,7 @@ EV.register('body', ({THREE, EV, quality}) => {
   geom.deleteAttribute('color');
   geom.setAttribute('aTinta', new THREE.BufferAttribute(tinta, 3));
   geom.setAttribute('aFibra', new THREE.BufferAttribute(fibra, 1));
+  geom.setAttribute('aSegue', new THREE.BufferAttribute(segue, 4));
 
   /* --------------------------------------------------------------- riscos nítidos
      Tendões e ligamentos finos demais para a pintura por vértice: polilinhas 3D (lado direito) coladas à pele, com
@@ -370,7 +379,7 @@ EV.register('body', ({THREE, EV, quality}) => {
     [[[3.6, -2.6, 7.0, 0.45], [4.8, 0.6, 6.9, 0.5], [8.5, 2.6, 6.0, 0.6], [11.5, 4.0, 3.8, 0.62], [13.3, 4.0, 0.5, 0.62], [13.9, 3.0, -3, 0.55], [13.2, 1.6, -7.5, 0.4]], 1.0],   // crista ilíaca
     [[[13.2, 1.6, -7.5, 0.4], [7, -6.5, -11.5, 0.4], [1.5, -11, -11.5, 0.4]], 0.8],                                 // ligamento inguinal
     /* o braço pende um pouco rodado para dentro: o olécrano e o tendão do tríceps olham para trás e para fora */
-    [[[20.2, 21, 4.6, 0.55], [20.45, 17, 4.4, 1.25], [20.7, 12.5, 4.0, 1.35], [20.95, 8.6, 3.5, 1.05], [21.2, 5.5, 3.0, 0.75]], 0.66],   // tendão do tríceps → olécrano
+    [[[20.8, 21.5, 4.2, 0.6], [21.05, 17, 4.0, 1.55], [21.3, 12.5, 3.6, 1.7], [21.55, 9.0, 3.1, 1.3], [21.75, 6.6, 2.7, 0.85]], 0.66],   // tendão do tríceps → olécrano
     [[[23.0, 12.5, 0.6, 0.7], [23.1, 8.4, 0.0, 0.9]], 0.5],                                                         // epicôndilo lateral
     [[[23.0, 8.0, -0.4, 0.3], [22.8, -3, -4.6, 0.32], [22.4, -14, -10.4, 0.3]], 0.7],                               // tendões e septos dos extensores
     [[[22.4, 7.4, 1.4, 0.3], [21.5, -3, -3.6, 0.32], [21.0, -14, -10.0, 0.3]], 0.7],
@@ -379,7 +388,8 @@ EV.register('body', ({THREE, EV, quality}) => {
     [[[17.0, 41.0, 3.6, 0.7], [17.5, 36, 5.2, 0.8], [19.2, 30, 4.6, 0.8], [20.3, 26.2, 2.2, 0.7]], -0.8],           // borda posterior do deltoide
     [[[15.6, 42.4, -4.6, 0.7], [17.4, 36, -5.8, 0.8], [19.5, 29.5, -3.8, 0.8], [20.3, 26.2, -0.8, 0.7]], -0.8],     // borda anterior do deltoide
     [[[19.2, 29.5, 5.2, 0.6], [20.0, 21.5, 5.0, 0.6]], -0.6],                                                     // entre as cabeças do tríceps
-    [[[4.6, -1.2, 7.2, 0.7], [10, -3.8, 7.6, 0.8], [15.4, -9, 2.2, 0.8]], -0.6]                                     // borda de cima do glúteo máximo
+    [[[4.6, -1.2, 7.2, 0.7], [10, -3.8, 7.6, 0.8], [15.4, -9, 2.2, 0.8]], -0.6],                                    // borda de cima do glúteo máximo
+    [[[13.2, 14, -0.5, 1.2], [12.4, 9, 1.5, 1.4], [11.5, 5.2, 3.0, 1.2]], -0.55]                                    // dobra do flanco (borda do oblíquo externo)
   ];
   const segA = [], segB = [], segF = [];
   { const cola = p => {                                              // desce pelo gradiente da SDF até a pele
@@ -400,16 +410,21 @@ EV.register('body', ({THREE, EV, quality}) => {
      pré-passo só de profundidade e depois a cor com teste ≤, de modo que cada pixel recebe UMA camada (o braço na
      frente do tronco não soma duas tintas). Saída já em sRGB "de tela" e alfa pré-multiplicado. */
   const VERT = `
-    attribute vec3 aTinta; attribute float aFibra;
-    varying vec3 vN; varying vec3 vV; varying vec3 vP; varying vec3 vT; varying vec3 vNo; varying float vS;
+    attribute vec3 aTinta; attribute float aFibra; attribute vec4 aSegue;
+    uniform vec3 uGl; uniform vec3 uAc; uniform float uResp;
+    varying vec3 vN; varying vec3 vV; varying vec3 vP; varying vec3 vT; varying vec3 vNo; varying vec2 vS;
     void main(){
-      vec4 mv = modelViewMatrix * vec4(position, 1.0);
-      vV = mv.xyz; vN = normalMatrix * normal; vNo = normal; vP = position; vT = aTinta; vS = aFibra;
+      /* os ombros e os braços acompanham a escápula (glenoide / acrômio); o tórax enche um pouco na inspiração */
+      vec3 d = aSegue.x * mix(uGl, uAc, aSegue.z) + vec3(0.0, aSegue.y * uAc.y, 0.0);
+      d.x *= sign(position.x);
+      vec3 p = position + d + normal * (uResp * aSegue.w);
+      vec4 mv = modelViewMatrix * vec4(p, 1.0);
+      vV = mv.xyz; vN = normalMatrix * normal; vNo = normal; vP = position; vT = aTinta; vS = vec2(aFibra, aSegue.x);
       gl_Position = projectionMatrix * mv;
       gl_Position.z = mix(gl_Position.z, gl_Position.w, 0.99);
     }`;
   const FRAG = `
-    varying vec3 vN; varying vec3 vV; varying vec3 vP; varying vec3 vT; varying vec3 vNo; varying float vS;
+    varying vec3 vN; varying vec3 vV; varying vec3 vP; varying vec3 vT; varying vec3 vNo; varying vec2 vS;
     uniform vec3 uMus; uniform vec3 uTen; uniform vec4 uLuz; uniform vec3 uAlfa; uniform vec3 uFib;
     #if NR > 0
     uniform vec4 uRa[NR]; uniform vec4 uRb[NR]; uniform float uRf[NR];
@@ -421,7 +436,7 @@ EV.register('body', ({THREE, EV, quality}) => {
     void main(){
       /* some aos poucos: coxas (alfa) e punhos (pontilhado nos dois passos, para não tapar o quadril que fica atrás) */
       float ax = abs(vP.x);
-      float braco = smoothstep(16.7, 17.3, ax) * step(vP.y, 4.0);
+      float braco = step(0.5, vS.y) * step(vP.y, 4.0);                 // vS.y = 1 nos braços
       if (braco > 0.5 && ruido(gl_FragCoord.xy) > smoothstep(-15.5, -7.0, vP.y)) discard;
       float some = mix(smoothstep(-27.0, -14.0, vP.y), 1.0, braco);
       vec3 n = normalize(vN), v = normalize(-vV);
@@ -432,7 +447,7 @@ EV.register('body', ({THREE, EV, quality}) => {
       float luz = uLuz.x + uLuz.y * l1 * l1 + uLuz.z * l2;
       /* estrias das fibras: finas ao longo de s, quebradas devagar ao longo do corpo */
       float lon = vP.y * 0.21 + vP.z * 0.13 + ax * 0.07;
-      float est = vn(vec2(vS * uFib.x, lon)) * 0.6 + vn(vec2(vS * uFib.x * 2.3 + 7.0, lon * 1.7 + 3.0)) * 0.4 - 0.5;
+      float est = vn(vec2(vS.x * uFib.x, lon)) * 0.6 + vn(vec2(vS.x * uFib.x * 2.3 + 7.0, lon * 1.7 + 3.0)) * 0.4 - 0.5;
       float branco = vT.y, sulco = 0.0;
       #if NR > 0
       vec3 pm = vec3(ax, vP.y, vP.z), nm = normalize(vec3(vNo.x * sign(vP.x), vNo.y, vNo.z));
@@ -446,19 +461,21 @@ EV.register('body', ({THREE, EV, quality}) => {
         else sulco = max(sulco, -uRf[i] * perto * (1.0 - smoothstep(0.0, r, d)));                 // sulco: sombra macia, sem contorno
       }
       #endif
-      vec3 cor = mix(uMus, uTen, branco) * luz * (1.0 - 0.2 * sulco);
+      /* sulcos e reentrâncias: um pouco mais escuros e, sobretudo, mais tinta (sombra quente, não cinza) */
+      float sombra = max(sulco, (1.0 - vT.x) * uFib.z);
+      vec3 cor = mix(uMus, uTen, branco) * luz * (1.0 - 0.10 * sombra);
       cor *= 1.0 + uFib.y * est * vT.z;
-      cor *= mix(uFib.z, 1.0, vT.x);
       cor *= 1.0 - uLuz.w * borda * borda;
-      float a = (uAlfa.x + (uAlfa.y - uAlfa.x) * pow(borda, uAlfa.z)) * some;
+      float a = (uAlfa.x + (uAlfa.y - uAlfa.x) * pow(borda, uAlfa.z)) * (1.0 + 0.4 * sombra) * some;
       gl_FragColor = vec4(cor * a, a);
     }`;
   const cor = hex => { const c = new THREE.Color(hex); return new THREE.Vector3(c.r, c.g, c.b); };   // sRGB de tela, sem conversão
   const uniforms = {
-    uMus: {value: cor(0xb09077)}, uTen: {value: cor(0xd9d6c4)},
-    uLuz: {value: new THREE.Vector4(0.76, 0.46, 0.04, 0.0)},         // ambiente, principal, preenchimento, escurecimento na borda
+    uMus: {value: cor(0xb78d74)}, uTen: {value: cor(0xd9d6c4)},
+    uLuz: {value: new THREE.Vector4(0.71, 0.54, 0.04, 0.0)},         // ambiente, principal, preenchimento, escurecimento na borda
     uAlfa: {value: new THREE.Vector3(0.30, 0.37, 2.5)},              // alfa no miolo, na borda, expoente
-    uFib: {value: new THREE.Vector3(3.0, 0.16, 0.74)}                // estrias por cm, contraste das estrias, cor no fundo dos sulcos
+    uFib: {value: new THREE.Vector3(3.0, 0.16, 0.9)},                // estrias por cm, contraste das estrias, peso da oclusão
+    uGl: {value: new THREE.Vector3()}, uAc: {value: new THREE.Vector3()}, uResp: {value: 0}   // ver update
   };
   if (NR > 0){ uniforms.uRa = {value: segA}; uniforms.uRb = {value: segB}; uniforms.uRf = {value: segF}; }
   const base = {vertexShader: VERT, fragmentShader: FRAG, uniforms, defines: {NR}, toneMapped: false, fog: false, lights: false, transparent: false, side: THREE.FrontSide};
@@ -469,6 +486,14 @@ EV.register('body', ({THREE, EV, quality}) => {
   const pre = new THREE.Mesh(geom, matZ); pre.renderOrder = -11; pre.castShadow = pre.receiveShadow = false;
   const malha = new THREE.Mesh(geom, matC); malha.renderOrder = -10; malha.castShadow = malha.receiveShadow = false;
   const group = new THREE.Group(); group.add(pre, malha);
-  return {group, dist};                                               // estático: sem update
+  /* O corpo não se deforma de verdade: só os ombros e os braços são levados (no shader de vértice) pelo deslocamento
+     da glenoide e da articulação acromioclavicular, e o tórax enche até 0,45 cm. Sem alocação: só uniformes. */
+  const L = EV.scap.L, gl0 = EV.scap.toWorld(L.glenoid, 1, EV.REST), ac0 = EV.scap.toWorld(L.ac || L.acromionTip, 1, EV.REST), _t = new THREE.Vector3();
+  const update = state => {
+    uniforms.uGl.value.copy(EV.scap.toWorld(L.glenoid, 1, state, _t)).sub(gl0);
+    uniforms.uAc.value.copy(EV.scap.toWorld(L.ac || L.acromionTip, 1, state, _t)).sub(ac0);
+    uniforms.uResp.value = 0.45 * EV.clamp(state.breath || 0, 0, 1);
+  };
+  return {group, update, dist};                                       // dist(x, y, z): SDF do corpo em repouso (extra, para testes)
 });
 })();

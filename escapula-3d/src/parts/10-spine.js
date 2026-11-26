@@ -1,5 +1,6 @@
 /* Peça `spine` — coluna vertebral: 24 vértebras (corpo, pedículos, lâminas, processos espinhoso, transversos e
-   articulares), discos intervertebrais, ligamentos amarelos lombares, sacro e cóccix.
+   articulares), discos intervertebrais, sacro e cóccix; mais os ligamentos que a referência deixa ver (amarelos e
+   interespinhosos lombares, membrana atlantoaxial) e o saco dural escuro dentro do canal.
 
    Como é feita: poucos MOLDES esculpidos com SDF em coordenadas locais da vértebra (+X direita, +Y cranial,
    +Z posterior; origem no centro do corpo) — atlas, áxis, cervical típica, C7, torácica alta / média / baixa,
@@ -87,12 +88,12 @@ EV.register('spine', ({THREE, EV, quality}) => {
       sph([2.3, -0.8, 3.75], 0.85), 0.2);                                                // istmo (cintura entre os articulares)
     /* processo articular superior: corno que sobe do pedículo, com o processo mamilar na borda de trás */
     const sap = uni(0.35, cap([1.8, 0.4, 2.95], [2.0, 1.6, 3.3], 0.66, 0.38), sph([2.32, 1.1, 3.52], 0.27));
-    /* espinhoso em machadinha: lâmina sagital (dois triângulos), borda posterior grossa que desce num gancho,
-       borda inferior côncava */
+    /* espinhoso em machadinha: lâmina sagital, borda posterior grossa que desce num pequeno gancho e borda
+       inferior côncava */
     const espinhoso = sub(uni(0.45, obox([0, -0.78, 4.4], [0.39, 1.23, 0.78], 0.3, 0, 3), cap([0, 0.1, 5.12], [0, -1.75, 5.13], 0.4, 0.46), cap([0, -1.75, 5.13], [0, -2.3, 5.24], 0.44, 0.26)),
       cap([-1, -2.85, 4.25], [1, -2.85, 4.25], 1.12), 0.15);
     /* transverso: espátula achatada (duas cápsulas paralelas), levemente para trás */
-    const transverso = uni(0.5, cap([1.8, 0.62, 2.6], [4.12, 0.6, 2.9], 0.32, 0.27), cap([1.8, -0.08, 2.6], [4.12, -0.1, 2.9], 0.32, 0.27));
+    const transverso = uni(0.5, cap([1.8, 0.62, 2.6], [4.12, 0.6, 2.9], 0.32, 0.28), cap([1.8, -0.08, 2.6], [3.95, -0.02, 2.88], 0.32, 0.24));
     const tudo = uni(0.26, corpoL,
       uni(0.55, lim(arco, [-0.3, -2.95, 1.3], [2.3, 1.3, 3.9]), lim(espinhoso, [-0.5, -2.6, 3.6], [0.5, 0.85, 5.6])),
       lim(sap, [1.1, -0.3, 2.25], [2.75, 2.25, 3.95]), lim(transverso, [1.45, -0.42, 2.25], [4.42, 0.95, 3.2]));
@@ -117,7 +118,7 @@ EV.register('spine', ({THREE, EV, quality}) => {
     /* transverso em clava */
     const bt = [1.0, 0.3, zl - 0.7], dt = un(bt, tp), ct = mais(tp, dt, -0.62);
     const arco = uni(0.32,
-      obox([0.98, 0.45 * hb + 0.1, Rz + 0.5], [0.36, 0.52, 0.75], 0.3),                  // pedículo
+      obox([0.98, 0.42 * hb + 0.08, Rz + 0.5], [0.36, 0.6, 0.75], 0.3),                  // pedículo
       obox([0.66, -0.2, zl - 0.08], [0.9, 0.42 * h, 0.3], 0.26, 16, -8),                 // lâmina
       cap(bt, ct, 0.66, 0.54), cap(mais(ct, [0, 1, 0], 0.12), mais(ct, [0, 1, 0], -0.14), 0.58),                                             // transverso
       obox([1.0, hb + 0.4, zl - 0.75], [0.46, 0.62, ea], 0.17, -8, 10),                 // articular superior
@@ -135,12 +136,13 @@ EV.register('spine', ({THREE, EV, quality}) => {
       cap([R + 0.02, hb - 0.05, -0.4], [R + 0.02, hb + 0.12, 0.45], 0.2));                // processo uncinado
     const pilar = cap([xp, 0.55, 0.95], [xp, -0.55, 1.6], 0.72);                          // pilar articular (maciço lateral)
     const pediculo = cap([R * 0.95, 0.1, 0.6], [xp - 0.4, 0.1, 0.95], 0.34);
-    /* lâmina em telha: borda de cima mais à frente, borda de baixo mais atrás (faz sombra sobre a vértebra de baixo);
-       o vão entre lâminas só abre perto da linha média */
-    const kh = h / 1.74, lu0 = [xp - 0.45, 0.52 * kh, 1.7], lu1 = [0, 0.36 * kh, 2.2], ll0 = [xp - 0.3, -0.8, 2.15], ll1 = [0, -0.72, 2.9];
-    const lamina = uni(0.25, placa(lu0, lu1, ll1, el), placa(lu0, ll1, ll0, el), cap(ll0, ll1, 0.36, 0.38));
+    /* lâmina em telha: uma placa recuada (quadrilátero plano) e, na borda de baixo, uma crista saliente que continua
+       no espinhoso — a "prateleira" clara que a referência mostra em cada vértebra; o vão entre lâminas só abre perto
+       da linha média */
+    const kh = h / 1.74, lu0 = [xp - 0.45, 0.52 * kh, 1.4], lu1 = [0, 0.36 * kh, 2.0], ll0 = [xp - 0.3, -0.75, 1.95], ll1 = [0, -0.7, 2.5];
+    const lamina = uni(0.2, placa(lu0, lu1, ll1, el), placa(lu0, ll1, ll0, el), cap([xp - 0.25, -0.82, 2.22], [0, -0.74, 2.95], 0.3, 0.33));
     let espinhoso;
-    if (p.bifido) espinhoso = uni(0.22, cap([0, -0.55, 2.7], [0, sp[0] + 0.05, sp[1] - 0.6], 0.36, 0.24), cap([0.08, sp[0] + 0.05, sp[1] - 0.62], [0.32, sp[0] - 0.12, sp[1] - 0.2], rp + 0.03, rp));
+    if (p.bifido) espinhoso = uni(0.22, cap([0, -0.62, 2.8], [0, sp[0] + 0.05, sp[1] - 0.6], 0.34, 0.24), cap([0.08, sp[0] + 0.05, sp[1] - 0.62], [0.32, sp[0] - 0.12, sp[1] - 0.2], rp + 0.03, rp));
     else espinhoso = uni(0.25, cap([0, -0.3, 2.6], [0, sp[0], sp[1] - 0.44], 0.44, 0.38), sph([0, sp[0] - 0.02, sp[1] - 0.44], 0.44));
     /* transverso: raiz anterior (do corpo ao tubérculo anterior), raiz posterior (do pilar à ponta) e a barra entre elas */
     const ta = [tp[0] - 0.7, tp[1] - 0.25, tp[2] - 0.8], tq = [tp[0] - 0.26, tp[1], tp[2]];
@@ -148,7 +150,7 @@ EV.register('spine', ({THREE, EV, quality}) => {
     const f = sub(uni(0.3, corpoC, pediculo, pilar, lamina, espinhoso, transverso),
       cap([R + 0.62, -1.5, 0.1], [R + 0.62, 1.5, 0.1], 0.27), 0.08);                      // forame transversário
     return {f: sim(f), min: [-tp[0] - 0.6, Math.min(-hb - 1.25, sp[0] - 0.9), -0.82 * R - 0.7], max: [tp[0] + 0.6, hb + 1.3, sp[1] + 0.6], cell: p.cell || 0.2,
-      R, h, hb, sp, tp, aoR: 1.1, aoS: 1.7, sombra: [1.5, 2.0, -0.7, 0.05, 0.36], spZ: [2.9, sp[1]], tpX: [xp + 0.75, tp[0]], tpZ: null, zc: 1.38, rc: 0.6, disco: {rx: R + 0.1, rz: 0.8 * R, flat: 0, e: 0.75}};
+      R, h, hb, sp, tp, aoR: 1.1, aoS: 1.7, sombra: [1.2, 1.7, -0.62, 0.0, 0.4], spZ: [3.0, sp[1]], tpX: [xp + 0.75, tp[0]], tpZ: null, zc: 1.38, rc: 0.6, disco: {rx: R + 0.1, rz: 0.8 * R, flat: 0, e: 0.75}};
   }
 
   /* ATLAS (C1): anel sem corpo — massas laterais, arcos anterior e posterior, transversos largos */
@@ -204,8 +206,8 @@ EV.register('spine', ({THREE, EV, quality}) => {
     const cr = (x0, y0, x1, y1, r, dz) => cap([x0, y0, zd(x0, y0) + dz], [x1, y1, zd(x1, y1) + dz], r);
     const cristaM = lim(uni(0.7, cap([0, -0.7, 3.0], [0, -1.6, 3.05], 0.5, 0.55), cap([0, -2.7, 2.85], [0, -4.0, 2.6], 0.5, 0.45), cap([0, -5.3, 2.2], [0, -6.4, 1.85], 0.42, 0.36)),
       [-0.6, -6.8, 1.4], [0.6, -0.2, 3.65], 0.8);
-    const cristaI = lim(uni(0.7, cr(1.65, -0.5, 1.6, -1.6, 0.42, -0.16), cr(1.55, -3.0, 1.5, -4.1, 0.4, -0.16), cr(1.4, -5.4, 1.35, -6.3, 0.36, -0.15), cr(1.2, -7.4, 1.15, -8.0, 0.32, -0.14)),
-      [0.8, -8.35, 0.4], [2.1, -0.05, 2.85], 0.8);
+    const cristaI = lim(uni(0.7, cr(1.7, -0.9, 1.65, -1.4, 0.45, -0.26), cr(1.55, -3.3, 1.5, -3.8, 0.42, -0.26)),
+      [0.8, -4.3, 1.2], [2.2, -0.4, 2.85], 0.8);
     const cristaL = lim(uni(0.7, cr(4.3, -0.6, 4.25, -1.9, 0.62, -0.22), cr(4.2, -3.0, 3.95, -4.2, 0.58, -0.22), cr(3.6, -5.4, 3.3, -6.4, 0.5, -0.2), cr(2.9, -7.4, 2.7, -8.0, 0.42, -0.18)),
       [2.25, -8.45, 0.2], [4.95, 0.05, 2.8], 0.8);
     /* processo articular superior de S1 (abraça por fora o articular inferior de L5) e o "chifre" póstero-superior da massa lateral */
@@ -217,20 +219,27 @@ EV.register('spine', ({THREE, EV, quality}) => {
       sph([0, -12.2, -2.8], 0.58), sph([0, -12.9, -3.4], 0.46), sph([0, -13.45, -3.95], 0.34),
       cap([0.8, -8.3, zd(0.8, -8.3) - 0.1], [0.75, -9.6, zd(0.75, -9.6) - 0.05], 0.3, 0.24)),
       [-0.9, -13.9, -4.4], [1.6, -7.9, 1.2], 0.7);
-    let f = uni(0.2, uni(0.45, uni(0.3, base, corpoS1), cristaM, cristaI, cristaL, topoS), coccix);
-    /* forames sacrais (4 pares; atravessam do dorso à face pélvica), fossas dorsais, sela da asa, canal e hiato */
-    for (const [fx, fy, fr] of [[3.1, -2.3, 0.4], [2.85, -4.75, 0.38], [2.45, -6.85, 0.33], [2.0, -8.6, 0.28]])
-      f = sub(f, lim(uni(0.2, cap([fx, fy + 0.2, -6], [fx, fy + 0.2, 5], fr), cap([fx - 0.1, fy - 0.24, -6], [fx - 0.1, fy - 0.24, 5], fr * 0.9)),
-        [fx - fr - 0.15, fy - fr - 0.3, -6], [fx + fr + 0.05, fy + fr + 0.25, 5], 0.45), 0.22);
+    const cristas = lim(uni(0.45, cristaM, cristaI, cristaL), [-0.6, -8.5, 0.2], [5.0, 0.1, 3.7], 0.85);
+    let f = uni(0.2, uni(0.45, uni(0.3, base, corpoS1), cristas, topoS), coccix);
+    /* escavações, agrupadas por região (cada grupo só é avaliado perto da sua caixa):
+       forames sacrais (4 pares; atravessam do dorso à face pélvica) */
     const caixaE = (c, r) => [[c[0] - r[0], c[1] - r[1], c[2] - r[2]], [c[0] + r[0], c[1] + r[1], c[2] + r[2]]];
-    const cava = (g, mn, mx) => { f = sub(f, lim(g, mn, mx, 0.5), 0.3); };
-    cava(cap([3.15, -1.2, zd(3.15, -1.2) + 0.5], [2.1, -8.4, zd(2.1, -8.4) + 0.42], 0.62, 0.5), [1.5, -8.9, 0.3], [3.8, -0.6, 3.5]);          // sulco dos forames
-    for (const [c, r] of [[[5.6, -1.7, zd(5.6, -1.7) + 0.75], [1.5, 1.5, 0.95]], [[5.0, -4.4, zd(5.0, -4.4) + 0.6], [1.2, 1.25, 0.85]],          // fossas dorsais
-                          [[3.5, 2.15, 1.5], [1.15, 1.05, 2.3]],                                                                      // sela entre o articular e o chifre
-                          [[0, 1.5, 2.9], [2.2, 1.9, 1.5]]]){ const q = caixaE(c, r); cava(ell(c, r), q[0], q[1]); }                   // abertura dorsal do canal (entre L5 e S1)
+    const oco = (c, r) => { const q = caixaE(c, r); return lim(ell(c, r), q[0], q[1], 0.5); };
+    const furos = [];
+    for (const [fx, fy, fr] of [[3.1, -2.3, 0.4], [2.85, -4.75, 0.38], [2.45, -6.85, 0.33], [2.0, -8.6, 0.28]])
+      furos.push(lim(uni(0.2, cap([fx, fy + 0.2, -6], [fx, fy + 0.2, 5], fr), cap([fx - 0.1, fy - 0.24, -6], [fx - 0.1, fy - 0.24, 5], fr * 0.9), sph([fx, fy, zd(fx, fy) + 0.35], fr + 0.32)),
+        [fx - fr - 0.4, fy - fr - 0.4, -6], [fx + fr + 0.4, fy + fr + 0.4, 5], 0.45));
+    f = sub(f, lim(S.union(...furos), [1.25, -9.4, -6], [3.95, -1.45, 5], 0.5), 0.22);
+    /* dorso: duas fossas laterais (atrás da face auricular) */
+    f = sub(f, lim(S.union(oco([5.6, -1.7, zd(5.6, -1.7) + 0.75], [1.5, 1.5, 0.95]), oco([5.0, -4.4, zd(5.0, -4.4) + 0.6], [1.2, 1.25, 0.85])),
+      [3.7, -5.7, 0.2], [7.1, -0.2, 3.6], 0.5), 0.3);
+    /* topo: sela entre o articular e o chifre, abertura dorsal do canal (janela entre L5 e S1) e faceta para L5 */
+    f = sub(f, lim(S.union(oco([3.5, 2.15, 1.5], [1.15, 1.05, 2.3]), oco([0, 1.5, 2.9], [2.2, 1.9, 1.5]),
+      lim(cap(mais(enc, [0, 1, 0.05], 1.4), mais(enc, [0, 1, 0.05], -0.35), 0.52), [enc[0] - 0.6, enc[1] - 1.0, enc[2] - 0.6], [enc[0] + 0.6, enc[1] + 2.0, enc[2] + 0.7], 0.4)),
+      [-2.2, -0.4, -0.8], [4.65, 3.6, 4.4], 0.5), 0.25);
+    /* canal sacral e hiato */
     f = sub(f, lim(uni(0.2, cap([0, 2.6, 2.2], [0, -4.6, 1.35], 0.62, 0.4), ell([0, -9.0, zd(0, -9.0) + 0.2], [0.5, 0.95, 0.55])),
-      [-0.7, -10.1, -0.6], [0.7, 3.3, 2.9], 0.4), 0.15);                                                                  // canal sacral e hiato
-    f = sub(f, lim(cap(mais(enc, [0, 1, 0.05], 1.4), mais(enc, [0, 1, 0.05], -0.35), 0.52), [enc[0] - 0.6, enc[1] - 1.0, enc[2] - 0.6], [enc[0] + 0.6, enc[1] + 2.0, enc[2] + 0.7], 0.4), 0.12);   // faceta para L5
+      [-0.7, -10.1, -0.6], [0.7, 3.3, 2.9], 0.4), 0.15);
     return {f: sim(f), min: [-8.0, -14.5, -5.2], max: [8.0, 4.0, 4.4], cell: 0.28, R: 2.8, h: 3.0, hb: 1.5, sp: [-0.6, 3.4], tp: [7.0, 1.0, -1.0],
       zc: 2.2, rc: 0.55, disco: {rx: 2.7, rz: 1.85, flat: 0.2, e: 1}, aoR: 2.2, aoS: 1.9, aoC: [0.42, 0.38, 0.33]};
   }
@@ -266,7 +275,7 @@ EV.register('spine', ({THREE, EV, quality}) => {
     n[0] === 'L' ? M.lombar : n === 'S1' ? M.sacro : (+n.slice(1) <= 4 ? M.torA : +n.slice(1) <= 9 ? M.torM : M.torB);
 
   /* Pontas dos processos LOMBARES em coordenadas locais (espinhoso [y, z]; transverso [x, y, z]). Na referência os
-     espinhosos são machadinhas com a borda posterior a ~6 cm do centro do corpo, e os "dedos" que aparecem à
+     espinhosos são machadinhas com a borda posterior a ~5,5 cm do centro do corpo, e os "dedos" que aparecem à
      esquerda da coluna são os transversos esquerdos, voltados um pouco para trás. (Os valores lombares do core
      tratavam esses dedos como espinhosos; nenhuma outra peça nasce nessas pontas.) */
   const ESP_L = {L1: [-0.9, 5.4], L2: [-1.0, 5.5], L3: [-1.0, 5.55], L4: [-1.0, 5.5], L5: [-0.8, 5.1]};
@@ -413,8 +422,13 @@ EV.register('spine', ({THREE, EV, quality}) => {
     const raio = t => { const s = t * tot; let i = 0; while (i < acum.length - 2 && s > acum[i + 1]) i++; const u = EV.clamp((s - acum[i]) / (acum[i + 1] - acum[i]), 0, 1);
       par[0] = EV.lerp(ra[i], ra[i + 1], u); par[1] = EV.lerp(rb[i], rb[i + 1], u); return par; };
     const g = EV.mesh.tube(t => cv.at(t), {segments: Math.round(100 * Q), radial: 8, radius: raio, up: new T.Vector3(1, 0, 0)});
-    { const uv = g.attributes.uv.array, cor = new Float32Array(g.attributes.position.count * 3), c0 = EV.srgb(0x4d4849), c1 = EV.srgb(0xa29c9c), t5 = acum[L.indexOf('L5')] / tot;
-      for (let i = 0, j = 0; i < cor.length; i += 3, j += 2){ const k = EV.smoothstep(t5 - 0.01, t5 + 0.035, uv[j]); cor[i] = EV.lerp(c0.r, c1.r, k); cor[i + 1] = EV.lerp(c0.g, c1.g, k); cor[i + 2] = EV.lerp(c0.b, c1.b, k); }
+    /* cor por vértice: oliva-acinzentado no pescoço (os vãos cervicais da referência são sombra, não buraco), escuro
+       no tórax e cinza-claro na janela lombossacra */
+    { const uv = g.attributes.uv.array, cor = new Float32Array(g.attributes.position.count * 3), c0 = EV.srgb(0x4d4849), c1 = EV.srgb(0xa29c9c), cc = EV.srgb(0x777062),
+        t5 = acum[L.indexOf('L5')] / tot, t7 = acum[L.indexOf('C7')] / tot;
+      for (let i = 0, j = 0; i < cor.length; i += 3, j += 2){
+        const k = EV.smoothstep(t5 - 0.01, t5 + 0.035, uv[j]), kc = 1 - EV.smoothstep(t7, t7 + 0.04, uv[j]);
+        cor[i] = EV.lerp(EV.lerp(c0.r, cc.r, kc), c1.r, k); cor[i + 1] = EV.lerp(EV.lerp(c0.g, cc.g, kc), c1.g, k); cor[i + 2] = EV.lerp(EV.lerp(c0.b, cc.b, kc), c1.b, k); }
       g.setAttribute('color', new T.BufferAttribute(cor, 3)); }
     const malha = new T.Mesh(g, new T.MeshStandardMaterial({color: 0xffffff, vertexColors: true, roughness: 0.9, metalness: 0}));
     malha.receiveShadow = true; malha.name = 'canal'; group.add(malha);

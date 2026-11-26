@@ -1,11 +1,17 @@
 /* Peça `ribs` — 12 pares de costelas, cartilagens costais e esterno.
 
-   Costelas: FITAS de seção achatada (superelipse: faces planas, bordas roliças, borda de cima mais grossa que a de
-   baixo) que acompanham a parede do gradil — a seção é inclinada pelo declive da parede medido entre a costela de
-   cima e a de baixo no mesmo azimute (as de cima olham para cima e para fora, as de baixo um pouco para baixo; a 1ª é
-   deitada). Cabeça e tubérculo arredondados junto da coluna, colo roliço, pontas em fuso nas flutuantes. A face de
-   dentro do gradil leva uma cor de vértice mais escura (oclusão de ambiente "assada"), como na referência, onde as
-   costelas do lado de lá aparecem cinza-bege por dentro.
+   Costelas: FITAS de seção achatada (superelipse quase elíptica, borda de cima mais grossa que a de baixo, raios de
+   EV.ribs.radii) com cabeça e tubérculo arredondados junto da coluna, colo roliço e pontas afiladas nas flutuantes.
+   A orientação da fita ao longo do arco imita a referência:
+   · no corpo ela acompanha a parede do gradil (inclinação = declive da parede medido entre a costela de cima e a de
+     baixo no mesmo azimute: as de cima olham para cima e para fora, as de baixo um pouco para baixo; a 1ª é deitada);
+   · do tubérculo ao ângulo o referencial é transportado sem torção a partir do corpo, e logo depois do ângulo há uma
+     torção extra (a face de fora olha para trás, para dentro e para baixo): vista por trás a costela sai da coluna
+     de perfil, fina, e só abre em fita larga mais adiante — de um lado e do outro da prancha, como no atlas;
+   · as flutuantes ficam com a face para trás (parede posterior do abdome).
+   Cor de vértice "assada": cada fita é clara em cima e escurece para um cinza-lavanda embaixo; a face de dentro do
+   gradil e o trecho junto da coluna são um pouco mais escuros.
+   Nenhum vértice fica por fora de EV.thorax (anel que fura a superfície é recuado na radial).
 
    Respiração sem custo por quadro: tudo é calculado duas vezes na construção (repouso e inspiração completa) e
    guardado como alvo de morph (morphAttributes); `update` só escreve morphTargetInfluences e a pose rígida do
@@ -21,7 +27,10 @@ EV.register('ribs', ({THREE, EV, quality}) => {
   const V3 = () => new THREE.Vector3();
   const v = V3(), fr = {};
   const bump = (t, c, w) => { const u = (t - c) / w; return u < -1 || u > 1 ? 0 : (1 - u * u) * (1 - u * u); };
-  const zEixo = y => EV.thorax.center(y).z;                         // só na construção
+  /* z do eixo do tórax em função da altura, tabelado uma vez (EV.thorax.center aloca um vetor por chamada) */
+  const [EY0, EY1] = EV.thorax.range(), EZ = new Float32Array(Math.round((EY1 - EY0) * 2) + 1);
+  for (let k = 0; k < EZ.length; k++) EZ[k] = EV.thorax.center(EY0 + k * 0.5).z;
+  const zEixo = y => { const f = clamp((y - EY0) * 2, 0, EZ.length - 1.001), k = Math.floor(f); return EZ[k] + (EZ[k + 1] - EZ[k]) * (f - k); };
 
   /* --------------------------------------------------------------- seção
      Perfil em volta do anel (SX ao longo de A = "altura" da fita, SY ao longo de B = para fora) e a normal 2D dele. */
@@ -199,9 +208,9 @@ EV.register('ribs', ({THREE, EV, quality}) => {
   /* cor de vértice ("luz assada", como na referência, onde cada fita tem a borda de cima clara e escurece para
      um cinza-lavanda embaixo): por fora depende de para onde a normal olha na vertical; por dentro do gradil e junto
      da coluna fica creme-acinzentada. Valores lineares que multiplicam a cor do material. */
-  const DENTRO = [0.56, 0.535, 0.465], MEIO = [0.74, 0.72, 0.715], BAIXO = [0.46, 0.43, 0.52];
+  const DENTRO = [0.88, 0.86, 0.78], MEIO = [0.56, 0.545, 0.54], BAIXO = [0.33, 0.30, 0.38];
   function tinge(cor, w, ny, fora, k){
-    const u = ny >= 0 ? ss(0, 0.9, ny) : -ss(0, 0.7, -ny);
+    const u = ny >= 0 ? ss(0, 0.9, ny) : -ss(0, 0.62, -ny);
     for (let c = 0; c < 3; c++){
       const luz = u >= 0 ? lerp(MEIO[c], 1, u) : lerp(MEIO[c], BAIXO[c], -u);
       cor[w + c] = luz * lerp(DENTRO[c], 1, fora) * (k.length ? k[c] : k);
@@ -222,7 +231,7 @@ EV.register('ribs', ({THREE, EV, quality}) => {
       A.copy(A0).multiplyScalar(c).addScaledVector(B0, sn); B.copy(B0).multiplyScalar(c).addScaledVector(A0, -sn);
       C.addScaledVector(B0, 0.14 * s.tub);                            // tubérculo: saliência para trás
       secao(s.a, s.e, s.n, s.assim);
-      const mn = Math.min(s.a, s.e);
+      const mn = Math.min(s.a, s.e), mx = Math.max(s.a, s.e);
       const o0 = o;
       o = aneis(pos, nor, o, k, n, mn * 0.9, i >= 11 ? mn * 1.6 : mn * 0.5);
       if (m === 0){
@@ -231,7 +240,9 @@ EV.register('ribs', ({THREE, EV, quality}) => {
         O.set(B0.x, 0, B0.z).normalize().multiplyScalar(Math.cos(gama)); O.y = Math.sin(gama);
         for (let w = o0; w < o; w += 3){
           const d = nor[w] * O.x + nor[w + 1] * O.y + nor[w + 2] * O.z;
-          tinge(corO, w, nor[w + 1], ss(-0.62, 0.22, d), sombra);
+          /* "luz de cima": mistura a normal com a altura do vértice dentro da seção (a face larga da fita é quase
+             plana — só pela normal ela sairia de um tom só; na referência ela escurece de cima para baixo) */
+          tinge(corO, w, clamp(0.55 * nor[w + 1] + 0.5 * (pos[w + 1] - C.y) / mx, -1, 1), ss(-0.62, 0.22, d), sombra);
         }
       }
       if (k === n - 1){ const e = fimR[i][m]; e.A.copy(A); e.B.copy(B); e.a = s.a; e.e = s.e; }
@@ -305,8 +316,8 @@ EV.register('ribs', ({THREE, EV, quality}) => {
       if (O.lengthSq() > 0.04){ O.normalize(); if (O.dot(Bt) < 0.2) O.copy(Bt); Bt.lerp(O, 0.25 * ss(0.05, 0.5, sp)).normalize(); }
       B.copy(Bt); A.crossVectors(B, Tg).normalize();
       const u = ss(0, i >= 8 ? 1 : 0.75, sp);
-      const a1 = i === 1 ? 0.40 : i === 10 ? 0.27 : i >= 8 ? 0.36 : 0.50, e1 = i === 1 ? 0.55 : i === 10 ? 0.21 : i >= 8 ? 0.25 : 0.30;
-      const a = lerp(fim.a * 0.95, a1, u), e = lerp(fim.e * 0.93, e1, u);
+      const aF = i === 1 ? 0.40 : i === 10 ? 0.27 : i >= 8 ? 0.36 : 0.50, eF = i === 1 ? 0.55 : i === 10 ? 0.21 : i >= 8 ? 0.25 : 0.30;   // seção no fim
+      const a = lerp(fim.a * 0.95, aF, u), e = lerp(fim.e * 0.93, eF, u);
       secao(a, e, lerp(2.7, 2.3, u), 0.08 * (1 - u));
       const mn = Math.min(a, e), o0 = o;
       o = aneis(pos, nor, o, k, n, mn * 0.4, mn * 0.8);
@@ -314,7 +325,7 @@ EV.register('ribs', ({THREE, EV, quality}) => {
         O.set(C.x, 0, C.z - zEixo(C.y)).normalize();
         for (let w = o0; w < o; w += 3){
           const d = nor[w] * O.x + nor[w + 2] * O.z;
-          tinge(corC, w, nor[w + 1], ss(-0.62, 0.22, d), TOM);
+          tinge(corC, w, clamp(0.55 * nor[w + 1] + 0.5 * (pos[w + 1] - C.y) / Math.max(a, e), -1, 1), ss(-0.62, 0.22, d), TOM);
         }
       }
     }
@@ -365,12 +376,13 @@ EV.register('ribs', ({THREE, EV, quality}) => {
   /* xifoide: lâmina fina que continua o corpo e dobra um pouco para trás, rumo a EV.sternum.xiphoid */
   const xd = Math.hypot(xl[1] + Lc, xl[2]), xcs = -(xl[1] + Lc) / xd, xsn = xl[2] / xd, Lx = xd * 0.92;
   const xif0 = placa(y => 0.16 + 0.62 * Math.sqrt(clamp((y + Lx) / Lx, 0, 1)), () => 0.5, -Lx, () => 0.20, 0.19);   // ponta em arco
-  const xif = (x, y, z) => { const yy = y + Lc, c = Math.cos(0.5 * Math.acos(clamp(xcs, -1, 1))), s = Math.sin(0.5 * Math.acos(clamp(xcs, -1, 1))) * (xsn < 0 ? -1 : 1); return xif0(x, yy * c - z * s, yy * s + z * c); };
+  const xang = 0.5 * Math.acos(clamp(xcs, -1, 1)) * (xsn < 0 ? -1 : 1), xc = Math.cos(xang), xs = Math.sin(xang);   // metade da dobra
+  const xif = (x, y, z) => { const yy = y + Lc; return xif0(x, yy * xc - z * xs, yy * xs + z * xc); };
   const S = EV.sdf;
   const crista = S.capsule([-1.35, 0.02, -0.06], [1.35, 0.02, -0.06], 0.50);        // ressalto do ângulo esternal
   const fEst = S.smooth(0.22, S.smooth(0.35, corpo, manu, crista), xif);
   const esterno = new THREE.Mesh(EV.mesh.fromSDF(fEst,
-    {min: [-3.3, -Lc - Lx - 0.8, -1.5], max: [3.3, Lm + 1.6, 2.0], cell: 0.27 / q, ao: true, aoRadius: 1.2, aoStrength: 0.8, exact: true}), EV.mats.bone());
+    {min: [-3.3, -Lc - Lx - 0.8, -1.5], max: [3.3, Lm + 1.6, 2.0], cell: Math.min(0.27 / q, 0.34), ao: true, aoRadius: 1.2, aoStrength: 0.8, exact: true}), EV.mats.bone());   // célula ≤ 0,34: o xifoide é fino
   esterno.castShadow = esterno.receiveShadow = true; group.add(esterno);
   const poeEsterno = b => {
     esterno.position.lerpVectors(e0.pos, e1.pos, b);

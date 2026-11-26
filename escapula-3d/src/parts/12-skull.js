@@ -1,7 +1,9 @@
-/* Peça `skull` — crânio (neurocrânio + face), mandíbula e dentes.
+/* Peça `skull` — crânio (neurocrânio + face), mandíbula e dentes; três malhas, peça estática (sem update).
    Tudo é escrito em cm no referencial local do crânio (+X direita, +Y para cima, +Z posterior, origem no centro da
    calota) e as malhas recebem EV.skull.center / quat / scale. Só o lado DIREITO é descrito: as SDFs são avaliadas
-   em |x| (espelho no plano mediano), o que também corta o custo pela metade. Peça estática (sem update). */
+   em |x| e as malhas são geradas para x ≥ 0 e espelhadas (metade do custo).
+   As medidas vieram da prancha de referência (vista por trás e pela direita, de leve por baixo): arco zigomático,
+   margem lateral da órbita, ramo e borda inferior da mandíbula, mastoide e linha nucal caem onde ela os mostra. */
 (() => {
 EV.register('skull', ({THREE, EV, quality}) => {
   const S = EV.sdf, sk = EV.skull, T = THREE, i3 = [0, 1, 2];
@@ -95,20 +97,20 @@ EV.register('skull', ({THREE, EV, quality}) => {
   const chain = (pts, r) => { const rr = i => Array.isArray(r) ? r[i] : r, o = [];
     for (let i = 0; i + 1 < pts.length; i++) o.push(cap(pts[i], pts[i + 1], rr(i), rr(i + 1))); return grp(0, o); };
   const quad = (a, b, c, d, t) => [pla(a, b, c, t), pla(a, c, d, t)];
-    const AP = [0, 0, 1];
+  const AP = [0, 0, 1];
 
   /* =============================================================== CRÂNIO */
   /* neurocrânio: calota (não mexer: a silhueta bate com a referência), cantos da testa, massa do temporal (parede
      lateral baixa, de onde sai o mastoide) e assoalho occipital */
   const calota = ell([0, 0.3, 0.5], [7.3, 6.6, 9.2]);
   const testa = grp(0, [ell([2.4, 0.4, -4.7], [3.0, 4.0, 3.6])]);
-  const temporal = grp(0, [ell([4.2, -3.8, 1.6], [1.9, 2.5, 3.3])]);
+  const temporal = grp(0, [ell([4.3, -3.9, 2.0], [1.95, 2.6, 3.8])]);
   const baseOcc = grp(0, [ell([0, -4.6, 2.3], [4.5, 2.35, 4.0])]);
   /* fossa temporal: funda atrás da órbita, acima do arco zigomático */
   const fossa = grp(0, [ell([6.6, -3.4, -4.3], [2.2, 2.3, 3.2])]);
   /* occipital: a escama fica mais cheia e vertical até a linha nucal e dobra para baixo dali (a dobra suave da nuca;
      na linha média ela faz a protuberância occipital externa, discreta) */
-  const nucal = grp(0, [ell([0, -1.6, 4.0], [4.6, 3.4, 5.5])]);
+  const nucal = grp(0, [ell([0, -1.8, 3.4], [6.2, 3.6, 5.9])]);
   /* processo mastoide: cone chato (largo de frente para trás), rombudo, apontando para baixo e um pouco para a frente */
   const mastoide = grp(0, [varrer([[[5.3, -4.6, 2.4], AP, 1.6, 1.0], [[5.15, -6.75, 1.85], AP, 0.72, 0.56]])]);
   /* base: côndilos occipitais, parte basilar e lâminas pterigoides */
@@ -131,11 +133,11 @@ EV.register('skull', ({THREE, EV, quality}) => {
       cap([0, -1.9, -7.95], [0, -3.8, -8.6], 0.55)                                        // ossos nasais
     ]),
     grp(0.5, [                                                                            // órbita e zigomático
-      grp(0, quad([4.6, -1.6, -6.25], [4.7, -4.3, -6.05], [3.5, -4.4, -3.9], [3.5, -1.7, -4.1], 0.45)),   // parede lateral da órbita
-      grp(0, quad([1.6, -4.75, -7.6], [4.6, -4.7, -6.2], [3.5, -4.5, -4.0], [1.6, -4.4, -4.3], 0.5)),       // assoalho da órbita
+      grp(0.2, quad([4.6, -1.6, -6.25], [4.7, -4.3, -6.05], [3.5, -4.4, -3.9], [3.5, -1.7, -4.1], 0.45)),   // parede lateral da órbita
+      grp(0.2, quad([1.6, -4.75, -7.6], [4.6, -4.7, -6.2], [3.5, -4.5, -4.0], [1.6, -4.4, -4.3], 0.5)),       // assoalho da órbita
       cap([4.57, -1.6, -6.3], ZO, 0.42),                                                  // margem lateral da órbita
       chain([ZO, Z3, [1.9, -4.8, -7.7]], 0.45),                                           // margem infraorbital
-      grp(0, [pla(Z1, ZJ, ZO, 0.6), pla(ZJ, Z5, ZO, 0.6), pla(ZO, Z5, Z4, 0.6), pla(ZO, Z4, Z3, 0.6)]),     // zigomático (placa)
+      grp(0.2, [pla(Z1, ZJ, ZO, 0.6), pla(ZJ, Z5, ZO, 0.6), pla(ZO, Z5, Z4, 0.6), pla(ZO, Z4, Z3, 0.6)]),     // zigomático (placa)
       ell([3.4, -5.2, -6.1], [1.45, 1.0, 1.25]),                                          // processo zigomático da maxila
       cap([4.15, -5.8, -5.8], [3.0, -6.7, -5.2], 0.45)                                    // pilar zigomático-maxilar
     ]),
@@ -155,7 +157,7 @@ EV.register('skull', ({THREE, EV, quality}) => {
   const solido = (x, y, z) => {                                       // crânio sem as cavidades (x ≥ 0)
     let d = calota(x, y, z);
     d = une(d, testa(x, y, z), 1.0); d = une(d, temporal(x, y, z), 1.2); d = une(d, baseOcc(x, y, z), 1.0);
-    d = tira(d, fossa(x, y, z), 0.4); d = une(d, nucal(x, y, z), 0.7);
+    d = tira(d, fossa(x, y, z), 0.7); d = une(d, nucal(x, y, z), 0.7);
     d = une(d, mastoide(x, y, z), 0.6); d = une(d, base(x, y, z), 0.6); d = une(d, face(x, y, z), 0.6);
     return une(d, arco(x, y, z), 0.4);
   };
@@ -168,7 +170,7 @@ EV.register('skull', ({THREE, EV, quality}) => {
   };
 
   /* ============================================================= MANDÍBULA
-     Ramo largo e chato, paralelo ao plano sagital; corpo em parábola até o mento (barras de seção elíptica). */
+     Ramo largo e chato (placa poligonal); corpo em parábola até o mento (barra varrida de seção elíptica). */
   /* estações do corpo: [borda inferior, crista alveolar] do ângulo até o mento */
   const est = [
     [[4.9, -11.7, -1.7], [4.85, -10.0, -2.2]],
@@ -185,7 +187,7 @@ EV.register('skull', ({THREE, EV, quality}) => {
   const corpo = varrer(secs.map((e, i) => [meio(e), sobe(e), alt(e), 0.5 + 0.06 * i / NB]));
   /* ramo: placa poligonal num plano oblíquo (os ramos convergem para a frente); contorno em (z, y): côndilo, borda
      posterior, ângulo aberto e arredondado, borda inferior, borda anterior, processo coronoide e incisura */
-  const ramoZY = [[-0.95, -5.3], [-0.75, -6.8], [-0.65, -8.2], [-0.65, -9.6], [-0.85, -10.5], [-1.3, -11.2], [-1.9, -11.65], [-2.6, -11.8],
+  const ramoZY = [[-0.8, -5.3], [-0.5, -6.8], [-0.35, -8.2], [-0.35, -9.6], [-0.6, -10.5], [-1.15, -11.2], [-1.85, -11.65], [-2.6, -11.8],
     [-2.9, -10.6], [-2.85, -9.0], [-2.9, -7.2], [-3.3, -4.9], [-2.85, -5.6], [-2.5, -6.15], [-2.1, -6.35], [-1.75, -6.1], [-1.5, -5.4]];
   const ramo = poli(ramoZY.map(q => [5.15 + 0.22 * (q[0] + 0.35), q[1], q[0]]), 0.6);
   const mRamo = grp(0, [ramo]), mCondilo = grp(0, [ell([5.0, -4.95, -1.2], [1.0, 0.48, 0.5])]), mCorpo = grp(0, [corpo]);
@@ -194,7 +196,7 @@ EV.register('skull', ({THREE, EV, quality}) => {
   const fMand = (x, y, z) => {
     if (x < 0) x = -x;
     let d = une(mRamo(x, y, z), mCondilo(x, y, z), 0.3);
-    d = une(d, mCorpo(x, y, z), 0.3); d = une(d, mBorda(x, y, z), 0.3);
+    d = une(d, mCorpo(x, y, z), 0.45); d = une(d, mBorda(x, y, z), 0.45);
     return une(d, mMento(x, y, z), 0.3);
   };
 
@@ -265,16 +267,33 @@ EV.register('skull', ({THREE, EV, quality}) => {
       /* (a calota é um elipsoide: a nuca já "olha" um pouco para baixo bem acima da linha nucal; y0..y1 seguram a
          sombra até a altura em que ela começa na referência) */
       const w = EV.smoothstep(0.02, -0.7, nor[i + 1]) * forca * (y0 === undefined ? 1 : EV.smoothstep(y0, y1, pos[i + 1]));
-      let r = EV.lerp(1, 0.84, w), g = EV.lerp(1, 0.80, w), b = EV.lerp(1, 1.5, w);          // (> 1 no azul: compensa a luz quente de baixo)
+      /* o material do osso (core) também escurece e esfria o que olha para baixo, MENOS onde a cor de vértice já vem
+         azulada: um viés de 9% no azul em tudo o que olha para baixo deixa essa sombra por conta desta pintura (sem
+         ele a calota ganhava uma faixa escura acima da linha nucal e uma faixa clara na transição) */
+      let r = EV.lerp(1, 0.87, w), g = EV.lerp(1, 0.83, w), b = EV.lerp(1, 1.5, w) * (1 + 0.09 * EV.smoothstep(0.1, -0.08, nor[i + 1]));
       if (fundo){ const d = fundo(pos[i], pos[i + 1], pos[i + 2], nor[i], nor[i + 1], nor[i + 2]); r *= EV.lerp(1, tom[0], d); g *= EV.lerp(1, tom[1], d); b *= EV.lerp(1, tom[2], d); }
       cor[i] *= r; cor[i + 1] *= g; cor[i + 2] *= b;
     }
   };
-  /* As SDFs são simétricas: cada malha é gerada só para x ≥ 0 (a grade começa duas células antes do plano mediano, com
+  /* As SDFs são simétricas: cada malha é gerada só para x ≥ 0 (a grade começa três células antes do plano mediano, com
      um plano de nós exatamente em x = 0) e depois espelhada — metade do custo. Os triângulos que cruzam o plano ficam
-     uma vez só; os que caem inteiros no lado esquerdo saem (voltam como espelho dos do lado direito). */
+     uma vez só; os que caem inteiros no lado esquerdo saem (voltam como espelho dos do lado direito). As três
+     camadas de folga garantem que as duas passadas de alisamento das normais dão o mesmo resultado dos dois lados
+     da emenda. */
   const meia = (f, mn, mx, cell, aoR) => {
-    const g = EV.mesh.fromSDF(f, {min: [-2 * cell, mn[1], mn[2]], max: mx, cell, ao: true, aoRadius: aoR, aoColor: LAVANDA});
+    const g = EV.mesh.fromSDF(f, {min: [-3 * cell, mn[1], mn[2]], max: mx, cell, ao: true, aoRadius: aoR, aoColor: LAVANDA});
+    /* As normais vêm do gradiente da SDF e "tremem" nas placas finas e nos vincos (viram de um vértice para o outro):
+       vistas de raspão, o traço de contorno do material do osso saía rabiscado. Duas passadas de média com os vizinhos
+       acalmam as normais sem mexer na forma. */
+    const N = g.attributes.normal.array, I = g.index.array, A = new Float32Array(N.length);
+    for (let p = 0; p < 2; p++){
+      A.fill(0);
+      for (let t = 0; t < I.length; t += 3){
+        const a = I[t] * 3, b = I[t + 1] * 3, c = I[t + 2] * 3;
+        for (let j = 0; j < 3; j++){ const s = N[a + j] + N[b + j] + N[c + j]; A[a + j] += s; A[b + j] += s; A[c + j] += s; }
+      }
+      for (let v = 0; v < N.length; v += 3){ const x = A[v], y = A[v + 1], z = A[v + 2], l = Math.hypot(x, y, z); if (l > 1e-9){ N[v] = x / l; N[v + 1] = y / l; N[v + 2] = z / l; } }
+    }
     return g;
   };
   const espelhar = g => {
@@ -309,20 +328,22 @@ EV.register('skull', ({THREE, EV, quality}) => {
 
   let t0 = agora();
   const gCranio = meia(fCranio, [0, -9.4, -10.2], [8.2, 7.6, 10.4], 0.31 / QM, AO_R);
-  /* profundidade abaixo da superfície "sem cavidades" = quão fundo o vértice está dentro de uma órbita, do nariz… */
+  /* fundo do crânio: (1) profundidade abaixo da superfície "sem cavidades" = quão dentro de uma órbita, do nariz, do
+     forame magno ou do meato o vértice está; (2) a região atrás da maxila (coanas, lâminas pterigoides), que na
+     referência é a mancha escura entre a base do crânio e o ramo da mandíbula; (3) a fossa temporal, de leve */
   const faringe = (x, y, z) => EV.smoothstep(4.0, 2.6, Math.abs(x)) * EV.smoothstep(-4.6, -5.6, y) * EV.smoothstep(-0.6, -1.8, z) * EV.smoothstep(-6.0, -4.6, z);
   pintar(gCranio, 1.0, (x, y, z) => { const ax = x < 0 ? -x : x;
-    return Math.max(EV.smoothstep(0.1, 1.2, -solido(ax, y, z)), 0.8 * faringe(x, y, z), 0.3 * EV.smoothstep(0.35, 0.0, fossa(ax, y, z))); }, [0.30, 0.28, 0.36], -3.6, -5.2);
+    return Math.max(EV.smoothstep(0.1, 1.2, -solido(ax, y, z)), 0.8 * faringe(x, y, z), 0.3 * EV.smoothstep(0.35, 0.0, fossa(ax, y, z))); }, [0.30, 0.28, 0.36], -3.9, -5.4);
   add(espelhar(gCranio)).name = 'cranio';
   ms.cranio = Math.round(agora() - t0); t0 = agora();
   const gMand = meia(fMand, [0, -13.2, -9.2], [6.6, -3.8, 1.4], 0.26 / QM, 1.8);
   /* face lingual (de dentro da boca) mais escura e oliva, como na referência */
-  pintar(gMand, 0.85, (x, y, z, nx) => 0.85 * EV.smoothstep(0.1, -0.7, nx * (x < 0 ? -1 : 1)) * EV.smoothstep(-4.2, -6.0, y), [0.42, 0.39, 0.31]);
+  pintar(gMand, 0.85, (x, y, z, nx) => 0.92 * EV.smoothstep(0.1, -0.7, nx * (x < 0 ? -1 : 1)) * EV.smoothstep(-4.2, -6.0, y), [0.36, 0.33, 0.25]);
   add(espelhar(gMand)).name = 'mandibula';
   ms.mandibula = Math.round(agora() - t0); t0 = agora();
   add(dentes(), EV.mats.bone({color: EV.srgb(0xfbf6e6), roughness: 0.26})).name = 'dentes';
   ms.dentes = Math.round(agora() - t0);
-  group.userData.ms = ms;
+  group.userData.ms = ms;                                             // tempo de cada malha (diagnóstico)
 
   return {group};                                                     // estático
 });

@@ -174,7 +174,8 @@ APP.setVisible = o => {
    Materiais de EV.mats (têm userData.evTint) recebem a tinta MISTURADA no shader — o azul aparece azul mesmo sobre
    a textura laranja. Outros materiais: emissive na cor da tinta + cor de base esmaecida. */
 let tintOn = false;
-const TINT_RED = [0.90, 0.045, 0.02, 0.60], TINT_BLUE = [0.03, 0.20, 1.0, 0.80];          // r, g, b lineares + mistura máxima
+/* o vermelho é um carmim (puxado para o magenta): um vermelho-alaranjado mal se distinguia do laranja do músculo */
+const TINT_RED = [0.88, 0.02, 0.085, 0.72], TINT_BLUE = [0.03, 0.20, 1.0, 0.80];          // r, g, b lineares + mistura máxima
 const _c0 = new T.Color();
 function applyTint(){
   for (const n of order){

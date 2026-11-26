@@ -12,7 +12,7 @@
   --accent:#0f5c63; --on-accent:#ffffff;
   --short:#a3202f; --long:#1f6790;
   --num-bg:#3d4349; --num-fg:#ffffff;
-  --tint-red:#cf3a2b; --tint-blue:#2f6fdf;
+  --tint-red:#c8323f; --tint-blue:#4f63d2;                                              /* as cores com que o 3D pinta (carmim e azul-violeta) */
   --shadow:rgba(22,37,43,.22);
   /* prancha: é papel branco nos dois temas, então a tinta dela não muda com o tema */
   --plate:#ffffff; --plate-veil:rgba(255,255,255,.86);
@@ -124,6 +124,13 @@ h1{margin:0;font-family:var(--display);font-stretch:condensed;font-weight:700;fo
   .key{top:2px;right:2px;width:min(52%,150px)}
   .key button{background:var(--plate-veil)}
 }
+/* prancha minúscula (celular pequeno deitado): nome nenhum cabe ao lado do desenho. Ficam os quatro números, que
+   continuam sendo botões (o nome segue lá para o leitor de tela); os nomes estão na legenda completa. */
+@container plate (max-width:239px){
+  .key{width:auto}
+  .key button{grid-template-columns:22px;justify-content:center;width:44px}
+  .key-name,.key-now{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+}
 @container plate (max-width:329px){                                                           /* as três pílulas não cabem numa linha */
   .pill{padding-inline:11px}
   .back-ref{left:auto;right:8px;bottom:54px}
@@ -143,7 +150,7 @@ h1{margin:0;font-family:var(--display);font-stretch:condensed;font-weight:700;fo
 .plate.is-fail #ev-canvas,.plate.is-fail .key,.plate.is-fail .views,.plate.is-fail .back-ref,.plate.is-fail .loading{display:none}
 
 /* --------------------------------------------------------------- coluna */
-.side{display:grid;grid-template-columns:minmax(0,1fr);gap:26px;min-width:0;container:side / inline-size}
+.side{display:grid;grid-template-columns:minmax(0,1fr);gap:26px;min-width:0;container:side / inline-size;overflow-wrap:break-word}
 .sec{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;min-width:0}
 h2{margin:0;font-family:var(--display);font-stretch:condensed;font-weight:700;font-size:22px;line-height:1.15}
 
@@ -213,10 +220,18 @@ h2{margin:0;font-family:var(--display);font-stretch:condensed;font-weight:700;fo
 
 /* tablet em pé: a mesma coluna, mais estreita e centrada */
 @media (min-width:600px){ .page > :not(.plate-col){width:100%;max-width:640px;margin-inline:auto} .keys{grid-template-columns:repeat(2,minmax(0,1fr));max-width:430px} }
-@container side (max-width:300px){ .keys{grid-template-columns:minmax(0,1fr)} }       /* coluna estreita (celular deitado): uma chave por linha */
+/* coluna estreita (celular deitado): uma chave por linha, e o "ver só este" desce para baixo do nome do músculo */
+@container side (max-width:300px){
+  .keys{grid-template-columns:minmax(0,1fr)}
+  .leg-head{grid-template-columns:26px minmax(0,1fr);row-gap:6px}
+  .leg-act{grid-column:2;justify-self:start}
+  .leg-now{margin-left:0}
+  .leg dl{margin-left:0;grid-template-columns:minmax(0,1fr);gap:0}                       /* Origem / Inserção / Ação em cima do texto */
+  .leg dt{padding-top:7px}
+}
 
 /* ------------------------------------------- computador (e celular deitado) */
-@media (min-width:900px), (min-width:600px) and (orientation:landscape) and (max-height:560px){
+@media (min-width:900px), (min-width:600px) and (orientation:landscape) and (max-height:560px), (min-width:480px) and (min-aspect-ratio:3/2) and (max-height:400px){
   .page{--pw:min(50vw,calc(86vh * 876 / 1200));grid-template-columns:var(--pw) minmax(0,540px);grid-template-rows:auto 1fr;justify-content:center;align-items:start;column-gap:44px;row-gap:22px;padding-block:22px 44px}
   .page > :not(.plate-col){max-width:none;margin-inline:0}
   .plate-col{grid-column:1;grid-row:1 / span 2;top:calc(env(safe-area-inset-top,0px) + 22px);margin:0;padding:0;background:none}
@@ -239,6 +254,7 @@ h2{margin:0;font-family:var(--display);font-stretch:condensed;font-weight:700;fo
   .plate.is-fail{display:block}
   .key{position:static;width:auto;padding:4px 4px 0 0}
 }
+@media (max-width:599px) and (min-aspect-ratio:3/2) and (max-height:400px){ .page{column-gap:22px} }   /* celular pequeno deitado */
 @media (prefers-reduced-motion:reduce){ *,*::before,*::after{transition:none!important;animation:none!important} }
 </style>
 
