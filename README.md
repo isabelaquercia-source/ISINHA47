@@ -14,13 +14,15 @@ Depois acesse `http://127.0.0.1:8765`.
 
 ## Body Lab
 
-10 protótipos de interface para consulta de exercício (treino, anatomia, teleconsulta e catálogo), com corpos SVG em acabamentos distintos.
+Consulta de exercício com foco em **movimento do corpo** (músculo ativo, ações, câmera lenta).
 
 ```bash
 python3 -m http.server 8766 --bind 127.0.0.1 --directory body-lab
 ```
 
-Depois acesse `http://127.0.0.1:8766`.
+- Movimento (principal): `http://127.0.0.1:8766/movimento.html`
+- Hub mobile: `http://127.0.0.1:8766/mobile.html`
+- 10 protos UI: `http://127.0.0.1:8766/`
 
 ## Câmera Distante
 

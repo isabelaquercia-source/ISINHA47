@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+<title>Body Lab · Movimento</title>
+<style>
+  :root {
+    --bg: #f4f5f7;
+    --ink: #0f172a;
+    --muted: #64748b;
+    --line: #e2e8f0;
+    --card: #fff;
+    --accent: #2563eb;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    min-height: 100%;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: system-ui, -apple-system, Segoe UI, sans-serif;
+  }
+  .top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: .85rem 1rem;
+    background: #fff;
+    border-bottom: 1px solid var(--line);
+    position: sticky;
+    top: 0;
+    z-index: 5;
+  }
+  .top a {
+    text-decoration: none;
+    color: var(--ink);
+    padding: .4rem .7rem;
+    border-radius: .55rem;
+    background: #f1f5f9;
+    font-size: .85rem;
+  }
+  .top strong { display: block; font-size: .95rem; }
+  .top small { color: var(--muted); font-size: .72rem; }
+  .wrap { max-width: 520px; margin: 0 auto; padding: 1rem 1rem 2rem; }
+
+  .corpo-root { display: grid; gap: .85rem; }
+  .corpo-lead {
+    margin: 0;
+    color: var(--muted);
+    font-size: .95rem;
+    line-height: 1.4;
+  }
+  .corpo-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: .45rem;
+  }
+  .corpo-actions button {
+    border: 1px solid var(--line);
+    background: #fff;
+    border-radius: .75rem;
+    padding: .7rem .65rem;
+    font: inherit;
+    font-size: .88rem;
+    font-weight: 600;
+    cursor: pointer;
+    color: var(--ink);
+  }
+  .corpo-actions button.on {
+    background: #0f172a;
+    color: #fff;
+    border-color: #0f172a;
+  }
+  .corpo-stage {
+    position: relative;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 1.1rem;
+    min-height: 52vh;
+    overflow: hidden;
+    display: grid;
+    place-items: center;
+  }
+  .corpo-svg-wrap { width: 100%; }
+  .corpo-svg { width: 100%; height: auto; display: block; max-height: 58vh; }
+  .corpo-overlay {
+    position: absolute;
+    top: .85rem;
+    right: 1rem;
+    text-align: right;
+    pointer-events: none;
+  }
+  .corpo-overlay strong {
+    display: block;
+    color: #ea580c;
+    font-size: 1.6rem;
+    letter-spacing: .02em;
+  }
+  .corpo-overlay span { color: var(--muted); font-size: .85rem; }
+  .corpo-tip { margin: 0; color: var(--muted); font-size: .92rem; line-height: 1.4; }
+  .corpo-readout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: .55rem;
+  }
+  .corpo-readout > div {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: .85rem;
+    padding: .75rem .85rem;
+  }
+  .corpo-readout span {
+    display: block;
+    font-size: .72rem;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: var(--muted);
+  }
+  .corpo-readout b { font-size: 1.15rem; }
+  .corpo-controls {
+    display: grid;
+    gap: .55rem;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: .95rem;
+    padding: .85rem;
+  }
+  .corpo-controls button {
+    justify-self: start;
+    border: 0;
+    background: var(--accent);
+    color: #fff;
+    font: inherit;
+    font-weight: 700;
+    padding: .55rem 1rem;
+    border-radius: 999px;
+    cursor: pointer;
+  }
+  .corpo-controls label {
+    display: grid;
+    gap: .25rem;
+    font-size: .8rem;
+    color: var(--muted);
+  }
+  .corpo-controls input[type="range"] { width: 100%; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .corpo-controls button { opacity: .7; }
+  }
+</style>
+</head>
+<body>
+  <header class="top">
+    <a href="./mobile.html">← Hub</a>
+    <div style="text-align:center">
+      <strong>Movimento do corpo</strong>
+      <small>consulta · músculo · ação</small>
+    </div>
+    <a href="./index.html">Protos</a>
+  </header>
+  <main class="wrap">
+    <div id="mount"></div>
+  </main>
+  <script>
+/**
+ * Corpo Engine — representação de movimento corporal para consulta.
+ * Foco: silhueta muda de verdade, músculo ativo, ação legível.
+ */
+window.CorpoEngine = (() => {
+  const ACTIONS = [
+    {
+      id: "segura",
+      label: "Segura a pelve",
+      cue: "SEGURA",
+      tip: "Glúteo médio do lado de apoio trava a pelve. Sem cair pro lado.",
+      muscle: "medioApoio",
+      view: "back",
+      kind: "singleLeg",
+    },
+    {
+      id: "abre",
+      label: "Abre a perna",
+      cue: "ABRE",
+      tip: "Abdutor leva a perna livre pra fora. Pelve quieta.",
+      muscle: "medioLivre",
+      view: "back",
+      kind: "abduct",
+    },
+    {
+      id: "freia",
+      label: "Freia o joelho",
+      cue: "FREIA",
+      tip: "No pouso, o músculo freia o joelho pra dentro.",
+      muscle: "medioApoio",
+      view: "back",
+      kind: "valgus",
+    },
+    {
+      id: "gira",
+      label: "Gira a coxa",
+      cue: "GIRA",
+      tip: "Rotação externa da coxa de apoio — pé firme, joelho rastreia.",
+      muscle: "medioApoio",
+      view: "back",
+      kind: "rotate",
+    },
+    {
+      id: "agacha",
+      label: "Agacha",
+      cue: "DESCE",
+      tip: "Quadril pra trás e baixo. Joelho e peito do pé alinhados.",
+      muscle: "quadGlute",
+      view: "side",
+      kind: "squat",
+    },
+    {
+      id: "afundo",
+      label: "Afunda",
+      cue: "AVANÇA",
+      tip: "Passo longo. Joelho da frente estável, tronco alto.",
+      muscle: "gluteQuad",
+      view: "side",
+      kind: "lunge",
+    },
+  ];
+
+  function lerp(a, b, t) {
+    return a + (b - a) * t;
+  }
+  function clamp(v, a, b) {
+    return Math.max(a, Math.min(b, v));
+  }
+  function easeInOut(t) {
+    return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+  }
+  /** ping-pong 0→1→0 */
+  function wave(t) {
+    const x = t % 1;
+    if (x < 0.45) return easeInOut(x / 0.45);
+    if (x < 0.55) return 1;
+    if (x < 1) return 1 - easeInOut((x - 0.55) / 0.45);
+    return 0;
+  }
+
+  function create(root, opts = {}) {
+    const state = {
+      actionId: opts.actionId || "segura",
+      t: 0,
+      speed: 1,
+      playing: true,
+      yaw: 0, // -1 left ... 1 right (fake rotate)
+      reduced: window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+    };
+
+    root.innerHTML = shell();
+    const refs = {
+      stage: root.querySelector("[data-stage]"),
+      svg: root.querySelector("[data-svg]"),
+      cue: root.querySelector("[data-cue]"),
+      tip: root.querySelector("[data-tip]"),
+      timer: root.querySelector("[data-timer]"),
+      pelve: root.querySelector("[data-pelve]"),
+      muscleName: root.querySelector("[data-muscle-name]"),
+      actions: root.querySelector("[data-actions]"),
+      play: root.querySelector("[data-play]"),
+      slow: root.querySelector("[data-slow]"),
+      scrub: root.querySelector("[data-scrub]"),
+      yaw: root.querySelector("[data-yaw]"),
+    };
+
+    refs.actions.innerHTML = ACTIONS.map(
+      (a) =>
+        `<button type="button" data-act="${a.id}" class="${a.id === state.actionId ? "on" : ""}">${a.label}</button>`,
+    ).join("");
+
+    refs.actions.addEventListener("click", (e) => {
+      const btn = e.target.closest("[data-act]");
+      if (!btn) return;
+      state.actionId = btn.dataset.act;
+      state.t = 0;
+      refs.actions.querySelectorAll("button").forEach((b) => b.classList.toggle("on", b === btn));
+      draw(true);
+    });
+
+    refs.play.addEventListener("click", () => {
+      state.playing = !state.playing;
+      refs.play.textContent = state.playing ? "Pausar" : "Play";
+    });
+
+    refs.slow.addEventListener("input", () => {
+      // 0.25x .. 1.5x
+      state.speed = 0.25 + Number(refs.slow.value) * 1.25;
+    });
+
+    refs.scrub.addEventListener("input", () => {
+      state.playing = false;
+      refs.play.textContent = "Play";
+      state.t = Number(refs.scrub.value);
+      draw(false);
+    });
+
+    refs.yaw.addEventListener("input", () => {
+      state.yaw = Number(refs.yaw.value);
+      draw(false);
+    });
+
+    let last = performance.now();
+    function tick(now) {
+      const dt = Math.min(0.05, (now - last) / 1000);
+      last = now;
+      if (state.playing && !state.reduced) {
+        state.t = (state.t + dt * 0.35 * state.speed) % 1;
+        refs.scrub.value = String(state.t);
+      }
+      draw(false);
+      requestAnimationFrame(tick);
+    }
+
+    function action() {
+      return ACTIONS.find((a) => a.id === state.actionId) || ACTIONS[0];
+    }
+
+    function draw() {
+      const a = action();
+      const w = wave(state.t);
+      const yaw = state.yaw;
+      refs.cue.textContent = a.cue;
+      refs.tip.textContent = a.tip;
+      refs.timer.textContent = (w * 3).toFixed(1).replace(".", ",") + " s";
+
+      let pelveDeg = 0;
+      let muscleLabel = "—";
+      let svg = "";
+
+      if (a.view === "side") {
+        const pose = sidePose(a.kind, w);
+        pelveDeg = pose.pelve;
+        muscleLabel = pose.muscleLabel;
+        svg = renderSide(pose, a, yaw);
+      } else {
+        const pose = backPose(a.kind, w, yaw);
+        pelveDeg = pose.pelve;
+        muscleLabel = pose.muscleLabel;
+        svg = renderBack(pose, a, yaw);
+      }
+
+      refs.pelve.textContent = (pelveDeg >= 0 ? "+" : "") + pelveDeg.toFixed(0) + "°";
+      refs.muscleName.textContent = muscleLabel;
+      refs.svg.innerHTML = svg;
+    }
+
+    /** Side view poses — big silhouette change */
+    function sidePose(kind, w) {
+      if (kind === "lunge") {
+        return {
+          hipY: lerp(0, 42, w),
+          thigh: lerp(-8, 48, w),
+          shin: lerp(6, -52, w),
+          thighB: lerp(12, -28, w),
+          torso: lerp(4, 12, w),
+          arm: lerp(10, 40, w),
+          pelve: lerp(0, 6, w),
+          muscleLabel: "glúteo + quad",
+          effort: w,
+        };
+      }
+      // squat
+      return {
+        hipY: lerp(0, 58, w),
+        thigh: lerp(-6, 78, w),
+        shin: lerp(8, -82, w),
+        thighB: 0,
+        torso: lerp(4, 22, w),
+        arm: lerp(8, 50, w),
+        pelve: lerp(0, 8, w),
+        muscleLabel: "quad + glúteo",
+        effort: w,
+      };
+    }
+
+    /** Back view — single leg / abduct / etc */
+    function backPose(kind, w, yaw) {
+      const lean = yaw * 22;
+      if (kind === "abduct") {
+        return {
+          stand: "L",
+          freeLegLift: lerp(20, 70, w),
+          freeLegOut: lerp(8, 55, w),
+          pelvisTilt: lerp(0, -4, w) + lean * 0.2,
+          kneeIn: 0,
+          thighSpin: 0,
+          torsoSway: lean,
+          pelve: lerp(0, -4, w),
+          muscleLabel: "médio (perna livre)",
+          active: "R",
+          effort: w,
+        };
+      }
+      if (kind === "valgus") {
+        return {
+          stand: "L",
+          freeLegLift: 35,
+          freeLegOut: 10,
+          pelvisTilt: lerp(0, 14, w) + lean * 0.2, // collapse demo
+          kneeIn: lerp(0, 28, w),
+          thighSpin: lerp(0, -12, w),
+          torsoSway: lean,
+          pelve: lerp(0, 14, w),
+          muscleLabel: "médio esquerdo (falha)",
+          active: "L",
+          effort: w,
+          fail: true,
+        };
+      }
+      if (kind === "rotate") {
+        return {
+          stand: "L",
+          freeLegLift: 40,
+          freeLegOut: 18,
+          pelvisTilt: lean * 0.15,
+          kneeIn: lerp(8, -10, w),
+          thighSpin: lerp(-15, 20, w),
+          torsoSway: lean,
+          pelve: lerp(0, 3, w),
+          muscleLabel: "médio + rotadores",
+          active: "L",
+          effort: w,
+        };
+      }
+      // segura pelve — classic single-leg
+      return {
+        stand: "L",
+        freeLegLift: lerp(25, 55, w),
+        freeLegOut: 12,
+        pelvisTilt: lerp(8, 0, w) + lean * 0.1, // corrects to level
+        kneeIn: 0,
+        thighSpin: 0,
+        torsoSway: lean,
+        pelve: lerp(8, 0, w),
+        muscleLabel: "médio esquerdo",
+        active: "L",
+        effort: w,
+      };
+    }
+
+    function renderSide(pose, action, yaw = 0) {
+      const accent = "#c8f542";
+      const effort = pose.effort;
+      const muscleOp = 0.25 + effort * 0.75;
+      const skew = yaw * 18;
+      return `
+      <svg viewBox="0 0 420 560" class="corpo-svg" aria-hidden="true">
+        <defs>
+          <linearGradient id="skinS" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#f2e2cc"/><stop offset="55%" stop-color="#c9a57c"/><stop offset="100%" stop-color="#7a5a3c"/>
+          </linearGradient>
+        </defs>
+        <ellipse cx="210" cy="525" rx="${110 + effort * 16}" ry="12" fill="${accent}" opacity="${0.12 + effort * 0.12}"/>
+        <g transform="translate(210 ${285 + pose.hipY}) rotate(${skew})">
+          <g transform="rotate(${pose.torso})">
+            <path d="M-12 0 C-26 22,-32 58,-28 95 C-24 118,-10 130,4 130 L26 120 C34 96,34 66,28 40 C22 16,8 4,-2 0 Z" fill="url(#skinS)"/>
+            <path d="M-2 36 C4 55,8 78,10 100" fill="none" stroke="#e11d48" stroke-width="5" stroke-linecap="round" opacity="${muscleOp}"/>
+            <ellipse cx="6" cy="26" rx="16" ry="13" fill="url(#skinS)"/>
+            <ellipse cx="4" cy="-36" rx="19" ry="22" fill="url(#skinS)"/>
+            <circle cx="12" cy="-38" r="2.4" fill="${accent}"/>
+            <g transform="translate(18 24) rotate(${pose.arm})">
+              <path d="M0 0 C10 18,12 40,8 60" fill="none" stroke="url(#skinS)" stroke-width="14" stroke-linecap="round"/>
+            </g>
+          </g>
+          <g transform="rotate(${pose.thigh})">
+            <path d="M0 2 C-4 36,-2 70,4 100" fill="none" stroke="url(#skinS)" stroke-width="26" stroke-linecap="round"/>
+            <path d="M-6 30 C0 50,4 72,6 90" fill="none" stroke="#e11d48" stroke-width="6" stroke-linecap="round" opacity="${muscleOp}"/>
+            <g transform="translate(4 100) rotate(${pose.shin})">
+              <circle cx="0" cy="0" r="10" fill="url(#skinS)"/>
+              <path d="M0 0 C2 30,2 60,0 95" fill="none" stroke="url(#skinS)" stroke-width="20" stroke-linecap="round"/>
+              <path d="M-10 95 C8 100,40 100,56 96" fill="none" stroke="url(#skinS)" stroke-width="12" stroke-linecap="round"/>
+            </g>
+          </g>
+          ${
+            action.kind === "lunge"
+              ? `<g transform="rotate(${pose.thighB})">
+            <path d="M6 4 C16 36,28 66,40 92" fill="none" stroke="url(#skinS)" stroke-width="22" stroke-linecap="round" opacity=".9"/>
+            <path d="M40 92 C48 120,58 145,70 165" fill="none" stroke="url(#skinS)" stroke-width="16" stroke-linecap="round"/>
+          </g>`
+              : ""
+          }
+        </g>
+        <text x="300" y="70" fill="#ea580c" font-size="28" font-weight="800" font-family="system-ui">${action.cue}</text>
+      </svg>`;
+    }
+
+    function renderBack(pose, action) {
+      // Rear view simplified athletic body — silhouette MUST change with freeLegLift/Out/pelvisTilt
+      const tilt = pose.pelvisTilt;
+      const lift = pose.freeLegLift;
+      const out = pose.freeLegOut;
+      const kneeIn = pose.kneeIn;
+      const spin = pose.thighSpin;
+      const sway = pose.torsoSway;
+      const effort = pose.effort;
+      const fail = !!pose.fail;
+      const activeL = pose.active === "L";
+      const redL = activeL ? 0.3 + effort * 0.7 : 0.08;
+      const redR = !activeL ? 0.3 + effort * 0.7 : 0.08;
+      const lineColor = fail ? "#ef4444" : "#22c55e";
+
+      // standing foot left (viewer left = person's left when back view... back view: person's left is viewer's right)
+      // We draw person from behind: left side of SVG = person's right shoulder.
+      // Keep it simple: support leg on SVG-left, free leg SVG-right for "stand L" meaning support on left of screen.
+
+      return `
+      <svg viewBox="0 0 420 560" class="corpo-svg" aria-hidden="true">
+        <defs>
+          <linearGradient id="skinB" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#e8cbb0"/><stop offset="100%" stop-color="#a67c52"/>
+          </linearGradient>
+        </defs>
+        <ellipse cx="210" cy="528" rx="120" ry="11" fill="#94a3b8" opacity=".2"/>
+
+        <g transform="translate(210 250) rotate(${sway})">
+          <!-- head -->
+          <ellipse cx="0" cy="-118" rx="28" ry="32" fill="url(#skinB)"/>
+          <!-- torso / shirt -->
+          <path d="M-48 -85 C-58 -40,-60 10,-52 55 L52 55 C60 10,58 -40,48 -85 Z" fill="#3b82f6"/>
+          <path d="M-40 -70 C-20 -55,20 -55,40 -70" fill="none" stroke="#1e3a8a" stroke-width="3" opacity=".35"/>
+
+          <!-- pelvis block -->
+          <g transform="rotate(${tilt})">
+            <ellipse cx="0" cy="62" rx="54" ry="18" fill="#1f2937"/>
+            <!-- pelvis guide -->
+            <line x1="-70" y1="62" x2="70" y2="62" stroke="${lineColor}" stroke-width="3" stroke-dasharray="8 6"/>
+            <circle cx="-54" cy="62" r="4" fill="${lineColor}"/>
+            <circle cx="54" cy="62" r="4" fill="${lineColor}"/>
+
+            <!-- glute med L (svg left) -->
+            <path d="M-58 40 C-72 55,-70 78,-52 85 C-40 78,-42 55,-48 42 Z" fill="#ef4444" opacity="${redL}"/>
+            <!-- glute med R -->
+            <path d="M58 40 C72 55,70 78,52 85 C40 78,42 55,48 42 Z" fill="#ef4444" opacity="${redR}"/>
+
+            ${
+              activeL
+                ? `<path d="M-62 88 C-62 70,-58 55,-54 48" fill="none" stroke="#fff" stroke-width="3" opacity=".9"/>
+                   <path d="M-54 48 L-60 58 M-54 48 L-48 58" fill="none" stroke="#ef4444" stroke-width="3" stroke-linecap="round"/>`
+                : `<path d="M62 88 C62 70,58 55,54 48" fill="none" stroke="#fff" stroke-width="3" opacity=".9"/>
+                   <path d="M54 48 L48 58 M54 48 L60 58" fill="none" stroke="#ef4444" stroke-width="3" stroke-linecap="round"/>`
+            }
+
+            <!-- support leg (left) -->
+            <g transform="translate(-28 78) rotate(${kneeIn * 0.3 + spin * 0.2})">
+              <path d="M0 0 L${-6 + kneeIn * 0.15} 95" fill="none" stroke="#111827" stroke-width="28" stroke-linecap="round"/>
+              <path d="M${-6 + kneeIn * 0.15} 95 L${-4 + kneeIn * 0.4} 190" fill="none" stroke="#111827" stroke-width="22" stroke-linecap="round"/>
+              <path d="M${-20 + kneeIn * 0.4} 190 H${18 + kneeIn * 0.4}" fill="none" stroke="#111827" stroke-width="12" stroke-linecap="round"/>
+              ${fail ? `<path d="M0 100 L${kneeIn} 100" fill="none" stroke="#ef4444" stroke-width="3" marker-end="url(#arrow)"/>` : ""}
+            </g>
+
+            <!-- free leg (right) — BIG motion -->
+            <g transform="translate(30 72) rotate(${-out})">
+              <path d="M0 0 L${12} ${40 + lift * 0.2}" fill="none" stroke="#111827" stroke-width="24" stroke-linecap="round"/>
+              <g transform="translate(12 ${40 + lift * 0.2}) rotate(${-lift})">
+                <path d="M0 0 L8 70" fill="none" stroke="#111827" stroke-width="20" stroke-linecap="round"/>
+                <path d="M-6 70 H22" fill="none" stroke="#111827" stroke-width="10" stroke-linecap="round"/>
+              </g>
+            </g>
+          </g>
+
+          <!-- arms -->
+          <path d="M-52 -40 L-78 30" fill="none" stroke="url(#skinB)" stroke-width="14" stroke-linecap="round"/>
+          <path d="M52 -40 L78 30" fill="none" stroke="url(#skinB)" stroke-width="14" stroke-linecap="round"/>
+        </g>
+
+        <text x="290" y="72" fill="#ea580c" font-size="30" font-weight="800" font-family="system-ui">${action.cue}</text>
+      </svg>`;
+    }
+
+    function shell() {
+      return `
+      <div class="corpo-root">
+        <p class="corpo-lead">O músculo que trabalha fica vermelho. Use câmera lenta e gire o corpo.</p>
+        <div class="corpo-actions" data-actions></div>
+        <div class="corpo-stage" data-stage>
+          <div class="corpo-svg-wrap" data-svg></div>
+          <div class="corpo-overlay">
+            <strong data-cue>SEGURA</strong>
+            <span data-timer>0,0 s</span>
+          </div>
+        </div>
+        <p class="corpo-tip" data-tip></p>
+        <div class="corpo-readout">
+          <div><span>Pelve</span><b data-pelve>0°</b></div>
+          <div><span>Quem trabalha</span><b data-muscle-name>—</b></div>
+        </div>
+        <div class="corpo-controls">
+          <button type="button" data-play>Pausar</button>
+          <label>Câmera lenta <input data-slow type="range" min="0" max="1" step="0.01" value="0.55"/></label>
+          <label>Scrub <input data-scrub type="range" min="0" max="1" step="0.001" value="0"/></label>
+          <label>Girar <input data-yaw type="range" min="-1" max="1" step="0.01" value="0"/></label>
+        </div>
+      </div>`;
+    }
+
+    draw(true);
+    if (!state.reduced) requestAnimationFrame(tick);
+    return {
+      setAction(id) {
+        state.actionId = id;
+        draw(true);
+      },
+      getState: () => ({ ...state }),
+    };
+  }
+
+  return { ACTIONS, create };
+})();
+
+CorpoEngine.create(document.getElementById("mount"));
+</script>
+</body>
+</html>
