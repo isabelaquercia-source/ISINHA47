@@ -197,7 +197,7 @@ const COST = [null,
   {W: 13.3, drop: 12.5, Dp: 11.0, xcc: 9.3, xa: 7.7, insp: 6.5, ka: 0.10, kl: 0.768, ke: 0.94, za: 1.5, da: 0.7, fl: 0.63, py: 0.85, yq: 0.5},
   {W: 12.65, drop: 12.5, Dp: 8.8, xcc: 9.5, xa: 6.05, insp: 6.2, ka: 0.18, kl: 0.846, ke: 0.90, za: 2.6, da: 0.43, fl: 0.574, yp: [0.293, 0.651], ya: [0.3, 0.68]},
   {W: 11.03, drop: 12.18, Dp: 7.45, xcc: 10.26, xa: 4.92, insp: 5.8, ka: 0.40, kl: 1,  ke: 0.891, za: 3.0, da: 0.88, fl: 0.653, yp: [0.372, 0.722], ya: [0.05, 0.661]},
-  {W: 10.2, drop: 11.15, Dp: 3.1, xcc: 10.2, xa: 5.4, insp: 4.2, ka: 0.30, kl: 0,    ke: 1, za: 1.8, da: 1.17, e1: 0.6, py: 0.54, ez: 1.49},
+  {W: 10.43, drop: 11.06, Dp: 2.97, xcc: 10.43, xa: 4.41, insp: 4.2, ka: 0.30, kl: 0,  ke: 1, za: 1.44, da: 0.41, e1: 0.5, py: 0.51, ez: 0.7},
   {W: 8.4,  drop: 6.65, Dp: -1.4, xcc: 8.4,  xa: 5.5, insp: 3.0, ka: 0.30, kl: 0,    ke: 1, za: 1.7, da: 2.4, e1: 0.95, py: 0.59, ez: 0.9}];
 const RIB_T = [0, 0.10, 0.22, 0.33, 0.44, 0.55, 0.70, 0.85, 1];   // parâmetro t de cada ponto de controle
 const RIB_N = 96;                                                  // amostras da tabela densa por costela

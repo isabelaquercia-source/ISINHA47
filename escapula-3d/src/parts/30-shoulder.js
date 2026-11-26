@@ -194,8 +194,8 @@ EV.register('shoulder', ({THREE, EV, quality}) => {
     [9.3,  -0.20, 0, 0.82,  1.21,  0.35,  0.90, -0.85, 0, 0.40]
   ].map(r => { r[2] = zb(r[0], r[1]); r[8] = zb(r[0], r[7]); return r; }).concat([
     /* raiz do acrômio: só a faixa da crista, que termina dentro da placa do acrômio */
-    [9.55, 1.00, 0.95, 0.82, 1.21, 0.62, 1.06, 0.90, 0.85, 0.39],
-    [9.9,  0.95, 1.05, 0.82, 1.22, 0.74, 1.14, 0.90, 1.00, 0.37]
+    [9.55, 1.00, 0.95, 0.82, 1.21, 0.62, 1.06, 0.90, 0.85, 0.38],
+    [9.9,  0.95, 1.10, 0.84, 1.20, 0.78, 1.15, 0.90, 1.05, 0.28]
   ]);
   const TS = tabela(ESP, 0.05), TC = TS.cols;
   /* incisura espinoglenoidal: borda lateral livre da espinha, côncava — um cilindro ao longo de y cava a cunha */
@@ -286,13 +286,35 @@ EV.register('shoulder', ({THREE, EV, quality}) => {
     ao: true, aoColor: [0.55, 0.53, 0.68], aoRadius: 1.6, aoStrength: 1.15
   });
   {
-    /* os vértices da "surface nets" são médias dos cruzamentos e ficam um pouco fora da superfície (as bordas finas
-       saem serrilhadas): dois passos de Newton ao longo da normal trazem cada um para f = 0 */
-    const P = geom.attributes.position.array, Nn = geom.attributes.normal.array;
-    for (let it = 0; it < 2; it++) for (let i = 0; i < P.length; i += 3){
-      const d = EV.clamp(fEsc(P[i], P[i + 1], P[i + 2]), -0.08, 0.08);
-      P[i] -= d * Nn[i]; P[i + 1] -= d * Nn[i + 1]; P[i + 2] -= d * Nn[i + 2];
+    /* acabamento da malha: os vértices da "surface nets" são médias dos cruzamentos e nas bordas finas (borda
+       superior, borda medial) saem serrilhados. Duas passadas de alisamento tangencial (média dos vizinhos) seguidas
+       de projeção de volta para f = 0 ao longo do gradiente; no fim as normais são refeitas pelo gradiente. */
+    const P = geom.attributes.position.array, Nn = geom.attributes.normal.array, I = geom.index.array, nV = P.length / 3;
+    const acc = new Float32Array(P.length), cnt = new Float32Array(nV), h = 0.09;
+    const grad = (x, y, z, o) => {
+      let gx = fEsc(x + h, y, z) - fEsc(x - h, y, z), gy = fEsc(x, y + h, z) - fEsc(x, y - h, z), gz = fEsc(x, y, z + h) - fEsc(x, y, z - h);
+      const il = 1 / (Math.sqrt(gx * gx + gy * gy + gz * gz) || 1);
+      Nn[o] = gx * il; Nn[o + 1] = gy * il; Nn[o + 2] = gz * il;
+    };
+    for (let it = 0; it < 2; it++){
+      acc.fill(0); cnt.fill(0);
+      for (let t = 0; t < I.length; t += 3){
+        const a = I[t] * 3, b = I[t + 1] * 3, c = I[t + 2] * 3;
+        for (let k = 0; k < 3; k++){ const pa = P[a + k], pb = P[b + k], pc = P[c + k]; acc[a + k] += pb + pc; acc[b + k] += pa + pc; acc[c + k] += pa + pb; }
+        cnt[I[t]] += 2; cnt[I[t + 1]] += 2; cnt[I[t + 2]] += 2;
+      }
+      for (let v = 0; v < nV; v++){
+        const o = v * 3, ic = 1 / (cnt[v] || 1);
+        let x = P[o] + 0.55 * (acc[o] * ic - P[o]), y = P[o + 1] + 0.55 * (acc[o + 1] * ic - P[o + 1]), z = P[o + 2] + 0.55 * (acc[o + 2] * ic - P[o + 2]);
+        for (let n = 0; n < 2; n++){
+          if (n === 0 || it === 1) grad(x, y, z, o);
+          const d = EV.clamp(fEsc(x, y, z), -0.12, 0.12);
+          x -= d * Nn[o]; y -= d * Nn[o + 1]; z -= d * Nn[o + 2];
+        }
+        P[o] = x; P[o + 1] = y; P[o + 2] = z;
+      }
     }
+    for (let o = 0; o < P.length; o += 3) grad(P[o], P[o + 1], P[o + 2], o);
     /* sombreado de atlas gravado na cor de vértice: o que olha para baixo (debaixo da espinha, do acrômio, das bordas)
        puxa para um cinza-lavanda, por cima da oclusão de ambiente que o fromSDF já gravou */
     const C = geom.attributes.color.array;
