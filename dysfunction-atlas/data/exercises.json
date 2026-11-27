@@ -1,0 +1,218 @@
+[
+  {
+    "id": "retracao-cervical",
+    "title": "Retração cervical (‘queixo pra trás’)",
+    "goal": "Trazer a cabeça sobre o tronco sem olhar pra baixo.",
+    "steps": ["Sente ou fique em pé alto", "Deslize o queixo para trás como um ‘gaveta’", "Segure 5 s, relaxe; 8–10 reps"],
+    "avoid": ["Olhar para o chão", "Encolher os ombros"],
+    "progression": "Deitado → sentado → em pé → com resistência leve no queixo"
+  },
+  {
+    "id": "rotacao-cervical-assistida",
+    "title": "Rotação cervical assistida",
+    "goal": "Recuperar giro do pescoço sem subir o ombro.",
+    "steps": ["Olhe para o lado até o limite confortável", "Use a mão só para guiar, sem forçar", "Volte ao centro; alterne os lados"],
+    "avoid": ["Forçar até dor", "Girar o tronco no lugar do pescoço"],
+    "progression": "Amplitude pain-free → pausas no fim de curso → em posições diferentes (sentado/em pé)"
+  },
+  {
+    "id": "retratacao-escapular",
+    "title": "Retração escapular na parede",
+    "goal": "Aproximar as omoplatas da coluna sem encolher o ombro.",
+    "steps": ["Costas leves na parede", "Deslize as omoplatas para trás e um pouco para baixo", "Segure 5 s; 8–12 reps"],
+    "avoid": ["Elevar os ombros até as orelhas", "Arquear a lombar"],
+    "progression": "Isometria curta → mais tempo → com faixa elástica leve"
+  },
+  {
+    "id": "serratil-punch",
+    "title": "Serrátil punch (protração controlada)",
+    "goal": "Ensinar a escápula a ‘grudar’ no tórax ao empurrar.",
+    "steps": ["Deitado ou em pé, braço à frente", "Empurre a mão para frente sem dobrar o cotovelo", "Sinta a omoplata deslizar no tórax; volte devagar"],
+    "avoid": ["Encolher o ombro", "Arquear as costas"],
+    "progression": "Sem peso → peso leve → em prancha com ombro"
+  },
+  {
+    "id": "along-peitoral",
+    "title": "Alongamento de peitoral na porta",
+    "goal": "Reduzir a tração que puxa ombro e escápula pra frente.",
+    "steps": ["Antebraço na batente, cotovelo na altura do ombro", "Dê um passo à frente até sentir alongar o peito", "Respire 20–30 s por lado"],
+    "avoid": ["Dor no ombro", "Hiperestender a lombar"],
+    "progression": "Ângulo do braço mais baixo → mais alto para variar fibras"
+  },
+  {
+    "id": "along-peitoral-porta",
+    "title": "Alongamento peitoral (porta)",
+    "goal": "Abrir a frente do ombro associada à cabeça pra frente.",
+    "steps": ["Mesma posição do alongamento na porta", "Mantenha a cabeça retraída enquanto alonga", "20–30 s"],
+    "avoid": ["Projetar o queixo", "Forçar o ombro"],
+    "progression": "Tempo maior → ambos os braços se confortável"
+  },
+  {
+    "id": "depressao-escapular",
+    "title": "Depressão escapular",
+    "goal": "Abaixar a escápula contra o hábito do ombro alto.",
+    "steps": ["Braços ao lado do corpo", "Deslize os ombros para baixo, longe das orelhas", "Segure 5–8 s; 8–10 reps"],
+    "avoid": ["Juntar as omoplatas com força demais", "Prender a respiração"],
+    "progression": "Sem carga → segurando algo leve → com elástico de cima para baixo"
+  },
+  {
+    "id": "along-trapezio-superior",
+    "title": "Alongamento do trapézio superior",
+    "goal": "Reduzir tensão do ombro ‘na orelha’.",
+    "steps": ["Sente alto", "Incline a orelha para o ombro oposto", "Mão leve na cabeça só para guiar; 20–30 s"],
+    "avoid": ["Puxar com força", "Girar o tronco"],
+    "progression": "Sem mão → com mão leve → em diferentes rotações do olhar"
+  },
+  {
+    "id": "mobilidade-toracica-extensao",
+    "title": "Extensão torácica no rolo/toalha",
+    "goal": "Abrir o meio das costas sem descarregar tudo na lombar.",
+    "steps": ["Rolo ou toalha no meio das costas", "Apoie a cabeça, mãos no peito", "Estenda só o tronco superior; 8–10 reps lentas"],
+    "avoid": ["Hiperestender a lombar", "Forçar o pescoço"],
+    "progression": "Toalha → rolo → com braços acima da cabeça"
+  },
+  {
+    "id": "rotacao-toracica-solo",
+    "title": "Rotação torácica de lado",
+    "goal": "Recuperar giro do tronco no meio das costas.",
+    "steps": ["Deitado de lado, joelhos juntos flexionados", "Abra o braço de cima como um livro", "Siga a mão com o olhar; alterne"],
+    "avoid": ["Deixar os joelhos abrirem", "Forçar o ombro no chão"],
+    "progression": "Amplitude confortável → pausa no fim → joelho superior estabilizado com mão"
+  },
+  {
+    "id": "respiracao-costal",
+    "title": "Respiração costal 360°",
+    "goal": "Expandir a caixa torácica e reduzir compensação lombar.",
+    "steps": ["Mãos nas laterais das costelas", "Inspire expandindo para os lados e costas", "Expire longo; 6–8 ciclos"],
+    "avoid": ["Só encher a barriga", "Encolher os ombros na inspiração"],
+    "progression": "Deitado → sentado → em posição de exercício"
+  },
+  {
+    "id": "tilt-pelvico-neutro",
+    "title": "Encontrar tilt pélvico neutro",
+    "goal": "Aprender a zona neutra entre ‘cavar’ e ‘achatar’ a lombar.",
+    "steps": ["Deitado, joelhos dobrados", "Faça a lombar cavar, depois achatar", "Pare no meio e respire; 8 ciclos"],
+    "avoid": ["Prender a respiração", "Usar só os glúteos com força"],
+    "progression": "Deitado → sentado → em pé → agachamento curto"
+  },
+  {
+    "id": "dead-bug",
+    "title": "Dead bug",
+    "goal": "Estabilizar o tronco enquanto braços/pernas se movem.",
+    "steps": ["Deitado, braços pra cima, joelhos a 90°", "Estenda um braço e a perna oposta sem arquear a lombar", "Volte e alterne; 6–8/lado"],
+    "avoid": ["Lombar saindo do chão", "Segurar a respiração"],
+    "progression": "Menos amplitude → mais amplitude → com elástico leve"
+  },
+  {
+    "id": "along-flexores-quadril",
+    "title": "Alongamento do flexor do quadril (afundo)",
+    "goal": "Liberar a frente do quadril que puxa a pelve pra frente.",
+    "steps": ["Joelho no chão, outro pé à frente", "Empurre a pelve levemente pra frente sem arquear", "20–30 s por lado"],
+    "avoid": ["Hiperlordose", "Inclinar o tronco pra frente demais"],
+    "progression": "Mãos no quadril → braço do mesmo lado acima da cabeça"
+  },
+  {
+    "id": "extensao-lombar-controlada",
+    "title": "Extensão lombar controlada (press-up suave)",
+    "goal": "Recuperar curva lombar sem forçar o fim de curso.",
+    "steps": ["De bruços, mãos sob os ombros", "Empurre só até o confortável, quadris no chão", "Desça devagar; 6–8 reps"],
+    "avoid": ["Empurrar até dor", "Encolher o pescoço"],
+    "progression": "Amplitude pequena → maior → pausas curtas no topo"
+  },
+  {
+    "id": "bird-dog",
+    "title": "Bird-dog",
+    "goal": "Extensão de quadril e estabilidade do tronco juntos.",
+    "steps": ["Em quatro apoios", "Estenda braço e perna opostos sem girar a pelve", "Segure 3–5 s; alterne"],
+    "avoid": ["Arquear a lombar", "Elevar a perna demais"],
+    "progression": "Sem pausa → com pausa → com elástico"
+  },
+  {
+    "id": "glute-bridge",
+    "title": "Ponte de glúteo",
+    "goal": "Extensão de quadril com pelve organizada.",
+    "steps": ["Deitado, pés no chão", "Empurre o chão e suba a pelve", "Aperte o glúteo no topo; 8–12 reps"],
+    "avoid": ["Empurrar com a lombar", "Joelhos caindo pra dentro"],
+    "progression": "Duas pernas → pausa → uma perna"
+  },
+  {
+    "id": "abducao-quadril-lado",
+    "title": "Abdução de quadril de lado (clamshell/side-lying)",
+    "goal": "Ativar o glúteo médio para estabilizar a pelve.",
+    "steps": ["De lado, joelhos dobrados ou perna estendida", "Levante a perna de cima sem girar a pelve", "8–12 reps lentas"],
+    "avoid": ["Rolar o tronco pra trás", "Usar o tronco no lugar do quadril"],
+    "progression": "Sem elástico → com elástico → em pé"
+  },
+  {
+    "id": "monstro-walk",
+    "title": "Monster walk com elástico",
+    "goal": "Treinar controle lateral do quadril em movimento.",
+    "steps": ["Elástico acima dos joelhos", "Agache leve e dê passos laterais", "Mantenha joelhos alinhados; 8–10 passos/lado"],
+    "avoid": ["Joelho cair pra dentro", "Tronco inclinar"],
+    "progression": "Passos curtos → mais longos → elástico mais firme"
+  },
+  {
+    "id": "apoio-unipodal-curto",
+    "title": "Apoio unipodal curto",
+    "goal": "Organizar pelve, joelho e pé em uma perna.",
+    "steps": ["Fique numa perna 10–20 s", "Pelve nivelada, joelho sobre o pé", "Troque de lado; 3 rounds"],
+    "avoid": ["Pelve cair", "Segurar a respiração"],
+    "progression": "Olhos abertos → instável leve → com tarefa de braço"
+  },
+  {
+    "id": "agachamento-espelho",
+    "title": "Agachamento com feedback visual",
+    "goal": "Treinar joelhos seguindo os pés.",
+    "steps": ["Pés na largura do quadril", "Agache olhando o alinhamento no espelho", "Suba empurrando o chão; 8–10 reps"],
+    "avoid": ["Joelho colapsar pra dentro", "Calcanhar subir se o objetivo é dorsiflexão"],
+    "progression": "Box squat → livre → com carga leve"
+  },
+  {
+    "id": "short-foot",
+    "title": "Pé curto (short foot)",
+    "goal": "Ativar o arco sem cronchar os dedos.",
+    "steps": ["Pé no chão", "Encurte o pé puxando a base dos dedos em direção ao calcanhar", "Segure 5 s; 8–10 reps"],
+    "avoid": ["Dobrar os dedos com força", "Levantar o calcanhar"],
+    "progression": "Sentado → em pé → unipodal"
+  },
+  {
+    "id": "elevacao-calcanhar-controlada",
+    "title": "Elevação de calcanhar controlada",
+    "goal": "Força e controle do complexo tornozelo-pé.",
+    "steps": ["Suba nos dedos em 2 s", "Desça em 3–4 s", "8–12 reps"],
+    "avoid": ["Empurrar só com o dedão torto", "Velocidade no descida"],
+    "progression": "Duas pernas → uma perna → no degrau"
+  },
+  {
+    "id": "mobilidade-tornozelo",
+    "title": "Mobilidade de dorsiflexão na parede",
+    "goal": "Ganhar espaço para o joelho avançar sem o calcanhar subir.",
+    "steps": ["Pé de frente para a parede", "Joelho toca a parede mantendo o calcanhar no chão", "Afaste o pé aos poucos; 8–10 toques"],
+    "avoid": ["Levantar o calcanhar", "Colapsar o arco"],
+    "progression": "Sem carga → com peso leve no joelho"
+  },
+  {
+    "id": "extensor-excentrico",
+    "title": "Excentrico dos extensores do punho",
+    "goal": "Fortalecer o padrão que sobrecarrega o cotovelo lateral.",
+    "steps": ["Antebraço apoiado, punho para fora da mesa", "Suba com a outra mão, desça sozinho em 3–4 s", "8–12 reps"],
+    "avoid": ["Dor aguda", "Movimento rápido"],
+    "progression": "Sem peso → peso leve → mais tempo na descida"
+  },
+  {
+    "id": "mobilidade-punho",
+    "title": "Mobilidade de punho em quatro apoios",
+    "goal": "Recuperar flexão/extensão do punho com carga leve.",
+    "steps": ["Em quatro apoios, dedos pra frente", "Balance o tronco pra frente e pra trás suavemente", "Gire os dedos pra fora/para trás se confortável"],
+    "avoid": ["Dor aguda", "Travar os cotovelos hiperestendidos"],
+    "progression": "Pouca carga → mais tempo → variações de orientação dos dedos"
+  },
+  {
+    "id": "along-extensores-punho",
+    "title": "Alongamento dos extensores do punho",
+    "goal": "Reduzir tensão que sobe pro cotovelo lateral.",
+    "steps": ["Braço à frente, cotovelo estendido", "Com a outra mão, flexione o punho suavemente", "20–30 s"],
+    "avoid": ["Puxar com força", "Dor no cotovelo"],
+    "progression": "Cotovelo mais flexionado → mais estendido"
+  }
+]

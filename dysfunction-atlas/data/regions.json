@@ -1,0 +1,47 @@
+[
+  {
+    "id": "pescoco-cabeca",
+    "label": "Pescoço e cabeça",
+    "hotspot": { "cx": 100, "cy": 42, "r": 22 }
+  },
+  {
+    "id": "ombro-escapula",
+    "label": "Ombro e escápula",
+    "hotspot": { "cx": 138, "cy": 88, "r": 24 }
+  },
+  {
+    "id": "toracica",
+    "label": "Coluna torácica",
+    "hotspot": { "cx": 100, "cy": 118, "r": 22 }
+  },
+  {
+    "id": "lombar",
+    "label": "Coluna lombar",
+    "hotspot": { "cx": 100, "cy": 168, "r": 20 }
+  },
+  {
+    "id": "pelve",
+    "label": "Pelve",
+    "hotspot": { "cx": 100, "cy": 198, "r": 22 }
+  },
+  {
+    "id": "quadril",
+    "label": "Quadril",
+    "hotspot": { "cx": 128, "cy": 210, "r": 20 }
+  },
+  {
+    "id": "joelho",
+    "label": "Joelho",
+    "hotspot": { "cx": 118, "cy": 268, "r": 18 }
+  },
+  {
+    "id": "tornozelo-pe",
+    "label": "Tornozelo e pé",
+    "hotspot": { "cx": 112, "cy": 330, "r": 18 }
+  },
+  {
+    "id": "cotovelo-punho",
+    "label": "Cotovelo e punho",
+    "hotspot": { "cx": 48, "cy": 168, "r": 18 }
+  }
+]

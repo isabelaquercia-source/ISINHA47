@@ -1,0 +1,92 @@
+[
+  {
+    "fromId": "anteriorizacao-cabeca",
+    "toId": "ombro-elevado",
+    "kind": "may_cause",
+    "note": "Cabeça à frente costuma puxar tensão para trapézio superior e elevação do ombro."
+  },
+  {
+    "fromId": "anteriorizacao-cabeca",
+    "toId": "hipercifose",
+    "kind": "often_related",
+    "note": "Cabeça pra frente e torácica mais curva frequentemente andam juntas."
+  },
+  {
+    "fromId": "hipercifose",
+    "toId": "escapula-protraida",
+    "kind": "may_cause",
+    "note": "Torácica mais curva favorece ombros e escápulas pra frente."
+  },
+  {
+    "fromId": "ombro-elevado",
+    "toId": "escapula-protraida",
+    "kind": "may_cause",
+    "note": "Domínio do trapézio superior pode alterar o ritmo escapular e a estabilidade no tórax."
+  },
+  {
+    "fromId": "escapula-protraida",
+    "toId": "ombro-elevado",
+    "kind": "often_related",
+    "note": "Protração e elevação escapular costumam coexistir em padrões de ombro."
+  },
+  {
+    "fromId": "toracica-rigida",
+    "toId": "rigidez-cervical",
+    "kind": "may_cause",
+    "note": "Quando a torácica não gira, o pescoço tenta completar o movimento."
+  },
+  {
+    "fromId": "toracica-rigida",
+    "toId": "hiperlordose-lombar",
+    "kind": "may_cause",
+    "note": "Falta de extensão torácica pode empurrar extensão excessiva para a lombar."
+  },
+  {
+    "fromId": "tilt-pelvico-anterior",
+    "toId": "hiperlordose-lombar",
+    "kind": "may_cause",
+    "note": "Pelve inclinada pra frente aumenta a curva lombar."
+  },
+  {
+    "fromId": "flexores-quadril-encurtados",
+    "toId": "tilt-pelvico-anterior",
+    "kind": "may_cause",
+    "note": "Flexores curtos puxam a pelve para a inclinação anterior."
+  },
+  {
+    "fromId": "tilt-pelvico-posterior",
+    "toId": "retificacao-lombar",
+    "kind": "may_cause",
+    "note": "Pelve pra trás tende a achatar a lombar."
+  },
+  {
+    "fromId": "gluteo-medio-fraco",
+    "toId": "joelho-valgo",
+    "kind": "may_cause",
+    "note": "Pouca estabilidade lateral do quadril permite o joelho cair pra dentro."
+  },
+  {
+    "fromId": "pe-pronado",
+    "toId": "joelho-valgo",
+    "kind": "may_cause",
+    "note": "Colapso do arco pode arrastar o joelho para dentro na cadeia cinética."
+  },
+  {
+    "fromId": "tornozelo-rigido",
+    "toId": "joelho-valgo",
+    "kind": "often_related",
+    "note": "Sem dorsiflexão, o corpo busca amplitude — às vezes via colapso medial."
+  },
+  {
+    "fromId": "punho-rigido",
+    "toId": "sobrecarga-lateral-cotovelo",
+    "kind": "may_cause",
+    "note": "Punho pouco móvel aumenta demanda dos extensores e da lateral do cotovelo."
+  },
+  {
+    "fromId": "rigidez-cervical",
+    "toId": "ombro-elevado",
+    "kind": "often_related",
+    "note": "Pescoço rígido e ombro elevado frequentemente aparecem no mesmo padrão de tensão."
+  }
+]
