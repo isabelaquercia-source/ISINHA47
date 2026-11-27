@@ -22,6 +22,16 @@ python3 -m http.server 8766 --bind 127.0.0.1 --directory body-lab
 
 Depois acesse `http://127.0.0.1:8766`.
 
+## Atlas do Movimento
+
+Catálogo de disfunções corporais: mapa do corpo, busca por sintoma, causas/relações, movimento ideal vs alterado e exercícios.
+
+```bash
+python3 -m http.server 8768 --bind 127.0.0.1 --directory dysfunction-atlas
+```
+
+Depois acesse `http://127.0.0.1:8768`.
+
 ## Câmera Distante
 
 6 ideias visuais pra treinar música no celular (highway + letra + play).

@@ -1,0 +1,200 @@
+[
+  {
+    "id": "anteriorizacao-cabeca",
+    "regionId": "pescoco-cabeca",
+    "namePopular": "Cabeça pra frente",
+    "nameTechnical": "Anteriorização da cabeça (forward head posture)",
+    "aliases": ["pescoço pra frente", "queixo pra frente", "forward head"],
+    "summary": "A cabeça fica à frente da linha dos ombros, aumentando a carga no pescoço.",
+    "signs": ["queixo projetado", "tensão na nuca", "ombros que ‘acompanham’ a cabeça"],
+    "movementId": "flexao-extensao-cervical",
+    "exerciseIds": ["retracao-cervical", "along-peitoral-porta", "mobilidade-toracica-extensao"]
+  },
+  {
+    "id": "rigidez-cervical",
+    "regionId": "pescoco-cabeca",
+    "namePopular": "Pescoço travado",
+    "nameTechnical": "Hipomobilidade cervical / rigidez segmentar",
+    "aliases": ["rigidez no pescoço", "pouca rotação do pescoço"],
+    "summary": "O pescoço gira ou inclina menos do que deveria; outros segmentos compensam.",
+    "signs": ["dificuldade de olhar por cima do ombro", "dor ao fim da amplitude", "ombros sobem ao girar a cabeça"],
+    "movementId": "rotacao-cervical",
+    "exerciseIds": ["rotacao-cervical-assistida", "retracao-cervical", "mobilidade-toracica-extensao"]
+  },
+  {
+    "id": "escapula-protraida",
+    "regionId": "ombro-escapula",
+    "namePopular": "Escápula pra frente",
+    "nameTechnical": "Protração escapular / discinesia escapular (protração)",
+    "aliases": ["ombro arredondado", "escápula afastada", "escápula não grudada"],
+    "summary": "A escápula fica mais afastada da coluna e menos estável no tórax — ‘desgrudada’ das costelas.",
+    "signs": ["ombros caídos pra frente", "espaço maior entre omoplata e coluna", "braço sobe com a omoplata ‘escapando’"],
+    "movementId": "elevacao-braco-escapula",
+    "exerciseIds": ["retratacao-escapular", "serratil-punch", "along-peitoral"]
+  },
+  {
+    "id": "ombro-elevado",
+    "regionId": "ombro-escapula",
+    "namePopular": "Ombro alto / trapézio",
+    "nameTechnical": "Elevação escapular com domínio do trapézio superior",
+    "aliases": ["ombro encolhido", "trapézio tenso", "ombro pra orelha"],
+    "summary": "O ombro fica elevado; o trapézio superior faz o trabalho que outros músculos deveriam dividir.",
+    "signs": ["um ombro mais alto", "tensão no trapézio", "ao elevar o braço, o ombro sobe cedo demais"],
+    "movementId": "elevacao-braco-escapula",
+    "exerciseIds": ["depressao-escapular", "retratacao-escapular", "along-trapezio-superior"]
+  },
+  {
+    "id": "hipercifose",
+    "regionId": "toracica",
+    "namePopular": "Costas muito curvadas",
+    "nameTechnical": "Hipercifose torácica",
+    "aliases": ["corcunda", "cifose aumentada", "ombro caído pra frente"],
+    "summary": "A curva natural da coluna torácica fica exagerada, empurrando o tronco pra frente.",
+    "signs": ["parte alta das costas arredondada", "dificuldade de estender o peito", "cabeça e ombros acompanham a curva"],
+    "movementId": "extensao-toracica",
+    "exerciseIds": ["mobilidade-toracica-extensao", "along-peitoral", "retratacao-escapular"]
+  },
+  {
+    "id": "toracica-rigida",
+    "regionId": "toracica",
+    "namePopular": "Torácica travada",
+    "nameTechnical": "Hipomobilidade torácica",
+    "aliases": ["pouca rotação do tronco", "costas rígidas no meio"],
+    "summary": "O meio das costas gira e estende pouco; lombar e pescoço acabam compensando.",
+    "signs": ["giro do tronco limitado", "sensação de ‘bloco’ no meio das costas", "lombar faz o movimento"],
+    "movementId": "rotacao-toracica",
+    "exerciseIds": ["rotacao-toracica-solo", "mobilidade-toracica-extensao", "respiracao-costal"]
+  },
+  {
+    "id": "hiperlordose-lombar",
+    "regionId": "lombar",
+    "namePopular": "Lombar muito arqueada",
+    "nameTechnical": "Hiperlordose lombar",
+    "aliases": ["cavado excessivo", "arco lombar aumentado"],
+    "summary": "A curva lombar fica exagerada; a pelve costuma inclinar pra frente junto.",
+    "signs": ["barriga projetada", "nádegas ‘para cima’", "tensão na lombar ao ficar em pé"],
+    "movementId": "flexao-extensao-lombar",
+    "exerciseIds": ["tilt-pelvico-neutro", "dead-bug", "along-flexores-quadril"]
+  },
+  {
+    "id": "retificacao-lombar",
+    "regionId": "lombar",
+    "namePopular": "Lombar reta demais",
+    "nameTechnical": "Retificação / hipolordose lombar",
+    "aliases": ["perda da curva lombar", "lombar plana"],
+    "summary": "A curva lombar diminui; o tronco pode parecer ‘achatado’ e a carga muda de lugar.",
+    "signs": ["costas baixas mais planas", "dificuldade de manter curva neutra", "compensação no quadril"],
+    "movementId": "flexao-extensao-lombar",
+    "exerciseIds": ["extensao-lombar-controlada", "bird-dog", "mobilidade-toracica-extensao"]
+  },
+  {
+    "id": "tilt-pelvico-anterior",
+    "regionId": "pelve",
+    "namePopular": "Pelve inclinada pra frente",
+    "nameTechnical": "Tilt pélvico anterior",
+    "aliases": ["bacia pra frente", "anterior pelvic tilt"],
+    "summary": "A bacia gira pra frente; a lombar arqueia e os flexores do quadril costumam estar curtos.",
+    "signs": ["cóccix ‘pra cima’", "lombar mais cava", "frente do quadril tensa"],
+    "movementId": "controle-pelvico",
+    "exerciseIds": ["tilt-pelvico-neutro", "along-flexores-quadril", "glute-bridge"]
+  },
+  {
+    "id": "tilt-pelvico-posterior",
+    "regionId": "pelve",
+    "namePopular": "Pelve inclinada pra trás",
+    "nameTechnical": "Tilt pélvico posterior",
+    "aliases": ["bacia enfiada", "posterior pelvic tilt"],
+    "summary": "A bacia gira pra trás; a lombar perde curva e o tronco pode ‘enrolar’.",
+    "signs": ["cóccix ‘enfiado’", "lombar mais plana", "sensação de sentar ‘embaixo’"],
+    "movementId": "controle-pelvico",
+    "exerciseIds": ["extensao-lombar-controlada", "glute-bridge", "respiracao-costal"]
+  },
+  {
+    "id": "flexores-quadril-encurtados",
+    "regionId": "quadril",
+    "namePopular": "Quadril ‘puxando’ pra frente",
+    "nameTechnical": "Encurtamento dos flexores do quadril",
+    "aliases": ["psoas tenso", "frente do quadril curta", "iliopsoas"],
+    "summary": "Os músculos da frente do quadril ficam curtos e puxam a pelve/tronco.",
+    "signs": ["dificuldade de estender o quadril", "lombar arqueia ao alongar", "passo curto"],
+    "movementId": "extensao-quadril",
+    "exerciseIds": ["along-flexores-quadril", "glute-bridge", "tilt-pelvico-neutro"]
+  },
+  {
+    "id": "gluteo-medio-fraco",
+    "regionId": "quadril",
+    "namePopular": "Quadril lateral fraco",
+    "nameTechnical": "Deficit de controle do glúteo médio",
+    "aliases": ["quadril instável", "trendelenburg", "joelho cai pra dentro"],
+    "summary": "O lado do quadril não estabiliza bem a pelve; o joelho pode cair pra dentro.",
+    "signs": ["pelve ‘cai’ ao ficar numa perna", "joelho valgo na agachada", "cansaço no lado do quadril"],
+    "movementId": "apoio-unipodal",
+    "exerciseIds": ["abducao-quadril-lado", "monstro-walk", "apoio-unipodal-curto"]
+  },
+  {
+    "id": "joelho-valgo",
+    "regionId": "joelho",
+    "namePopular": "Joelho pra dentro",
+    "nameTechnical": "Valgo dinâmico do joelho",
+    "aliases": ["joelho cai", "knock knee dinâmico", "valgo"],
+    "summary": "No agachar ou pousar, o joelho se aproxima da linha média em vez de seguir o pé.",
+    "signs": ["joelhos se ‘beijam’ no agachamento", "dor medial", "quadril não controla"],
+    "movementId": "agachamento",
+    "exerciseIds": ["agachamento-espelho", "monstro-walk", "abducao-quadril-lado"]
+  },
+  {
+    "id": "joelho-varo",
+    "regionId": "joelho",
+    "namePopular": "Joelho pra fora",
+    "nameTechnical": "Varo do joelho / empurrão lateral",
+    "aliases": ["joelho arqueado", "bow leg dinâmico"],
+    "summary": "O joelho se afasta da linha média; a carga sobe no lado externo.",
+    "signs": ["espaço grande entre joelhos", "peso no lado de fora do pé", "rigidez lateral"],
+    "movementId": "agachamento",
+    "exerciseIds": ["agachamento-espelho", "mobilidade-tornozelo", "glute-bridge"]
+  },
+  {
+    "id": "pe-pronado",
+    "regionId": "tornozelo-pe",
+    "namePopular": "Pé ‘caído’ pra dentro",
+    "nameTechnical": "Pronação excessiva / pé plano dinâmico",
+    "aliases": ["arco caído", "pé chato dinâmico", "overpronation"],
+    "summary": "O arco do pé cede demais; o joelho e o quadril podem acompanhar pra dentro.",
+    "signs": ["arco some ao apoiar", "calcanhar cai pra dentro", "joelho tende ao valgo"],
+    "movementId": "apoio-unipodal",
+    "exerciseIds": ["short-foot", "elevacao-calcanhar-controlada", "apoio-unipodal-curto"]
+  },
+  {
+    "id": "tornozelo-rigido",
+    "regionId": "tornozelo-pe",
+    "namePopular": "Tornozelo travado",
+    "nameTechnical": "Limitação de dorsiflexão do tornozelo",
+    "aliases": ["pouca dorsiflexão", "tornozelo duro", "agacha e o calcanhar sobe"],
+    "summary": "O tornozelo não dobra bem pra frente; o movimento sobe pra joelho e tronco.",
+    "signs": ["calcanhar sobe no agachamento", "tronco inclina cedo", "passada curta"],
+    "movementId": "agachamento",
+    "exerciseIds": ["mobilidade-tornozelo", "elevacao-calcanhar-controlada", "agachamento-espelho"]
+  },
+  {
+    "id": "sobrecarga-lateral-cotovelo",
+    "regionId": "cotovelo-punho",
+    "namePopular": "Cotovelo lateral sobrecarregado",
+    "nameTechnical": "Sobrecarga dos extensores do punho / padrão de epicôndilo lateral",
+    "aliases": ["cotovelo de tenista", "dor na lateral do cotovelo", "extensores tensos"],
+    "summary": "Os músculos que estendem o punho ficam sobrecarregados e puxam a lateral do cotovelo.",
+    "signs": ["dor na lateral do cotovelo", "aperto ao pegar objetos", "punho rígido em extensão"],
+    "movementId": "pegada-punho",
+    "exerciseIds": ["extensor-excentrico", "mobilidade-punho", "along-extensores-punho"]
+  },
+  {
+    "id": "punho-rigido",
+    "regionId": "cotovelo-punho",
+    "namePopular": "Punho travado",
+    "nameTechnical": "Hipomobilidade do punho",
+    "aliases": ["pouca flexão do punho", "punho duro"],
+    "summary": "O punho flexiona ou estende pouco; cotovelo e ombro compensam na pegada.",
+    "signs": ["amplitude reduzida", "compensação no cotovelo", "pegada desconfortável"],
+    "movementId": "pegada-punho",
+    "exerciseIds": ["mobilidade-punho", "along-extensores-punho", "extensor-excentrico"]
+  }
+]

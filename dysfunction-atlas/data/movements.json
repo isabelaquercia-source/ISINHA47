@@ -1,0 +1,134 @@
+[
+  {
+    "id": "flexao-extensao-cervical",
+    "title": "Flexão e extensão do pescoço",
+    "ideal": "Cabeça alinhada sobre o tronco; o movimento acontece nos segmentos cervicais sem projetar o queixo nem encolher os ombros.",
+    "altered": "Com a cabeça pra frente, a extensão vira ‘olhar pra cima com o queixo’; a flexão dobra só a base do pescoço e a nuca fica sobrecarregada.",
+    "joints": ["articulações facetárias cervicais", "atlanto-occipital"],
+    "muscles": {
+      "agonists": ["flexores profundos do pescoço", "extensores cervicais"],
+      "stabilizers": ["flexores profundos", "trapézio médio/inferior"],
+      "compensators": ["esternocleidomastóideo", "trapézio superior", "elevadores da escápula"]
+    }
+  },
+  {
+    "id": "rotacao-cervical",
+    "title": "Rotação do pescoço",
+    "ideal": "O olhar gira com a coluna cervical; ombros ficam baixos e o tronco não precisa girar cedo.",
+    "altered": "Com rigidez, a amplitude some no meio do caminho; ombro e tronco ‘roubam’ o giro.",
+    "joints": ["articulações facetárias cervicais", "atlanto-axial"],
+    "muscles": {
+      "agonists": ["rotadores cervicais", "esternocleidomastóideo (contralateral)"],
+      "stabilizers": ["flexores profundos", "multífidos cervicais"],
+      "compensators": ["trapézio superior", "romboides / tronco"]
+    }
+  },
+  {
+    "id": "elevacao-braco-escapula",
+    "title": "Elevação do braço",
+    "ideal": "Escápula estável no tórax no início; depois gira gradualmente pra cima (rotação superior) enquanto o braço sobe — ‘grudada’ nas costelas, não flutuando.",
+    "altered": "Escápula sobe cedo (trapézio superior) ou se afasta do tórax (protração); o ombro ‘busca’ amplitude e o ritmo escapuloumeral muda.",
+    "joints": ["glenoumeral", "escapulotorácica", "acromioclavicular"],
+    "muscles": {
+      "agonists": ["deltóide", "supraespinhal"],
+      "stabilizers": ["serrátil anterior", "trapézio médio/inferior", "manguito rotador"],
+      "compensators": ["trapézio superior", "levantador da escápula", "peitoral"]
+    }
+  },
+  {
+    "id": "extensao-toracica",
+    "title": "Extensão torácica",
+    "ideal": "O peito abre no meio das costas; a lombar não precisa hiperestender pra ‘substituir’ a torácica.",
+    "altered": "Com hipercifose ou rigidez, a extensão some no meio e sobe pra lombar ou pescoço.",
+    "joints": ["articulações costovertebrais", "facetárias torácicas"],
+    "muscles": {
+      "agonists": ["extensores torácicos", "romboides"],
+      "stabilizers": ["serrátil anterior", "multífidos"],
+      "compensators": ["eretores lombares", "extensores cervicais"]
+    }
+  },
+  {
+    "id": "rotacao-toracica",
+    "title": "Rotação do tronco (torácica)",
+    "ideal": "O giro acontece principalmente na torácica; pelve estável, respiração livre.",
+    "altered": "Torácica travada → lombar e quadril giram demais; ou o ombro ‘puxa’ o movimento.",
+    "joints": ["facetárias torácicas", "costovertebrais"],
+    "muscles": {
+      "agonists": ["oblíquos", "rotadores torácicos"],
+      "stabilizers": ["diafragma", "multífidos"],
+      "compensators": ["eretores lombares", "quadrados lombares"]
+    }
+  },
+  {
+    "id": "flexao-extensao-lombar",
+    "title": "Flexão e extensão lombar",
+    "ideal": "Curva lombar se move de forma distribuída; pelve e torácica colaboram sem um segmento ‘travar’ ou ‘explodir’.",
+    "altered": "Hiperlordose: extensão já começa no extremo. Retificação: falta curva neutra e a carga concentra.",
+    "joints": ["facetárias lombares", "discos intervertebrais lombares"],
+    "muscles": {
+      "agonists": ["eretores da espinha", "abdômen"],
+      "stabilizers": ["transverso do abdômen", "multífidos", "assoalho pélvico"],
+      "compensators": ["flexores do quadril", "isquiotibiais"]
+    }
+  },
+  {
+    "id": "controle-pelvico",
+    "title": "Controle da pelve (tilt)",
+    "ideal": "Pelve encontra e mantém uma zona neutra; lombar e quadril se organizam em cima disso.",
+    "altered": "Tilt anterior: lombar cava. Tilt posterior: lombar achata. O movimento ‘some’ da articulação do quadril.",
+    "joints": ["sacroilíacas", "lombossacra", "coxofemoral"],
+    "muscles": {
+      "agonists": ["abdômen", "glúteos", "eretores"],
+      "stabilizers": ["transverso", "assoalho pélvico"],
+      "compensators": ["flexores do quadril", "isquiotibiais", "eretores lombares"]
+    }
+  },
+  {
+    "id": "extensao-quadril",
+    "title": "Extensão do quadril",
+    "ideal": "A perna vai pra trás com a pelve estável; glúteo lidera sem arquear a lombar.",
+    "altered": "Flexores curtos limitam a extensão; a lombar hiperestende pra ‘completar’ o gesto.",
+    "joints": ["coxofemoral"],
+    "muscles": {
+      "agonists": ["glúteo máximo", "isquiotibiais"],
+      "stabilizers": ["glúteo médio", "core"],
+      "compensators": ["eretores lombares", "isquiotibiais em excesso"]
+    }
+  },
+  {
+    "id": "apoio-unipodal",
+    "title": "Apoio em uma perna",
+    "ideal": "Pelve nivelada, joelho alinhado sobre o pé, arco do pé ativo sem colapsar.",
+    "altered": "Glúteo médio fraco → pelve cai. Pé pronado → joelho vai pra dentro. Cadeia inteira desorganiza.",
+    "joints": ["coxofemoral", "joelho", "tornozelo", "articulações do pé"],
+    "muscles": {
+      "agonists": ["glúteo médio", "intrínsecos do pé"],
+      "stabilizers": ["glúteo máximo", "tibial posterior", "core"],
+      "compensators": ["tensor da fáscia lata", "adutores", "estratégias do tronco"]
+    }
+  },
+  {
+    "id": "agachamento",
+    "title": "Agachamento",
+    "ideal": "Joelhos seguem os pés; tronco controlado; tornozelos permitem o joelho avançar sem o calcanhar subir.",
+    "altered": "Valgo: joelho pra dentro. Varo: joelho pra fora. Tornozelo rígido: tronco inclina e calcanhar sobe.",
+    "joints": ["coxofemoral", "tibiofemoral", "tornozelo"],
+    "muscles": {
+      "agonists": ["quadríceps", "glúteos"],
+      "stabilizers": ["glúteo médio", "core", "intrínsecos do pé"],
+      "compensators": ["adutores", "lombar", "estratégia de tronco"]
+    }
+  },
+  {
+    "id": "pegada-punho",
+    "title": "Pegada e movimento do punho",
+    "ideal": "Punho estável em posição neutra/leve extensão; força vem do antebraço sem sobrecarregar o epicôndilo.",
+    "altered": "Punho rígido ou extensão forçada → tensão sobe pro cotovelo lateral; ombro pode compensar a pegada.",
+    "joints": ["radiocarpiana", "articulações do cotovelo"],
+    "muscles": {
+      "agonists": ["flexores e extensores do punho", "intrínsecos da mão"],
+      "stabilizers": ["extensores do punho", "supinador / pronador"],
+      "compensators": ["extensores em sobrecarga", "deltóide / trapézio na pegada"]
+    }
+  }
+]
